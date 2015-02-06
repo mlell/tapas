@@ -1,0 +1,34 @@
+Dependencies
+============
+
+To use the scripts in this folder, the following dependencies must be
+installed on your computer:
+
+* R
+* R packages:
+  - ggplot2
+  - gridExtra
+  - (testthat) (to run unit tests)
+
+* Python 3
+
+Setting up the shell for work
+=============================
+
+The lib/ folder contains the R package `docopt` and the Python package
+`docopt` (yes, its two times the same name). If this package is not 
+installed for R and Python on your computer, you need to add the
+`lib/` folder to R's and Python's seach path by source'ing the 
+`shell-init.sh` script in each shell you use for executing some of
+the scripts in this toolset.
+
+It's important that you don't execute the `shell-init.sh` script like
+you would normally do (by typing `./shell-init.sh` into your shell),
+but that you type `source shell-init.sh`.
+
+The manual
+==========
+
+The manual lies in the `manual/` folder. Open the file `manual.html`
+with your browser.
+

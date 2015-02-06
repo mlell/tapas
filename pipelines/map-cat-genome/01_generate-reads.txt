@@ -1,0 +1,238 @@
+
+#' Generate reads from cat and other species
+set -ueC
+
+#' Reads from three origins are generated and their read names will contain
+#' their origin genome and their true mapping
+
+#' Define variables for later use
+#' ==============================
+#'
+#' Output directory
+#' ----------------
+odir="$pr/data/gen/cat_reads"
+
+#' Change working directory
+# mkdir $odir
+cd $odir
+
+#' Scripts
+#' -------
+#'
+#' Directory where scripts are.
+scd="$pr/scripts"
+gscd="$pr/scripts/general"
+
+#' Index of large genomes
+s_fasta_index="$scd/generate-reads/nucl/extract-ref/fasta_record_index"
+
+#' Remove newlines and whitespace in reference genomes (easier indexing)
+s_linearize_fasta="$scd/generate-reads/nucl/extract-ref/linearize_fasta"
+
+#' Extraction of fragments out of a reference sequence
+s_nucl_uniform="$scd/generate-reads/nucl/extract-ref/uniform.py"
+
+#' Generate quality scores for nucleotide strings
+s_quali_const="$scd/generate-reads/quali/gen-constant-score.pl"
+
+#' Compose a FASTQ from its components ID, nucleotide and quality string
+s_synth_fastq="$scd/generate-reads/synth-fastq.py"
+
+#' Change the ID, nucleotide sequence or quality string of a FASTQ
+s_filter_fastq="$gscd/filter-fastq.py"
+
+#' Count nucleotides
+s_count_nucleotides="$gscd/count-nucleotides.pl"
+
+#' Mutate a nucleotide sequence using a table specifying probability parameters
+s_multiple_mutate="$scd/induce-errors/multiple_mutate.py"
+
+#' Map reads using BWA
+s_map_bwa="$scd/bwa/map-reads-bwa.sh"
+
+#' Data
+#' ----
+#'
+#' Reference sequences
+#'
+d_ref="$pr/data/in/ref"
+#d_pubref="/raid6/public/referenceData"
+d_pubref="${HOME}/Studium/Hiwi/genomes"
+#d_pubref="${HOME}/hiwi/genomes"
+
+#' This makes an associative array in bash!
+declare -A ref
+
+#' Parameter tables for mutation insertion
+d_mutpar="$pr/data/gen/artif-mutpar"
+
+#' Get used reference keys:
+smp_keys=( fcatus )
+cnt_keys=( scoelicolor nostoc retli )
+all_keys=( ${smp_keys[@]} ${cnt_keys[@]} )
+
+
+# Felis catus (cat) 
+ref[fcatus]="$d_pubref/FelisCatus/felis.fasta"
+# Sus scrofa (pig)
+## ref[sscrofa]="$d_ref/NC011112_ingr_mito.fasta"
+# Streptomyces coelicolor (Actinomycetes)
+ref[scoelicolor]="$d_ref/NC00388.3_scoelicolor.fasta"
+# Nostoc sp. (Cyanobacteria)
+ref[nostoc]="$d_ref/nostoc_PCC7107_complete.fasta"
+# Rhizobium etli (Alphaproteobacteria)
+ref[retli]="$d_ref/NC07761.1_retli.fasta"
+# Homo sapiens
+## ref[hsapiens]="$d_pubref/HomoSapiens/homo.fasta"
+
+
+#' Linearize FASTA and generate indices for genomes
+#' ================================
+mkdir genome_in
+for key in ${all_keys[@]}; do
+    cat << EOF
+    $s_linearize_fasta "${ref[$key]}" > genome_in/${key}.fasta.lin
+    $s_fasta_index "genome_in/${key}.fasta.lin" > "genome_in/${key}.idx"
+    EOR
+EOF
+done | mcall.py --status -t 4 -s EOR 
+
+#' Genome sizes (bytes, not bases!)
+#' ================================
+for r in ${all_keys[@]} ;do
+    echo -n "$r "
+    grep "len" < genome_in/${r}.idx | \
+        awk '{i=i+$2} END{print i}'
+done | column -t
+
+## fcatus       2428557402
+## scoelicolor  8667507
+## nostoc       6329823
+## retli        4381608
+
+#' Constructing a genome needs about threefold coverage. Read sizes are
+#' approximately 40bp. Therefore, (16780/40)*3 ~= 1300 reads are needed for 
+#' the *Ursus spelaeus* mitogenome. For the contaminant genomes more reads
+#' are generated so that the total count of contaminant reads exceeds 
+#' that of U.spelaeus reads multiple-fold.
+#' 
+#' Sample reads 
+#' ============
+#' Sample reads from each of the reference sequences
+#'
+#' Common parameters: read length, std. deviation in read length
+readlen=40
+readlen_sd=8
+
+declare -A nreads
+nreads=( [fcatus]=6000
+         [scoelicolor]=2000
+         [nostoc]=2000
+         [retli]=2000 )
+
+#' Seeds can be choosen arbitrarily. Same seed gives same coordinates
+#' of extracted reads.
+declare -A seeds
+seeds=( [fcatus]=1003
+        [scoelicolor]=1004
+        [nostoc]=1005
+        [retli]=1006 )
+#' Generate the sample reads by randomly choosing sequence fragments
+#' of the specified reference genomes
+#' These commands generate the files "index.list" and "reads.raw.list"
+for k in ${all_keys[@]};do
+    echo $k
+    mkdir $k
+    $s_nucl_uniform --index genome_in/${k}.idx      \
+                    --linearized    genome_in/${k}.fasta.lin \
+                    ${nreads[$k]}   $readlen   \
+                    $readlen_sd     ${seeds[$k]} > $k/reads.tab
+done 
+
+#' Remove reads which contain 'N' characters
+for k in ${all_keys[@]}; do
+    grep -v "N" $k/reads.tab > $k/tmp && \
+    mv $k/tmp $k/reads.tab
+done
+
+for k in ${all_keys[@]}; do
+    wc -l $k/reads.tab
+done
+#' Split the output into separate files
+#' Columns 1-3 > index.list
+#' Column 4    > reads.raw.list
+for k in ${all_keys[@]}; do
+    grep -v "^#" $k/reads.tab | \
+    awk -v k=$k\
+        'BEGIN{OFS="_"} 
+         {print $1,$2,$3 > k"/index.list";
+          print $4 > k"/reads.raw.list"}'
+done
+
+
+#' Quality scores
+#' ==============
+#' Generate from the nucleotide strings quality scores: only F, same length
+for d in ${all_keys[@]};do
+    $s_quali_const F \
+        < $d/reads.raw.list \
+        > $d/quali.raw.list
+done
+
+#' Add origin to index
+#' ===================
+#' Example index format now: `mito_1572498_1572538'
+for d in ${all_keys[@]};do
+    awk '{print "'$d'_"$0}' $d/index.list > tmp && \
+        mv tmp $d/index.list
+done
+
+#' Generate FASTQ
+#' ==============
+for d in ${all_keys[@]};do
+    $s_synth_fastq $d/reads.raw.list $d/quali.raw.list $d/index.list \
+        > ${d}.fastq
+done
+
+#' Print number of reads per organism
+for k in ${all_keys[@]}; do
+    wc -l ${k}.fastq | awk '{print $2": "$1/4" reads"}'
+done
+
+
+#' Because of evolution or chemical damage
+#'
+#' Only the cat genome is subjected to mutation
+#' 
+#' Different combinations of constant and position-dependent mutation
+#' rates are used. These are saved in th $d_mutpar folder.
+
+mut_files=($d_mutpar/mut_*)
+echo ${mut_files[@]}
+
+for param_file in ${mut_files[@]}; do
+    # Extract XX from /path/to/mut_XX
+    mut_index=${param_file##*/mut_}
+    echo $mut_index ...
+    $s_filter_fastq --nucleotide \
+        @  $s_multiple_mutate "$param_file" @ \
+        < fcatus.fastq \
+        > fcatus_mut_${mut_index}.fastq
+done
+
+#' Merge mutated cat reads to unmutated contamination reads
+#' ========================================================
+
+
+#' Get all contaminant FASTQ: append .fastq to all contaminant keys
+cnt_files=${cnt_keys[@]/%/.fastq}
+echo ${cnt_keys[@]}
+echo ${cnt_files[@]}
+
+for f in fcatus_mut_*; do
+    mut_index=${f#fcatus_mut_}
+    cat "$f" ${cnt_files[@]} > all_mut_$mut_index
+done
+
+# vim: tw=70:ft=sh
+

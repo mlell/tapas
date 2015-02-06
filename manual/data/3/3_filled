@@ -1,0 +1,5 @@
+strand	from	to	factor	geom_prob	intercept
+5	C	T	0.5	0.1	0
+3	G	A	0.5	0.1	0
+3	*	*	0	0	0.3
+

@@ -1,0 +1,48 @@
+# don't delete data if this file should be executed non-interactively
+set -ueC
+
+mkdir 03_out
+cd 03_out
+# Directory containing unmutated reads
+d_fastq="../01_out/reads"
+# Directory containing mutation parameters
+d_mut="../02_out"
+
+# Used scripts. Invoke these scripts with the --help or -h switch to get
+# detailed descriptions.
+#
+# Directory
+scd="../../scripts"
+# Subject the chosen parts of a FASTQ file to processing of custom scripts
+s_filter_fastq="$scd/general/filter-fastq.py"
+# Mutate nucleotide strings following a tabular description of mutation 
+# probabilities
+s_multiple_mutate="$scd/induce-errors/multiple_mutate.py"
+
+function mutate_cat(){
+    i=$1
+
+    $s_filter_fastq \
+        --nucleotide @ $s_multiple_mutate "$d_mut/mut_$i" @ \
+        < "$d_fastq/fcatus.fastq" \
+        > fcatus_mut_$i.fastq
+}
+
+
+# List mutation parameter files generated in script 02
+mutfiles=($(ls $d_mut/mut_* | xargs -n1 basename ))
+
+for i in ${mutfiles[@]#mut_};do
+    echo $i ...
+    mutate_cat $i
+
+    cat fcatus_mut_$i.fastq $d_fastq/{bsubtilis,scoelicolor}.fastq \
+        > all_mut_${i}.fastq
+done
+
+
+
+
+
+# vim: ft=sh
+

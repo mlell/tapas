@@ -1,0 +1,46 @@
+set -ue
+
+# Generate mutation tables, using combinations of parametes. The values 
+# are specified in 
+
+d_in="$pr/data/in/artif-mutpar"
+d_out="$pr/data/gen/artif-mutpar"
+
+mkdir $d_out
+cd $d_out
+
+s_cross_tab="$pr/scripts/general/cross_tab.py"
+s_index_column="$pr/scripts/general/index-column.py"
+
+
+# Generate all combinations of params factor, geom_prob, intercept
+$s_cross_tab --head 1 $d_in/par/* > tmp
+$s_index_column < tmp > combination_indices
+
+#less combination_indices
+
+# Generate one file for each combination, copying the header line 
+# in each file
+awk '(NR==1){header=$0; next}; {print header; print $0}' tmp | \
+split -d -l 2 - tmp_
+
+# Add strand, from, to entries so that symmetric 
+# mutation patterns arise
+for f in tmp_*; do
+    # filename: tmp_XX => i=XX
+    i=${f#tmp_}
+    $s_cross_tab --head 1 $d_in/strand.tab $f > mut_$i
+done
+
+echo "mut" > mut.tab
+for f in tmp_*; do
+    i=${f#tmp_}
+    echo $i >> mut.tab
+done
+
+#less mut.tab
+
+rm tmp*
+
+# vim:ft=sh:tw=80
+

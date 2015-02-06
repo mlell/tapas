@@ -1,0 +1,9 @@
+bowtie2
+--{preset}
+--mm
+--ignore-quals
+-U $d_reads/all_c_{mut}.fastq
+-x $bowtie_index
+-S run/{index}.sam
+> log/{index}.log 2>&1 
+&& gzip run/{index}.sam

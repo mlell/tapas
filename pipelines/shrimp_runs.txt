@@ -1,0 +1,146 @@
+#' Just in case someone executes this as a script
+#' Don't use undefined vars, exit on error, don't overwrite with >
+set -ueC
+
+d_out="$pr/data/gen/shrimp_runs"
+d_reads="$pr/data/gen/multi-origin_reads"
+#mkdir $d_out
+cd $d_out
+
+s_shrimp="gmapper"
+s_cross_tab="cross_tab.py"
+s_table2calls="table2calls.py"
+s_mcall="mcall.py"
+s_index_column="$pr/scripts/index-column.py"
+ref_uspel="$pr/data/in/ref/NC011112_ingr_mito.fasta"
+
+#' Specify used seed weights
+#' =========================
+
+mkdir par
+
+cat > par/s.tab <<EOF
+s
+w10
+w14
+w18
+EOF
+
+
+#' Indexing the reference genome
+#' =============================
+#'
+#' ***NOTE:*** SHRiMP's gmapper fails with a segmentation fault if a
+#' genome index is loaded, which has been generated using the steps 
+#' described below. 
+#' Therefore, the step below is of no current use.
+#' 
+#' Shrimp uses genome indices using different seeds which must be matched
+#' exactly. Three different weights of seeds are used: the minimum and 
+#' the maximum weight for which SHRiMP defines default seeds and an 
+#' intermediate weight
+# mkdir ref
+# for s in $(tail -n+2 par/s.tab); do
+#    echo "$s_shrimp -H -s $s -S $d_out/ref/uspe_$s $ref_uspel \
+#         > ref/${s}.log 2>&1"
+# done | mcall.py -t 4
+
+#' Defining combinations of mapping parameters
+#' ===========================================
+#' 
+#' The authoritative explanation of the mapping parameters can be
+#' found in SHRiMPs README file
+#'
+#' -n: Whether a candidate position is defined on the reference
+#'     when one (value 1) or two (2) seeds match exactly.
+#' -r: Expand on a found seed match only if the optimistic score of the
+#'     seed-match is at least x% of the maximum attainable score of the
+#'     mapping. This parameter is ignored if -n 1.
+
+cat > par/n.tab <<EOF
+n   r
+1   <>
+2   35%
+2   55%
+2   75%
+EOF
+
+#' Replace spaces by tabs in the above file
+sed -ri 's/ +/\t/g' par/n.tab
+
+#' -l : ignore candidate match windows (CMW) that overlap with an already 
+#'      found CMW by more than x% of read length
+
+cat > par/l.tab <<EOF
+l
+90%
+70%
+EOF
+
+#' Parameters for Smith-Waterman global read alignment:
+#' -m: Match score
+#' -i: Mismatch score
+#' Gap parameters are not changed as of now, as no gaps have been inserted
+#' into the reads as of now.
+
+cat > par/m.tab <<EOF
+m
+6
+10
+14
+EOF
+
+cat > par/i.tab <<EOF
+i
+-7
+-15
+-20
+EOF
+
+
+#' Create combinations of parameter values
+#' =======================================
+
+$s_cross_tab --head 1 par/*.tab $d_reads/mut.tab \
+    > pars.tab
+
+
+#' Add an index column
+
+$s_index_column --inplace pars.tab
+
+mkdir aln
+mkdir log
+
+#' Set the call template for gmapper
+
+shrimp_opts="--fastq --sam --qv-offset 33 --sam-unaligned"
+
+call_tmpl="$s_shrimp $shrimp_opts
+-s {s} -H -n {n} [-r {r}] -l {l} -m {m} -i {i}
+$d_reads/all_c_{mut}.fastq $ref_uspel
+> aln/{index}.sam
+2> log/{index}.log &&
+gzip aln/{index}.sam"
+
+(
+    echo $call_tmpl 
+    echo ---
+    cat pars.tab
+)   > shrimp.mcall
+
+#' Subset the call table for test execution
+
+# head -n5 shrimp.mcall > shrimp_test.mcall
+# cat shrimp_test.mcall
+
+wc -l shrimp.mcall
+
+$s_table2calls shrimp.mcall > shrimp.calls
+
+$s_mcall --cmdfile shrimp.calls --threads 6 
+    2> mcall.err > mcall.out 
+
+
+# vim: tw=80:ft=sh
+

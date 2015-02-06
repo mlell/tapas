@@ -1,0 +1,60 @@
+Read mapping is performed using a parameter directory as input. 
+This directory must be of the following structure
+
+```
+-tmpl (text file)
+-par  (directory)
+-- ...
+-- ... (text tables of arbitrary names)
+```
+
+The `par` directory contains text tables of parameter values. It is
+expected that each file denotes in its first line the parameter name
+and in the following rows the corresponding values. 
+
+If multiple files are placed in the `par` directory, all combinations
+of the stored parameter values will be run.
+
+The `tmpl` file contains the command template for the mapper run.
+Before execution, every occurrence of a braced name, like {this}, is
+replaced by an actual parameter value, if one file in the `par` directory 
+contains this name in its header line.
+
+There is a special entry, {index}. This field is replaced by an unique
+number for each run performed.
+
+All content in the `tmpl` file is concatenated into one line. Therefore,
+if multiple commands are to be run, these must be connected by using the
+';' (run next command, no matter what), '&&' (run next command if previous
+command generated no error) or '||' (run next command if previous command 
+generated an error). Empty lines are ignored.
+
+All generated output must be saved to files using standard shell 
+redirection operators like '>'(standard output) or '2>' (standard error).
+
+If a parameter shall be ommitted in a part of the generated calls, the 
+respective part in the `tmpl` file can be enclosed by brackets.
+
+Example
+I
+
+Generate the mapper calls using the mapping_run.sh script. There are two 
+parameters expected: DESC_DIR refers to the directory structure previously
+described. OUT_DIR is a name of a new, to-be-created folder which will
+serve as working directory of all runs, that is, it will contain the 
+output files if no explicit path is stated following any '>' operator
+in the `tmpl` file.
+
+The result is a text file `calls` containing newline-separated calls, which 
+can be executed for example using the tool `mcall.py` (next paragraphs) 
+or GNU parallel. 
+
+```{sh}
+# Export a variable needed by the tmpl file. Remember to use absolute
+# paths.
+scripts/map/mapping_run.sh data/mapping data/4/4.
+# Show output 
+head -n3 data/4/4.calls
+head -n4 data/4/4.partab
+```
+

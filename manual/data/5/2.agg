@@ -1,0 +1,6 @@
+t.org	m.org	correct	count
+retli	*	FALSE	5
+volpertinger	*	FALSE	4
+retli	volpertinger	FALSE	20
+volpertinger	volpertinger	FALSE	1
+volpertinger	volpertinger	TRUE	20

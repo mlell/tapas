@@ -1,0 +1,6 @@
+$s_map_bwa 
+    $d_fastq/all_c_{mut}.fastq 
+    $bwa_index   
+    run/{index} 
+    -n{n} -l{l} -k{k} -M{M} 
+    > log/{index}.log 2>&1

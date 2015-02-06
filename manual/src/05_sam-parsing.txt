@@ -1,0 +1,284 @@
+Parsing of SAM files
+====================
+
+With the following tools, SAM files can be parsed to gain information of read
+names, where they were mapped, which quality score the mapping was assigned
+and so on. 
+
+The procedures in this chapter may vary more than the previous ones, 
+depending on the research question.
+
+In the setting this package was originally designed for, the names of the
+reads carry the information where the reads actually belong to. This
+information can subsequently be compared to the actual mapping information
+obtained from the SAM file.
+
+Extraction of information
+-------------------------
+
+For this purpose, the `sam-extract.R` tool can be used. This tool
+converts a SAM file into a table, where the columns can be
+informations obtained from the read names or SAM fields. The names of
+the SAM fields can be looked up in the SAM specification online, but
+the most important ones are:
+
+* qname: read name
+* rname: FASTA record name of genome this read was mapped to. `*` if 
+         not mapped.
+* pos:   base index of mapping position (1-based index!)
+* mapq:  quality score assigned by the mapper
+* cigar: CIGAR String: Information about gaps and mismatches in
+         the alignment read -- reference
+
+Take care not to put any spaces in the argument of --sam-fields.
+
+```{.sh}
+scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
+    data/4/1.sam  >  data/5/1.tab
+```
+
+```{.sh}
+head data/5/1.tab | column -t
+```
+
+```{.sh}
+tail data/5/1.tab | column -t
+```
+
+Bring together true read information from all origin organisms
+--------------------------------------------------------------
+
+This can be done by concatenating the tabular files generated during
+the read sampling process (Section 2). `awk` is used to concatenate
+the files while not repeating the header line of the second file:
+
+```{.sh}
+awk '(NR==1 || FNR!=1)' \
+      data/2/sample.tab \
+      data/2/retli.tab  \
+    > data/5/all.tab
+```
+
+Alternatively: Do the same and additionally ensure that the header 
+lines of the two files match.
+
+```{.sh}
+awk '(NR==1){
+         header=$0
+     }(FNR==1 && header!=$0){ 
+         print "Headers dont match!"|"cat >&2"
+         exit 1
+     }(NR==1 || FNR!=1){
+        print
+     }' \
+     data/2/sample.tab \
+     data/2/retli.tab  \
+   > data/5/all.tab
+```
+
+
+Identify correctly mapped reads
+-------------------------------
+
+One possibility is the script used below, `exactmap.R`
+
+This script relies on the input table columns having specific names. 
+For details see the help of the script by calling 
+`scripts/eval/exactmap.R -h`.
+
+Use the `--qthresh` parameter to declare all reads with a mapping
+quality below a certain threshold as not mapped. 
+
+```{.sh}
+scripts/eval/exactmap.R data/5/all.tab \
+                        data/5/1.tab  \
+                      > data/5/1.crct
+
+cat data/5/1.crct | column -t
+```
+
+
+For the next steps, the reads must be grouped by the original organism
+and the organism they were mapped to. This can be done by merging 
+the table `idlist` from Section 1 two times:
+
+The last two lines of the first command in the following example serve 
+for replacing `data/5/5.crct` using a temporary file.
+
+The first argument of `merge_organisms.R` may be a hypen (-) in which case
+the first table is read from standard input. This is handy for merging
+multiple information.
+
+Note that the information about the true origin organism of the
+*R. etli* contaminant reads needs to be merged into 
+the information about the organism of the sample organisms'
+chromosomes. Speaking in files, `data/1/sample.recids` must be
+concatenated with `data/2/retli.recids`
+
+This is done by:
+
+```{.sh}
+awk '(NR==1 || FNR!=1)' \
+    data/1/sample.recids \
+    data/2/retli.recids \
+    > data/5/all.recids
+
+cat data/5/all.recids | column -t
+```
+
+This is because the reads weren't mapped
+against the *R. etli* reference genome, therefore the *R. etli*
+chromosome can not appear as a `rname` value of the SAM file.
+
+```{.sh}
+scripts/eval/merge_organisms.R data/5/1.crct \
+                               m.orig \
+                               data/5/all.recids \
+                               organism=m.org  |  \
+scripts/eval/merge_organisms.R - \
+                               t.orig \
+                               data/5/all.recids \
+                               organism=t.org  \
+                            > data/5/1.crct.tmp &&
+                            mv data/5/1.crct{.tmp,}
+
+cat data/5/1.crct | column -t
+```
+
+As next step, the number of reads are counted which belong to 
+certain categories. Here, the categories are:
+  * Correctly mapped or not
+  * Origin organism
+  * Organism a read was mapped to
+
+the `cbind` function is needed in order to name the column containing 
+the read count
+
+```{.sh}
+scripts/general/pocketR.R '
+    aggregate(cbind(count=read) ~ t.org+m.org+correct, 
+        FUN=length, data=input)
+    ' \
+    data/5/1.crct > data/5/1.agg
+
+cat data/5/1.agg | column -t
+```
+
+Another possibility if you're proficient in dplyr:
+
+```{.sh}
+scripts/general/pocketR.R --pkg dplyr '
+    group_by(input, t.org, m.org, correct) %>%
+    summarize(count=n())
+    ' \
+    data/5/1.crct > data/5/1.agg
+
+head data/5/1.agg | column -t
+```
+
+This format may be used to plot the read fate of a single mapper run
+and to derive the measures sensitivity and specificity:
+
+```{.sh}
+scripts/eval/plot-read-fate.R t.org        m.org  \
+                              correct      count \
+                              data/5/1.pdf data/5/1.agg
+```
+
+<a href="data/5/1.pdf">Click here</a> to see the plot.
+
+Sensitivity and specificity
+---------------------------
+
+  * **Sensitivity** (recall) shows how many reads have been mapped
+    correctly by the mapper which are supposed to map.
+  * **Specificity** (precision) shows how many reads have been
+    correctly identified as non-endogenous and were therefore not
+    mapped.
+
+If non-endogenous reads were included in the reads, like we did by
+including the *R. etli* reads, both measures can be calculated.
+
+The following script needs the same kind of input as the
+`plot-read-fate.R` script. Additionally, a list of organisms must be
+specified, whose genomes the mapper used as a reference. 
+
+If you specify multiple organisms, separate them by commas and don't
+include any spaces.
+
+```{.sh}
+scripts/eval/sensspec.R data/5/1.agg volpertinger \
+    > data/5/1.parameters
+
+column -t data/5/1.parameters
+```
+
+
+
+Repeat all steps for every SAM file
+-----------------------------------
+
+The code needed to evaluate the data generated by the mapper might as
+well be included in the mapping template script introduced in the last
+section. If this is done, the data evaluation can be as well
+parallelized as the mapping process.
+
+All scripts used here were already introduced in this section.
+
+The files `data/5/all.tab` and `data/5/all.recids` must be calculated
+prior to execution of this script. This has been done in this section 
+as well.
+
+Browse the <a href="data/5">directory `data/5`</a> to see the results.
+
+```{.sh}
+for sam in data/4/*.sam; do
+    # Generate output prefix from input name: `4.sam` -> `4`
+    bn=$(basename $sam)
+    opref=${bn%.sam}
+
+    # Extract SAM fields
+    scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
+        ${sam}  >  data/5/${opref}.tab
+
+    # Mark correctly/incorrectly mapped reads
+    scripts/eval/exactmap.R data/5/all.tab \
+                            data/5/${opref}.tab  \
+                          > data/5/${opref}.crct
+
+    # Get organisms for chromosome names
+    scripts/eval/merge_organisms.R data/5/${opref}.crct \
+                                   m.orig \
+                                   data/5/all.recids \
+                                   organism=m.org  |  \
+    scripts/eval/merge_organisms.R - \
+                                   t.orig \
+                                   data/5/all.recids \
+                                   organism=t.org  \
+                                > data/5/${opref}.crct.tmp &&
+                                mv data/5/${opref}.crct{.tmp,}
+    
+    # Count reads per origin/target organism and mapping status
+    scripts/general/pocketR.R '
+        aggregate(cbind(count=read) ~ t.org+m.org+correct, 
+            FUN=length, data=input)
+        ' \
+        data/5/${opref}.crct > data/5/${opref}.agg
+
+    # Plot mapping targets per origin organism 
+    scripts/eval/plot-read-fate.R t.org        m.org  \
+                                  correct      count \
+                                  data/5/${opref}.pdf data/5/${opref}.agg
+
+    # Calculate sensitivity, specificity and balanced accuracy
+    scripts/eval/sensspec.R data/5/${opref}.agg volpertinger \
+        > data/5/${opref}.performance
+
+    echo "$sam done. -> Generated data/5/${opref}.{tab,agg,crct,pdf,performance}"
+
+done
+```
+
+    
+
+vim:tw=70

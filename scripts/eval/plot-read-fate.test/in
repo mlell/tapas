@@ -1,0 +1,10 @@
+true	mapped	corr	hqual	count
+horse	horse	TRUE	TRUE	100
+horse	horse	TRUE	FALSE	10
+horse	horse	FALSE	TRUE	5
+horse	horse	FALSE	FALSE	20
+horse	mouse	TRUE	TRUE	5
+horse	mouse	TRUE	FALSE	10
+mouse	none	FALSE	FALSE	100
+horse	none	FALSE	FALSE	20
+

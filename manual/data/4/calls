@@ -1,0 +1,6 @@
+(n=0; runidx=0; k=2; source data/mapping/map-bwa.sh);
+(n=4; runidx=1; k=2; source data/mapping/map-bwa.sh);
+(n=8; runidx=2; k=2; source data/mapping/map-bwa.sh);
+(n=0; runidx=3; k=10; source data/mapping/map-bwa.sh);
+(n=4; runidx=4; k=10; source data/mapping/map-bwa.sh);
+(n=8; runidx=5; k=10; source data/mapping/map-bwa.sh);

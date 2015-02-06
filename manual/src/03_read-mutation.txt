@@ -1,0 +1,223 @@
+Mutation of reads
+=================
+
+Mutation probabilities
+----------------------
+
+The reads are mutated using per base probabilities derived from the
+geometric distribution. The mutation probabiltiy at the read ends is
+the highest. By this, the chemical damage near read ends can be
+modelled. For this, three parameters are important:
+
+  * The base-independent mutation probability $t$ ($0<t<1$). This is
+    the probability of any base to mutate, regardless of its proximity
+    to the end of the read. This can be used to model evolutionary
+    distance.
+
+  * The steepness $p$ ($0<p<1$) of the mutation probability decline
+    when moving away from the read end. The higher this parameter the
+    steeper is the decline of mutation probability when moving away
+    from the read end.
+
+  * The multiplying factor $f$. At the read end, $f+t$ is the
+    probability of the first base of the read to be mutated.
+
+With this model, its possible to archive mutation probabilities
+greater than one. This makes of course no sense and the mutation
+probability is cut back to one in such cases.
+
+In mathematical notation, the mutation probability $P_{mut}$ of a base
+number $x$, starting to count at the reads' end, is:
+
+$$P_{mut}(x) = f \cdot dgeom(x;p) + t$$
+
+with $dgeom(X;P)$ being the density function of the geometric
+distribution, with parameters X = number of tries; P = success probability.
+
+The following sketch graphs illustrate the three parameters:
+
+<img src="fig/mut.svg" width="800" />
+
+Specifying the parameters
+-------------------------
+
+The mutation probabilities are saved as a text table. It looks like
+this:
+
+```{.sh}
+cat data/mut-tables/mut.tab
+```
+
+The columns have the following meaning:
+ 
+  * strand:  [3 or 5] On which end of the read should base 1 be
+    located, the base with the highest mutation probability
+  * from: [Letter or *] Which bases should mutate according to this
+    lines' parameters. * means this rule applies to every base.
+  * to:   [Letter or *] Which base should a mutation event yield. 
+          * means a base (A,T,C,G) different from the original base
+          is chosen at random.
+  * factor: $f$ from the previous section
+  * geom_prob: $p$ from the previous section
+  * intercept: $t$ from the previous section
+
+In the example above, a base is $x$ bp away from the 5' end of
+a read of length l. That means, it is $(l-x)$ bp away from the 3' end
+of the read. The exchage probability depends on the type of the
+nucleotide and on $x$:
+
+Base at position $x$ is not Cytosine:
+
+$$P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
+P_{\ast\rightarrow\ast}$$
+
+Base at position $x$ is Cytosine (C): 
+
+$$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
+          (0.3\times dgeom(x;0.4) + 0.1) + 
+          (0.1\times dgeom((l-x);0.2) + 0.0) $$
+
+Mutate a sequence
+-----------------
+
+The `multiple-mutate.py` tool takes a table of the previous section as
+input and mutates strings provided to it on standard input
+accordingly. 
+
+Mutations can be inserted either before a FASTQ file is assembled
+(`synth-fastq.py`, see previous section):
+```{.sh}
+scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab \
+    < data/2/sample.n
+```
+
+Alternatively, a already existant FASTQ file can be mutated using the
+`filter-fastq.py` tool in cooperation with `multiple-mutate.py`:
+
+```{.sh}
+scripts/general/filter-fastq.py --nucleotide \
+  @ scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab @ \
+  < data/2/sample.fastq > data/3/sample_mut.fastq
+
+head data/3/sample_mut.fastq
+```
+
+The `filter-fastq.py` script enables you to apply an arbitrary script
+on just one part of a FASTQ file (ID line, nucleotide line, quality
+line). The used script must accept the respective part on standard
+input and prints the modified version on standard output. The modified
+FASTQ file is assembled by `filter-fastq.py` from the output of its
+children scripts and printed on standard output. 
+
+On the `filter-fastq.py` call, the @ sign serves as a sentinel character,
+which determines start and end of the child scripts' command line. It
+can be an arbitrary character, as long as it doesn't occur inside the
+child scripts' command line.
+
+
+Combining endogenous and non-endogenous reads
+---------------------------------------------
+
+In this example, the endogenous reads undergo simulated mutation
+and damage prior to mapping, while the contaminant reads do not.
+
+Therefore, now is the time to combine the mutated sample reads
+and the contaminant reads generated in the last section to one
+file. For this purpose, the UNIX tool `cat` is used:
+
+```{.sh}
+cat data/3/sample_mut.fastq data/2/retli.fastq \
+    > data/3/all.fastq
+```
+
+Obtaining mutation rates from mapDamage
+---------------------------------------
+
+Damage patterns from mapDamage can be converted into a table
+with mutation parameters by least-squares fitting. For this purpose,
+the mapDamage output files ending with `... _freq.txt` are needed.
+
+The following command fits a geometric distribution to mapDamage data, 
+shows the derived parameters and plots the data with the fitted curve.
+
+The `cut` command is used only to limit the output to a
+width acceptable for this manual. Use the bash `>` redirection
+operator to write this output into a file suitable for
+`multiple_mutate.py`.
+
+```{.sh}
+scripts/distribution-parametrization/mapdamage2geomparam.py \
+    --fit-plots data/3/fit_ \
+    data/mapdamage/*.txt | \
+    cut -f1-6 | \
+    column -t
+```
+
+The generated plots can be viewed 
+<a href="data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
+<a href="data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
+fit_000_GS136_3pGtoA_freq.txt.pdf
+
+Generating multiple damage patterns using a parameter table
+-----------------------------------------------------------
+
+The `fill_template.py` script expects a table, where each row is used
+to fill a prespecified template with values. 
+
+For example, if a template is written which looks like this:
+
+```{.sh}
+column -t data/mut-tmpl/mut-tmpl
+```
+
+And a table is created which looks like this:
+
+```{.sh}
+column -t data/mut-tmpl/tab
+```
+
+several files can be generated with 
+
+```{.sh}
+scripts/general/fill_template.py \
+    data/mut-tmpl/mut-tmpl \
+    < data/mut-tmpl/tab
+```
+
+Use the `--output` switch of this script to write each file in a
+separate file. The argument of `--output` can (and should!) contain
+column names of the table, enclosed in braces {...}. This creates a
+separate filename per input row. 
+
+For example, the mentioned-above table can be prepended with an index
+column:
+
+```{.sh}
+scripts/general/index-column.py <data/mut-tmpl/tab >data/3/tab-i
+
+head data/3/tab-i | column -t
+```
+
+Now, each output of `fill_template.py` can be written to its own 
+output file:
+
+```{.sh}
+scripts/general/fill_template.py \
+    --output "data/3/{index}_filled" \
+    data/mut-tmpl/mut-tmpl \
+    < data/3/tab-i
+
+for f in data/3/*_filled; do
+    echo " === $f === "
+    column -t $f
+done
+```
+
+If several combinations of mutation parameters shall be tested,
+`cross_tab.py` can be used to generate the table from predefined
+parameter values, like described with mapper parameters in the next
+section.
+
+
+
+vim:tw=70

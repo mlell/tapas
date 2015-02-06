@@ -1,0 +1,131 @@
+Generate mapper calls
+=====================
+
+To generate the calls to the mapper using different combinations of 
+parameters, several files holding the values of the different parameters
+are first combined to a table holding all possible combinations of them.
+
+Subsequently, every line is given a unique index which can be referred to
+e.g. when writing output files of the mapping process. By this index, each
+run writes to a different output file.
+
+The parameter values are saved in several files, one per parameter. 
+In this example, the BWA parameters n and k are varied which results
+in two files:
+
+```{.sh}
+ls data/mapping/*.par
+```
+
+The files can have arbitrary filenames, they are in a tabular format
+where the column names relate to variables which are set automatically
+later in the process.
+
+```{.sh}
+column -t data/mapping/n.par
+```
+
+To generate all combinations of parameters, two scripts are used:
+
+  * `scripts/general/cross_tab.py` expects multiple files and outputs all
+    possible combinations of their lines. 
+
+  * `scripts/general/index-column.py` This script prepends a counting number 
+    to each input line. It can be used to generate index columns for text 
+    tables.
+
+Generate all possible combinations of parameters, retaining 1 header
+line:
+```{.sh}
+scripts/general/cross_tab.py --head 1 data/mapping/*.par > data/4/partab
+head data/4/partab | column -t
+```
+
+Add an index column called runidx:
+```{.sh}
+scripts/general/index-column.py --colname runidx --inplace data/4/partab
+head data/4/partab | column -t
+```
+
+Read now the script `data/mapping/map-bwa.sh` and see how the variables
+used there correspond to the column names of partab. The script is
+shown in the next code block. There is an additional
+variable there, `$fastq`. This variable needs to be set and exported before
+executing the calls, which will be done in the next section.
+
+```{.bash}
+#!/usr/bin/bash
+
+## This script performs a mapping using BWA.
+## It requires the variables k, n, runidx and fastq be set 
+## prior to its execution.
+
+# Fail if any needed variable is not set
+set -ue
+
+bwa aln -n $n -k $k        \
+    data/genome/sample     \
+    $fastq                 \
+    > data/4/${runidx}.sai \
+    2> data/4/${runidx}.log &&
+
+bwa samse data/genome/sample \
+      data/4/${runidx}.sai   \
+      $fastq                 \
+      > data/4/${runidx}.sam \
+     2>> data/4/${runidx}.log
+
+```
+
+Below the calls are generated.
+
+```{.sh}
+# Convert the table into calls that can be executed in the next section
+scripts/general/table2calls.py  data/4/partab \
+                                data/mapping/map-bwa.sh \
+                              > data/4/calls
+head data/4/calls
+```
+
+Executing multiple mapping runs in parallel
+===========================================
+
+For this task, many programs can be used, from simple shell background
+spawning using & (in bash) to job managers orchestrating a big network
+of worker machines. In this package, a simple programm is implemented
+which executes a user-definable number of jobs in parallel and
+waits with spawning new ones until another of its already started jobs
+finishes.
+
+Note that it is possible to use user-defined shell functions or
+variables, if they are made available using the `export VARIABLE` or
+`export -f FUNCTION` bash commands (replace UPPERCASE letters by 
+actual name). Refer to the manual of your shell if you're using a 
+different shell than bash.
+
+Note as well that more CPU cores than started parallel processes are
+needed if the mappers run on multiple cores themselves. Whether to
+exploit parallelism implemented in the mappers or to use
+`mcall.py` is up to you.
+
+Invoke `scripts/general/mcall.py --help` to get more information about
+this tool.
+
+Example: Run the previously generated mapper calls. 
+
+```{.sh}
+    # Export variable for use in mcall.py
+    export fastq="$(pwd)/data/3/all.fastq"
+    # Execute calls, at 2 cores
+    scripts/general/mcall.py -c data/4/calls -t 2 \
+                             --status
+    # Standard error was piped to log files, 
+    # Standard output was piped to sam files, as specified in the
+    # `tmpl` file.
+    head data/4/0.log
+    head -n15 data/4/0.sam
+```
+
+
+
+vim:tw=70

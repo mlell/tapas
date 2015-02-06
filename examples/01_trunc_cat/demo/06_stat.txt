@@ -1,0 +1,71 @@
+# Don't delete data in case this file is executed non-interactively
+set -ueC
+
+scd="$pr/scripts"
+d_tab="$pr/demo/05_out"
+run_pars="$pr/demo/04_out/out/pars.tab"
+mut_pars="$pr/demo/02_out/combination_indices"
+
+s_pocketr="$scd/general/pocketR.R"
+s_sensspec="$scd/eval/sensspec.R"
+s_plot="$scd/eval/plot_parameter_effects.R"
+s_add_column="$scd/general/add_const_column.sh"
+
+mkdir 06_out
+cd 06_out
+
+awk '(NR==1 || FNR!=1)' "$d_tab/"*.tab  > all.tab
+
+# Aggregate counts of mapped/not mapped reads for each 
+# true organism -- mapped organism combination
+
+# Aggregate for 2 different quality scores
+$s_pocketr '
+ input[input$mapq < 10, "correct"] <- FALSE
+ aggregate(cbind(count=qname) ~ torg+organism+correct+run, data=input,
+ FUN=length)' \
+ all.tab > agg10.tab
+
+$s_pocketr '
+ input[input$mapq < 30, "correct"] <- FALSE
+ aggregate(cbind(count=qname) ~ torg+organism+correct+run, 
+            data=input, FUN=length)' \
+ all.tab > agg30.tab
+
+
+# Calculate sensitivity and specificity per mapper run
+# for two quality thresholds
+$s_sensspec --c-morg organism --c-torg torg agg30.tab > ss30.tab
+$s_sensspec --c-morg organism --c-torg torg agg10.tab > ss10.tab
+
+# Add column specifying threshold for subsequent table concatenation
+$s_add_column ss30.tab quality 30
+$s_add_column ss10.tab quality 10
+
+# Concatenate sensit.-specif. results for two quality thresholds
+awk '(NR==1 || FNR!=1)' ss30.tab ss10.tab > ss.tab
+
+# Pull in parameter and mutation data using run column
+# the mut column is obtained from the run-parameter association,
+# mutation parameter can be 
+$s_pocketr '
+o <- merge(inputs[[1]], inputs[[2]], by.x="run",by.y="index")
+o <- merge(o, inputs[[3]], by.x="mut", by.y="index")
+return(o)' \
+    ss.tab $run_pars $mut_pars > sspar.tab
+
+$s_plot sspar.tab --signif 1 --color all_intercept n sensitivity \
+    sens_n_mut.pdf
+$s_plot sspar.tab --signif 1 --color all_intercept quality sensitivity \
+    sens_qual_mut.pdf
+$s_plot sspar.tab --signif 1 --color all_intercept k sensitivity \
+    sens_k_mut.pdf
+$s_plot sspar.tab --signif 1 geom_prob sensitivity \
+    sens_geom.pdf
+
+
+
+
+
+# vim:ft=sh
+

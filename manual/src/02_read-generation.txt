@@ -1,0 +1,182 @@
+Generating sample reads
+=======================
+
+The output FASTQ file will be constructed by interleaving the contents
+of three files, containing the read names, the nucleotide strings and
+the quality strings, respectively. These files will be generated in
+the following. 
+
+Additionally, a table containing the read names with the true read
+positions will be created, to evaluate later on whether a read was
+mapped correctly.
+
+Generate nucleotide strings and read names
+------------------------------------------
+
+The uniform.py script can be used to sample reads from a reference
+genome. The script needs a FASTA file as input, as well as the desired
+amount of reads to be generated, the minimum length and the decay
+length. The read lengths are exponentially distributed; the decay
+length parameter specifies the length by which half of the reads are
+longer than the minimum read length.
+
+The input genome is linearized and an offset index is created by default, 
+as described in the previous section. This can be suppressed by the 
+command line switches `--linearized` and `--index`, if these steps are
+executed manually previously.
+
+Example: Extract 25 reads, with minimum length 20 basepairs, where
+half of the reads have a length longer than 25 bp. The value 123 
+is used to initialize the random number generator, i.e. can be used to
+obtain reproducible reads. This last parameter can be omitted.
+
+The resulting output is a table containing four columns:
+
+ 1. The FASTA record name (e.g. chromosome) where the read originated.
+ 2. 1-based base number of the reads' first base.
+ 3. 1-based base number of the reads' last base.
+ 4. The nucleotides of the read
+
+The base indices are 1-based because base indices are 1-based in
+SAM-files as well. (whereas in BAM-files, they are 0-based, but that
+is not of interest here.)
+
+Generate reads without prior genome processing steps:
+
+```{.sh}
+scripts/generate-reads/nucl/uniform.py data/genome/sample.fasta \
+    25 20 5 123  >  data/2/sample.tab
+# Show output 
+head data/2/sample.tab | column -t
+```
+
+Generate reads while using a pre-processed genome (linearized and
+indexed). See previous section for generation of the used input files.
+
+
+```{.sh}
+scripts/generate-reads/nucl/uniform.py \
+    --index data/1/sample.idx \
+    --linearized data/1/sample.fasta.lin \
+    25 20 5 123 >  data/2/sample.tab
+# Show output
+head data/2/sample.tab | column -t
+```
+
+As a last step, the output table is given an index column which
+assigns a unique name to each read:
+
+```{.sh}
+scripts/general/index-column.py --prefix "sample_" \
+                                --colname name \
+                                --inplace data/2/sample.tab
+
+head data/2/sample.tab | column -t
+```
+
+
+Splitting the read sampler output
+---------------------------------
+
+The first two columns of the output will be included in a table which
+lists the true positions of the reads. Therefore the column names will
+start with 't' (true) in this case, but the names are arbitrary.
+
+This table will also list the future read names, which are generated
+using awk. 
+
+The last column will be the nucleotide strings of the new FASTQ file.
+This column will be written to an extra file.
+
+Generate the table with true read positons and add the FASTA record
+name (tail -n+2 ... removes the first line (header line)):
+
+```{.sh}
+awk '(NR!=1){
+        print $1 > "data/2/sample.i";
+        print $5 > "data/2/sample.n";
+     }' \
+     data/2/sample.tab
+```
+Show output
+```{.sh}
+head data/2/sample.i
+```
+
+```{.sh}
+head data/2/sample.n
+```
+
+```
+
+Quality strings
+---------------
+
+Currently, the effect of quality strings on the mapping result has not
+been investigated. Currently only strings of constant quality score
+are used. This can be done by the sed tool, which replaces every 
+character by an F:
+
+```{.sh}
+sed 's/./F/g' data/2/sample.n > data/2/sample.q
+head data/2/sample.q
+```
+
+Creating a FASTQ file
+---------------------
+
+The `synth-fastq.py` tool creates a FASTQ file from its components,
+nucleotide string, quality string and read name (ID line). If the file
+containing the read lines is omitted, the reads are numbered
+sequentially.
+
+```{.sh}
+scripts/generate-reads/synth-fastq.py data/2/sample.{n,q,i} \
+    > data/2/sample.fastq
+
+head data/2/sample.fastq
+```
+
+Repeat the above steps to generate contaminant reads
+----------------------------------------------------
+
+This commands generate some reads from a truncated Rhizobium etli
+genome, to supply reads which are not supposed to map. This way,
+contamination with non-endogenous reads are simulated.
+
+The endogenous (`sample.fastq`) and contaminant (`retli.fastq`) 
+read will be merged into one fastq file (`all.fastq`) once the
+sample reads have undergone mutation simulation. This will be 
+done in the next section.
+
+```{.sh}
+scripts/genome/mfasta-idlist.sh data/retli/retli_tr.fasta retli \
+    > data/2/retli.recids
+
+scripts/generate-reads/nucl/uniform.py \
+    data/retli/retli_tr.fasta \
+    25 20 5 234 \
+    > data/2/retli.tab
+
+scripts/general/index-column.py  --prefix retli_ \
+                                 --colname name  \
+                                 --inplace data/2/retli.tab
+
+awk '(NR!=1){ 
+       print $1 > "data/2/retli.i";
+       print $5 > "data/2/retli.n";
+     }' \
+    < data/2/retli.tab
+                                 
+sed 's/./F/g' < data/2/retli.n \
+              > data/2/retli.q
+
+scripts/generate-reads/synth-fastq.py \
+    data/2/retli.n \
+    data/2/retli.q \
+    data/2/retli.i \
+    > data/2/retli.fastq
+
+```
+
+vim:tw=70

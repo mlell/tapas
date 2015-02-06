@@ -1,0 +1,66 @@
+Genome Preparation
+==================
+ 
+
+Prior to extraction of reads, the original genomes must be 
+preprocessed. This encompasses three steps:
+ 
+Record index table
+------------------
+The FASTA record identifiers must be written in a table.
+This enables to assign different chromosomes to the same organism
+later on in the analysis (Section 5)
+
+In this example, the reads stem from our sample organism
+'volpertinger':
+
+```{.sh}
+scripts/genome/mfasta-idlist.sh data/genome/sample.fasta volpertinger \
+    > data/1/sample.recids
+head data/1/sample.recids
+```
+
+The second parameter is optional, but handy if the target genome is
+comprised of multiple FASTA records. It adds a column called
+"organism" which holds the string of the second argument (in this
+case, "sample"). The resulting table can be used to associate all the
+FASTA records of this FASTA file to the same organism in subsequent
+analysis steps.
+
+Linearization
+-------------
+
+The genome files must be linearized. This means the deletion of
+all whitespace and newline characters in the data section of
+each FASTA record. This is needed because this makes it much
+quicker to jump to a specific base in the FASTA file.
+
+In the following example the output lines are truncated for better
+readability
+
+```{.sh}
+scripts/generate-reads/nucl/linearize_fasta \
+    data/genome/sample.fasta > data/1/sample.fasta.lin
+
+# Show output, partially
+cut -c-80 data/1/sample.fasta.lin
+```
+
+Record offset index
+-------------------
+
+To efficiently know the location of a specific FASTA record in a
+FASTA-file, an index of file offsets of these records must be saved. 
+
+```{.sh}
+scripts/generate-reads/nucl/fasta_record_index \
+    data/1/sample.fasta.lin > data/1/sample.idx
+
+# Show output, partially
+head data/1/sample.idx
+```
+
+
+
+
+vim:tw=70

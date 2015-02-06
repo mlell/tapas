@@ -1,0 +1,10 @@
+set -u;
+$pr/mapper-compare/bwa/map-reads-bwa.sh
+$reference
+{reads}
+$pr/mapper-compare/bwa/Usp_mito/Usp_mito
+{reads}_l{seed_len} 
+-l {seed_len}
+-t 1
+
+---

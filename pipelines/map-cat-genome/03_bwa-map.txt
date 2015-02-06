@@ -1,0 +1,18 @@
+set -ue 
+
+set -u 
+#' Variables needed by the subscripts
+export d_fastq="$pr/data/gen/cat_reads"
+export bwa_index="$HOME/hiwi/genomes/FelisCatus/felis.fasta"
+export s_map_bwa="$pr/scripts/bwa/map-reads-bwa.sh"
+
+
+#' Run 1
+
+s_mapping="$pr/pipelines/mapping_run.sh"
+
+
+$s_mapping "$pr/data/in/par_cat/bwa/1" "$pr/data/gen/cat_mappings/bwa/1"
+
+# vim:ft=sh:tw=70
+

@@ -1,0 +1,4 @@
+2015-03-26 15:19:02,645	INFO	main: Started with the command: /usr/local/bin/mapDamage -i Index9.sort_rmdup-0.bam -r /home/rincewind/refsMT/pbe.fasta --no-stats
+2015-03-26 15:19:04,632	DEBUG	main: BAM read in 2.725806 seconds
+2015-03-26 15:19:05,230	INFO	main: Successful run
+2015-03-26 15:19:05,230	DEBUG	main: Run completed in 3.323927 seconds

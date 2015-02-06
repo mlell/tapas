@@ -1,0 +1,41 @@
+120000 20 11
+0 A1 dna:chromosome chromosome:Felis_catus_6.2:A1:1:239302903:1 REF
+0 6000 0
+0 A2 dna:chromosome chromosome:Felis_catus_6.2:A2:1:169043629:1 REF
+6000 6000 1
+0 A3 dna:chromosome chromosome:Felis_catus_6.2:A3:1:142459683:1 REF
+12000 6000 0
+0 B1 dna:chromosome chromosome:Felis_catus_6.2:B1:1:205241052:1 REF
+18000 6000 1
+0 B2 dna:chromosome chromosome:Felis_catus_6.2:B2:1:154261789:1 REF
+24000 6000 0
+0 B3 dna:chromosome chromosome:Felis_catus_6.2:B3:1:148491654:1 REF
+30000 6000 0
+0 B4 dna:chromosome chromosome:Felis_catus_6.2:B4:1:144259557:1 REF
+36000 6000 1
+0 C1 dna:chromosome chromosome:Felis_catus_6.2:C1:1:221441202:1 REF
+42000 6000 0
+0 C2 dna:chromosome chromosome:Felis_catus_6.2:C2:1:157659299:1 REF
+48000 6000 1
+0 D1 dna:chromosome chromosome:Felis_catus_6.2:D1:1:116869131:1 REF
+54000 6000 0
+0 D2 dna:chromosome chromosome:Felis_catus_6.2:D2:1:89822065:1 REF
+60000 6000 0
+0 D3 dna:chromosome chromosome:Felis_catus_6.2:D3:1:95741729:1 REF
+66000 6000 3
+0 D4 dna:chromosome chromosome:Felis_catus_6.2:D4:1:96020406:1 REF
+72000 6000 0
+0 E1 dna:chromosome chromosome:Felis_catus_6.2:E1:1:63002102:1 REF
+78000 6000 0
+0 E2 dna:chromosome chromosome:Felis_catus_6.2:E2:1:64039838:1 REF
+84000 6000 0
+0 E3 dna:chromosome chromosome:Felis_catus_6.2:E3:1:43024555:1 REF
+90000 6000 0
+0 F1 dna:chromosome chromosome:Felis_catus_6.2:F1:1:68669167:1 REF
+96000 6000 0
+0 F2 dna:chromosome chromosome:Felis_catus_6.2:F2:1:82763536:1 REF
+102000 6000 1
+0 MT dna:chromosome chromosome:Felis_catus_6.2:MT:1:17009:1 REF
+108000 6000 0
+0 X dna:chromosome chromosome:Felis_catus_6.2:X:1:126427096:1 REF
+114000 6000 1

@@ -1,0 +1,63 @@
+Comparing multiple mapper runs
+==============================
+
+The file `data/4/partab` holds the information which parameters were
+used for which mapping run. By relating the output measures like
+sensitivity, specificity or balanced accuracy to these parameters, the
+influence of individual parameters can be assessed.
+
+First step is to combine the output measures of all runs:
+
+```{.sh}
+for f in data/5/*.performance; do
+    i=$(basename ${f%.performance})
+
+    scripts/general/add_const_column.sh $f runidx $i \
+        > data/6/${i}.performance
+done
+
+awk '(NR==1||FNR!=1)' data/6/*.performance > data/6/performance
+
+cat data/6/performance | column -t
+```
+
+Next, the parameter values belonging to the run indices are joined in, 
+appending the parameter columns to `data/6/parameters` itself.
+
+```{.sh}
+scripts/general/pocketR.R '
+    merge(inputs[[1]], inputs[[2]], by="runidx", all.x=TRUE)
+    ' \
+    data/6/performance data/4/partab > data/6/performance.tmp &&
+    mv data/6/performance{.tmp,}
+
+head data/6/performance | column -t
+```
+
+The value of one parameter can be plotted against some measure. The
+following command shows plots where the X and Y axis are free to
+choose. If multiple runs yield a similar score on the Y axis, their
+data points are merged to form one bigger dot on the plot. Here all
+numbers are rounded to one significant digit, because only 8 mapping
+runs are compared in this example. Therefore results must be
+aggregated coarsely to demonstrate the results.
+
+```{.sh}
+# Plot n versus BCR
+scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance n bcr \
+    data/6/n.pdf
+
+# Plot k versus BCR
+scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance k bcr \
+    data/6/k.pdf
+```
+
+View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and
+ <a href="data/6/k.pdf">k vs. BCR</a>.
+
+ It can be seen that n seems to have an impact on the BCR whereas k
+ does not. The BCR rises and falls again because the gain in
+ sensitivity is offset by the loss in specificity if n rises too high.
+
+
+vim:tw=70

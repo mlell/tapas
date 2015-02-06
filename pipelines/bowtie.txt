@@ -1,0 +1,230 @@
+
+function col_indices(){
+    head -1 "$1" | awk '{split($0,a); for(k in a){print k,a[k]}}' | sort -n
+}
+
+s_mapping_run="$pr/pipelines/mapping_run.sh"
+s_sam_stats="$pr/pipelines/sam-stats.sh"
+s_group_summary="$pr/pipelines/group_summary.sh"
+s_sens_spec="$pr/pipelines/sens-spec.R"
+s_param_anova="$pr/pipelines/param-anova.R"
+s_pocketr="$pr/scripts/pocketR.R"
+s_histogram="$pr/pipelines/histogram.R"
+
+d_dsc="$pr/data/in/par_bowtie"
+d_gen="$pr/data/gen/bowtie"
+
+#' Bowtie Evaluation
+#' =================
+#' 
+#' Param Combinations 1
+#' --------------------
+
+#' Run mapper.
+$s_mapping_run $d_dsc/1 $d_gen/1
+
+cd $d_gen/1
+
+#' Save mapping status ((in-)correct, high quality) of reads
+$s_sam_stats run 20
+
+#' Aggregate run statistics (create 1.agg 1.tab)
+$s_group_summary run 1 pars.tab
+
+#' Get quality
+awk '(NR!=1){print $7}' 1.tab | sort -n | uniq -c > quality.all.hist &
+
+#' Get 1.tab column indices
+col_indices 1.tab
+
+#' Get quality of correctly mapped reads
+awk '($11 == "TRUE"){print $7}' 1.tab | sort -n |uniq -c > quality.cmap.hist &
+awk '($11 == "FALSE"){print $7}' 1.tab | sort -n |uniq -c > quality.imap.hist &
+
+#' Calculate sensitivity and specificity of each run
+$s_sens_spec 1.agg > performance.tab
+
+#' Merge performance and parameter table by the run number
+$s_pocketr "merge(inputs[[1]], inputs[[2]],by.x='index',by.y='run')" \
+    pars.tab performance.tab \
+    > performance_par.tab
+
+$s_pocketr '
+o <- subset(input, torg == "uspemito" & org == "uspemito")
+print(max(subset(o, correct.mapping)$count))
+print(min(subset(o, !correct.mapping & high.quality)$count))
+NULL
+' 1.agg
+
+#' ANOVA of parameter influence
+model1="D*gbar*i*L*ma*mp*mut*R*score_min"
+#$s_param_anova $d_gen/1/performance_par.tab --tab-out $model1 > anova.tab
+#$s_param_anova $d_gen/1/performance_par.tab --filter-pval 0.1 $model1 
+
+$s_param_anova performance_par.tab --anova --filter-pval 0.1 \
+    "sensitivity~D*gbar*i*L*ma*mp*score_min*mut*R"
+$s_param_anova performance_par.tab --anova --filter-pval 0.1 \
+    "sensitivity~D+gbar+i+L+ma+mp+score_min+mut+R"
+$s_param_anova performance_par.tab --anova --filter-pval 0.5\
+    "sensitivity~(D+gbar+i+L+ma+mp+score_min+R)*mut" #| \
+    tee model
+
+
+#' Show column numbers of performance_par.tab
+col_indices performance_par.tab
+
+#' Show best sensitivity and best specificity for each mutation rate
+for mut in $(tail -n +2 $d_dsc/1/par/mut); do
+    echo Mutation Rate $mut
+    echo "--- Sensitivity ---"
+    echo $'run\tsensitivity\tspecificity'
+    awk '($8 == "'$mut'")' performance_par.tab | \
+        sort -k 13 -k 16 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$13,$16}'
+    echo "--- Specificity ---"
+    awk '($8 == "'$mut'")' performance_par.tab | \
+        sort -k 16 -k 13 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$13,$16}'
+done | tee max-sens-spec
+
+
+
+
+
+
+
+
+#' This param combination yielded almost no correct results!
+
+#' ===================================================================================
+
+#' Param Combinations 2: Preset values
+#' --------------------
+
+#' Run mapper.
+$s_mapping_run $d_dsc/2 $d_gen/2
+cd $d_gen/2
+
+#' Save mapping status ((in-)correct, high quality) of reads
+$s_sam_stats run 20
+
+#' Aggregate run statistics
+$s_group_summary run 2 pars.tab
+
+#' Show column numbers of 2.tab
+col_indices 2.tab
+
+#' Get quality of correct maps
+awk '(NR!=1 && $11 == "TRUE"){print $7}' 2.tab  | sort -n | uniq -c
+
+#' Get quality of incorrect maps
+awk '(NR!=1 && $11 == "FALSE"){print $7}' 2.tab  | sort -n | uniq -c
+
+#' Calculate sensitivity and specificity of each run
+$s_sens_spec 2.agg > performance.tab
+
+#' Merge performance and parameter table by the run number
+$s_pocketr "merge(inputs[[1]], inputs[[2]],by.x='index',by.y='run')" \
+    pars.tab performance.tab \
+    > performance_par.tab
+
+#' Show column numbers of performance_par.tab
+col_indices performance_par.tab
+
+#' Show best sensitivity and best specificity for each mutation rate
+for mut in $(tail -n +2 $d_dsc/2/par/mut); do
+    echo Mutation Rate $mut
+    echo "--- Sensitivity ---"
+    echo $'run\tsensitivity\tspecificity'
+    awk '($2 == "'$mut'")' performance_par.tab | \
+        sort -k 6 -k 9 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$6,$9}'
+    echo "--- Specificity ---"
+    awk '($2 == "'$mut'")' performance_par.tab | \
+        sort -k 9 -k 16 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$6,$9}'
+done
+
+#' --> We can do better than the presets!
+
+
+# ===========================================================================
+
+#' Parameter Set 3
+#' ===============
+
+#' New Set of options
+#' Try to increase sensitivity
+#' * L: Really no effect? (1)  Set it lower to 3
+#' * i: (Offset between read seeds) Set lower and check influence of 
+#'      const/factor part
+#' * gbar: (Allow gaps at ends of reads): Delete, no effect and no gaps here
+#' * ma: Increase both values with 1
+#' * mp:  (mismatch penalty): set lower to investigate what happens if ma ~= mp
+#' * score-min: Strong interaction with mut: if score lower, sens. higher?
+#'              -> set to even lower values
+#' * R: (Re-seed reads that have repetetive seeds). Too specific. Remove.
+#' * D: (consecutive seed extension attempts). No effect. Remove
+
+#' Run mapper.
+$s_mapping_run $d_dsc/3 $d_gen/3
+
+cd $d_gen/3
+
+#' Save mapping status ((in-)correct, high quality) of reads
+#' This quality threshold has been adjusted to 12 because of information of the
+#' quality distribution count ~ quality for both of correct/no(t correct) mapping
+$s_sam_stats run 16
+
+#' Aggregate run statistics (create 1.agg 1.tab)
+$s_group_summary run 3 pars.tab
+
+#' Get quality
+awk '(NR!=1){print $7}' 3.tab | sort -n | uniq -c > quality.all.hist &
+
+#' Get 1.tab column indices
+col_indices 3.tab
+
+#' Get quality of correctly mapped reads
+awk '($11 == "TRUE"){print $7}' 3.tab | sort -n |uniq -c > quality.cmap.hist &
+awk '($11 == "FALSE"){print $7}' 3.tab | sort -n |uniq -c > quality.imap.hist &
+
+#' Calculate sensitivity and specificity of each run
+$s_sens_spec 3.agg > performance.tab
+
+#' Merge performance and parameter table by the run number
+$s_pocketr "merge(inputs[[1]], inputs[[2]],by.x='index',by.y='run')" \
+    pars.tab performance.tab \
+    > performance_par.tab
+
+$s_pocketr '
+o <- subset(input, torg == "uspemito" & org == "uspemito")
+print(max(subset(o, correct.mapping)$count))
+print(min(subset(o, !correct.mapping & high.quality)$count))
+NULL
+' 3.agg
+
+#' ANOVA of parameter influence
+$s_param_anova performance_par.tab "sensitivity~i+L+ma+mp+mut+score_min"
+$s_param_anova performance_par.tab "sensitivity~(i+L+ma+mp+score_min)*mut" | \
+    tee model.sens
+
+$s_param_anova performance_par.tab "specificity~(i+L+ma+mp+score_min)*mut" | \
+    tee model.spec
+
+#' Show column numbers of performance_par.tab
+col_indices performance_par.tab
+
+#' Show best sensitivity and best specificity for each mutation rate
+for mut in $(tail -n +2 $d_dsc/1/par/mut); do
+    echo Mutation Rate $mut
+    echo "--- Sensitivity ---"
+    echo $'run\tsensitivity\tspecificity'
+    awk '($6 == "'$mut'")' performance_par.tab | \
+        sort -n -k 10 -k 13 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$10,$13}'
+    echo "--- Specificity ---"
+    awk '($6 == "'$mut'")' performance_par.tab | \
+        sort -n -k 13 -k 10 -r | head -n 5 | awk -vOFS=$"\t" '{print $1,$10,$13}'
+done | tee max-sens-spec
+
+
+
+# vim: ft=sh
+
+
