@@ -20,10 +20,8 @@ length. The read lengths are exponentially distributed; the decay
 length parameter specifies the length by which half of the reads are
 longer than the minimum read length.
 
-The input genome is linearized and an offset index is created by default, 
-as described in the previous section. This can be suppressed by the 
-command line switches `--linearized` and `--index`, if these steps are
-executed manually previously.
+For the FASTA file, an index file must exist which was generated in
+the previous section using samtools.
 
 Example: Extract 25 reads, with minimum length 20 basepairs, where
 half of the reads have a length longer than 25 bp. The value 123 
@@ -44,7 +42,7 @@ is not of interest here.)
 Generate reads without prior genome processing steps:
 
 ```{.sh}
-scripts/generate-reads/nucl/uniform.py data/genome/sample.fasta \
+scripts/generate-reads/uniform.py data/genome/sample.fasta \
     25 20 5 123  >  data/2/sample.tab
 # Show output 
 head data/2/sample.tab | column -t
