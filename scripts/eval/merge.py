@@ -67,21 +67,20 @@ def main(argv):
     else:
         llfd_b = os.open(args["b"],os.O_RDONLY)
 
-    print(args,file=sys.stderr)
     print([llfd_a,llfd_b],file=sys.stderr)
 
     if llfd_a == sys.stdin.fileno() and llfd_b == sys.stdin.fileno():
         raise ValueError("-a and -b cannot both read from standard in!")
 
-    a_fh = os.fdopen(llfd_a)
-    b_fh = os.fdopen(llfd_b)
+    # Use unbuffered IO to wrap file descriptors
+    a_fh = os.fdopen(llfd_a, 'rb', 0)
+    b_fh = os.fdopen(llfd_b, 'rb', 0)
 
-
-    header_a = a_fh.readline().rstrip().split("\t")
-    header_b = b_fh.readline().rstrip().split("\t")
-
-    print(a_fh.tell())
-    print(b_fh.tell())
+    def_enc = sys.getdefaultencoding()
+    header_a = a_fh.readline().decode(def_enc)
+    header_b = b_fh.readline().decode(def_enc)
+    header_a = header_a.rstrip().split("\t")
+    header_b = header_b.rstrip().split("\t")
 
     # acols, bcols: list of 2-tuples. First value of tuple specifies
     # column name in input, second value of tupls specifies column 
@@ -133,6 +132,8 @@ def main(argv):
     
     # Add outer join arguments
     joinargs = []
+    joinargs.extend(["-1",str(a_by_i+1)])
+    joinargs.extend(["-2",str(b_by_i+1)])
     if "a" in args["all"] : joinargs.extend(["-a","1"])
     if "b" in args["all"] : joinargs.extend(["-a","2"])
     if args["all"] : # Any join
@@ -172,50 +173,49 @@ def main(argv):
     os.set_inheritable(llfd_a,True)
     os.set_inheritable(llfd_b,True)
 
-    sort_cmd_a = "| LC_ALL=C sort -k1 -t$'\\t'" if not args["a_sorted"] else ""
-    sort_cmd_b = "| LC_ALL=C sort -k1 -t$'\\t'" if not args["b_sorted"] else ""
+    sort_cmd_a = "| LC_ALL=C sort -k{by} -t$'\\t'".format(by=a_by_i+1) \
+            if not args["a_sorted"] else ""
+    sort_cmd_b = "| LC_ALL=C sort -k{by} -t$'\\t'".format(by=b_by_i+1) \
+            if not args["b_sorted"] else ""
 
     cmd_taba = "{awk} <&{fd} {sort}".format(
             awk = "cat",
             #awk  = awk_select_cols(a_cols_i),
             fd   = llfd_a,
-            #sort = sort_cmd_a 
-            sort = "")
+            sort = sort_cmd_a )
+            #sort = "")
     
     cmd_tabb = "{awk} <&{fd} {sort}".format(
             awk = "cat",
             #awk  = awk_select_cols(b_cols_i),
             fd   = llfd_b,
-            #sort = sort_cmd_b 
-            sort = "")
+            sort = sort_cmd_b )
+            #sort = "")
 
-    cmd = ("join {args} -j1 -t$'\\t' <({input_a}) <({input_b})").format(
+    cmd = ("join {args} -t$'\\t' <({input_a}) <({input_b})").format(
             input_a = cmd_taba,
             input_b = cmd_tabb,
             args = " ".join(joinargs))
 
-
-    #print(a_cols_print + b_cols_print, file=sys.stderr)
-    if debug:     
-        print("EXECUTE:", file=sys.stderr)
-        print(cmd, file=sys.stderr)
-        print("----------------------------------",file=sys.stderr)
-        print(a_cols_i, file=sys.stderr)
-        print(b_cols_i, file=sys.stderr)
 
     print("\t".join(a_cols_print+b_cols_print)) 
     sys.stdout.flush()
 
     # Handle SIGPIPE properly, e.g. when piped to head
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-    #sp.check_call(cmd_tabb, close_fds=False,shell=True, executable="/bin/bash")
-    sp.check_call("cat <&{}|wc -l".format(llfd_a), pass_fds=[llfd_a,llfd_b],shell=True, executable="/bin/bash")
-    print("-----------------")
-    sp.check_call("cat <&{}|wc -l".format(llfd_b), pass_fds=[llfd_a,llfd_b],shell=True, executable="/bin/bash")
+
+    # Execute join
+    sp.check_call(cmd, close_fds=False,shell=True, executable="/bin/bash")
 
     sys.stdout.flush() 
 
     return 0
+
+def read_unbuffered_line(stream):
+    out = []
+    while True:
+        char = stream.read(1)
+
 
 def rnd_string(length):
     chars = string.ascii_lowercase+string.ascii_uppercase+string.digits
