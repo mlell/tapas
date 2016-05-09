@@ -7,23 +7,41 @@
   <title></title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
+div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; }
-code > span.dt { color: #902000; }
-code > span.dv { color: #40a070; }
-code > span.bn { color: #40a070; }
-code > span.fl { color: #40a070; }
-code > span.ch { color: #4070a0; }
-code > span.st { color: #4070a0; }
-code > span.co { color: #60a0b0; font-style: italic; }
-code > span.ot { color: #007020; }
-code > span.al { color: #ff0000; font-weight: bold; }
-code > span.fu { color: #06287e; }
-code > span.er { color: #ff0000; font-weight: bold; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
   <link rel="stylesheet" href="manual.css" type="text/css" />
   <script type="text/javascript">/*<![CDATA[*/
@@ -104,19 +122,16 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="TOC">
 <h2 id="toctitle">Table of Contents</h2>
 <ul class="incremental">
-<li><a href="#genome-preparation">Genome Preparation</a><ul class="incremental">
+<li><a href="#dependencies-of-the-scripts">Dependencies of the scripts</a><ul class="incremental">
 <li><a href="#record-index-table">Record index table</a></li>
-<li><a href="#linearization">Linearization</a></li>
-<li><a href="#record-offset-index">Record offset index</a></li>
 </ul></li>
 <li><a href="#generating-sample-reads">Generating sample reads</a><ul class="incremental">
 <li><a href="#generate-nucleotide-strings-and-read-names">Generate nucleotide strings and read names</a></li>
-<li><a href="#splitting-the-read-sampler-output">Splitting the read sampler output</a></li>
+<li><a href="#putting-together-the-fastq-file">Putting together the FASTQ file</a></li>
+<li><a href="#read-names">Read names</a></li>
 <li><a href="#quality-strings">Quality strings</a></li>
-<li><a href="#creating-a-fastq-file">Creating a FASTQ file</a></li>
+<li><a href="#putting-the-fastq-file-together">Putting the FASTQ file together</a></li>
 <li><a href="#repeat-the-above-steps-to-generate-contaminant-reads">Repeat the above steps to generate contaminant reads</a></li>
-</ul></li>
-<li><a href="#mutation-of-reads">Mutation of reads</a><ul class="incremental">
 <li><a href="#mutation-probabilities">Mutation probabilities</a></li>
 <li><a href="#specifying-the-parameters">Specifying the parameters</a></li>
 <li><a href="#mutate-a-sequence">Mutate a sequence</a></li>
@@ -130,6 +145,8 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#extraction-of-information">Extraction of information</a></li>
 <li><a href="#bring-together-true-read-information-from-all-origin-organisms">Bring together true read information from all origin organisms</a></li>
 <li><a href="#identify-correctly-mapped-reads">Identify correctly mapped reads</a></li>
+<li><a href="#custom-determination-of-correct-match">Custom determination of correct match</a></li>
+<li><a href="#grouping-of-reads">Grouping of reads</a></li>
 <li><a href="#sensitivity-and-specificity">Sensitivity and specificity</a></li>
 <li><a href="#repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</a></li>
 </ul></li>
@@ -137,229 +154,177 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#glossary">Glossary</a></li>
 </ul>
 </div>
-<h1 id="genome-preparation">Genome Preparation</h1>
-<p>Prior to extraction of reads, the original genomes must be preprocessed. This encompasses three steps:</p>
+<p><span class="title">The TAPAS manual</span></p>
+<h1 id="dependencies-of-the-scripts">Dependencies of the scripts</h1>
+<p>The scripts consisting this software depend on</p>
+<ul class="incremental">
+<li>A Python 3 installation</li>
+<li>R</li>
+</ul>
+<p>Furthermore, the scripts depend on several packages which are included.</p>
+<p>vim:tw=70 Genome Preparation ==================</p>
 <h2 id="record-index-table">Record index table</h2>
-<p>The FASTA record identifiers must be written in a table. This enables to assign different chromosomes to the same organism later on in the analysis (Section 5)</p>
-<p>In this example, the reads stem from our sample organism 'volpertinger':</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/genome/mfasta-idlist.sh</span> data/genome/sample.fasta volpertinger \
-    <span class="kw">&gt;</span> data/1/sample.recids
-<span class="kw">head</span> data/1/sample.recids</code></pre>
-<pre class="output"><code>record  organism
-A1  volpertinger
-A2  volpertinger
-A3  volpertinger
-B1  volpertinger
-B2  volpertinger
-B3  volpertinger
-B4  volpertinger
-MT  volpertinger
-X   volpertinger</code></pre>
-<p>The second parameter is optional, but handy if the target genome is comprised of multiple FASTA records. It adds a column called &quot;organism&quot; which holds the string of the second argument (in this case, &quot;sample&quot;). The resulting table can be used to associate all the FASTA records of this FASTA file to the same organism in subsequent analysis steps.</p>
-<h2 id="linearization">Linearization</h2>
-<p>The genome files must be linearized. This means the deletion of all whitespace and newline characters in the data section of each FASTA record. This is needed because this makes it much quicker to jump to a specific base in the FASTA file.</p>
-<p>In the following example the output lines are truncated for better readability</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/generate-reads/nucl/linearize_fasta</span> \
-    data/genome/sample.fasta <span class="kw">&gt;</span> data/1/sample.fasta.lin
-
-<span class="co"># Show output, partially</span>
-<span class="kw">cut</span> -c-80 data/1/sample.fasta.lin</code></pre>
-<pre class="output"><code>&gt;A1 dna:chromosome chromosome:Felis_catus_6.2:A1:1:239302903:1 REF
-CCAAACAATAAAGACTCTTAAAAACTGAGAACAATGAGGGTTGATGGGGGGTGGGAGAGGAGGGGAGGGTGGGTGATGGG
-&gt;A2 dna:chromosome chromosome:Felis_catus_6.2:A2:1:169043629:1 REF
-CCGTACCAGCAGAACCCAACCCCAACCCCAACCCCAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAAC
-&gt;A3 dna:chromosome chromosome:Felis_catus_6.2:A3:1:142459683:1 REF
-TCACTGGATCCCCCTTAGGATCTCTTGTAGGGCTGGTTTAGTGGTGATGAATTCCTTCAGTTTTTGTTTGTTTGGGAAGA
-&gt;B1 dna:chromosome chromosome:Felis_catus_6.2:B1:1:205241052:1 REF
-ATCTAGACTTTAAAATAAAGACTGCAACAAGAGATGAAGAATGGTGTTGTATCATAATTAAGGGAGTCTATCCACCAAAA
-&gt;B2 dna:chromosome chromosome:Felis_catus_6.2:B2:1:154261789:1 REF
-AAAAAAAAAGAAAGAAAAGAAAAGAAAATCTGGATCTCAAAAAGGTATCTGCACTCCTGTGTGATAATACTGTGTTACAG
-&gt;B3 dna:chromosome chromosome:Felis_catus_6.2:B3:1:148491654:1 REF
-GCACTGGGTGATTGAATAAAAATATAGGACCCACATATCTTCTACCTACAAGAGACTAATTATAGAACTGAAGTATCAAA
-&gt;B4 dna:chromosome chromosome:Felis_catus_6.2:B4:1:144259557:1 REF
-CTGGTCTGAAGAGCCTGGAAAGGATGACAGGACATGGGCCTATTCCTTTTTCCCACTCAGACTCAATGTGAAGACTTTAG
-&gt;MT dna:chromosome chromosome:Felis_catus_6.2:MT:1:17009:1 REF
-GGACTAATGACTAATCAGCCCATGATCACACATAACTGTGGTGTCATGCATTTGGTATTTTTTATTTTTAGGGGGTCGAA
-&gt;X dna:chromosome chromosome:Felis_catus_6.2:X:1:126427096:1 REF
-CACCACTTCCTTGTTCCCCATCTATCACATCCGGCCATTAGGAGAAAATTACAGGGTATACTGACAGGTGACAAACGTGA</code></pre>
-<h2 id="record-offset-index">Record offset index</h2>
-<p>To efficiently know the location of a specific FASTA record in a FASTA-file, an index of file offsets of these records must be saved.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/generate-reads/nucl/fasta_record_index</span> \
-    data/1/sample.fasta.lin <span class="kw">&gt;</span> data/1/sample.idx
-
-<span class="co"># Show output, partially</span>
-<span class="kw">head</span> data/1/sample.idx</code></pre>
-<pre class="output"><code>head 0
-data 67
-len 6000
-head 6068
-data 6135
-len 6000
-head 12136
-data 12203
-len 6000
-head 18204</code></pre>
+<p>First, index the genome using <code>samtools</code>. This is needed for several downstream tools:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">samtools</span> faidx data/genome/sample.fasta</code></pre></div>
+<pre class="output"><code></code></pre>
 <h1 id="generating-sample-reads">Generating sample reads</h1>
 <p>The output FASTQ file will be constructed by interleaving the contents of three files, containing the read names, the nucleotide strings and the quality strings, respectively. These files will be generated in the following.</p>
 <p>Additionally, a table containing the read names with the true read positions will be created, to evaluate later on whether a read was mapped correctly.</p>
 <h2 id="generate-nucleotide-strings-and-read-names">Generate nucleotide strings and read names</h2>
-<p>The uniform.py script can be used to sample reads from a reference genome. The script needs a FASTA file as input, as well as the desired amount of reads to be generated, the minimum length and the decay length. The read lengths are exponentially distributed; the decay length parameter specifies the length by which half of the reads are longer than the minimum read length.</p>
-<p>The input genome is linearized and an offset index is created by default, as described in the previous section. This can be suppressed by the command line switches <code>--linearized</code> and <code>--index</code>, if these steps are executed manually previously.</p>
+<p>The <code>uniform</code> script can be used to sample reads from a reference genome. The script needs a FASTA file as input, as well as the desired amount of reads to be generated, the minimum length and the decay length. The read lengths are exponentially distributed; the decay length parameter specifies the length by which half of the reads are longer than the minimum read length.</p>
+<p>For the FASTA file, an index file must exist which was generated in the previous section using samtools.</p>
 <p>Example: Extract 25 reads, with minimum length 20 basepairs, where half of the reads have a length longer than 25 bp. The value 123 is used to initialize the random number generator, i.e. can be used to obtain reproducible reads. This last parameter can be omitted.</p>
-<p>The resulting output is a table containing four columns:</p>
+<p>The resulting output will be a raw list of nucleotide sequences and a table containing three columns:</p>
 <ol class="incremental" style="list-style-type: decimal">
 <li>The FASTA record name (e.g. chromosome) where the read originated.</li>
 <li>1-based base number of the reads' first base.</li>
 <li>1-based base number of the reads' last base.</li>
-<li>The nucleotides of the read</li>
 </ol>
-<p>The base indices are 1-based because base indices are 1-based in SAM-files as well. (whereas in BAM-files, they are 0-based, but that is not of interest here.)</p>
-<p>Generate reads without prior genome processing steps:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/generate-reads/nucl/uniform.py</span> data/genome/sample.fasta \
-    25 20 5 123  <span class="kw">&gt;</span>  data/2/sample.tab
-<span class="co"># Show output</span>
-<span class="kw">head</span> data/2/sample.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>record  start  end   read
-A2      498    518   AGAATGAAATCTTGCCATTTG
-B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-A2      4682   4701  ATGTAATATTATTTANNNNN
-B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC</code></pre>
-<p>Generate reads while using a pre-processed genome (linearized and indexed). See previous section for generation of the used input files.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/generate-reads/nucl/uniform.py</span> \
-    --index data/1/sample.idx \
-    --linearized data/1/sample.fasta.lin \
-    25 20 5 123 <span class="kw">&gt;</span>  data/2/sample.tab
-<span class="co"># Show output</span>
-<span class="kw">head</span> data/2/sample.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>record  start  end   read
-A2      498    518   AGAATGAAATCTTGCCATTTG
-B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-A2      4682   4701  ATGTAATATTATTTANNNNN
-B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC</code></pre>
-<p>As a last step, the output table is given an index column which assigns a unique name to each read:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/index-column.py</span> --prefix <span class="st">&quot;sample_&quot;</span> \
-                                --colname name \
-                                --inplace data/2/sample.tab
-
-<span class="kw">head</span> data/2/sample.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>name      record  start  end   read
-sample_0  A2      498    518   AGAATGAAATCTTGCCATTTG
-sample_1  B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-sample_2  X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-sample_3  B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-sample_4  B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-sample_5  A2      4682   4701  ATGTAATATTATTTANNNNN
-sample_6  B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-sample_7  A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-sample_8  MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC</code></pre>
-<h2 id="splitting-the-read-sampler-output">Splitting the read sampler output</h2>
-<p>The first two columns of the output will be included in a table which lists the true positions of the reads. Therefore the column names will start with 't' (true) in this case, but the names are arbitrary.</p>
-<p>This table will also list the future read names, which are generated using awk.</p>
-<p>The last column will be the nucleotide strings of the new FASTQ file. This column will be written to an extra file.</p>
-<p>Generate the table with true read positons and add the FASTA record name (tail -n+2 ... removes the first line (header line)):</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR!=1){</span>
-<span class="st">        print $1 &gt; &quot;data/2/sample.i&quot;;</span>
-<span class="st">        print $5 &gt; &quot;data/2/sample.n&quot;;</span>
-<span class="st">     }&#39;</span> \
-     data/2/sample.tab</code></pre>
+<p>The base indices are 1-based because base indices are 1-based in SAM-files as well. (whereas in BAM-files, they are 0-based, but we don't need to deal with BAM-files here.)</p>
+<p>We will generate sample reads from our sample genome of a volpertinger.</p>
+<p>Execute the following script to generate random nucleotide sequences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/uniform</span> data/genome/volpertinger.fasta \
+    --seed 1234 \
+    --output data/2/volpertinger.coord data/2/volpertinger.nucl \
+    25 20 5</code></pre></div>
 <pre class="output"><code></code></pre>
-<p>Show output</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/2/sample.i</code></pre>
-<pre class="output"><code>sample_0
-sample_1
-sample_2
-sample_3
-sample_4
-sample_5
-sample_6
-sample_7
-sample_8
-sample_9</code></pre>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/2/sample.n</code></pre>
-<pre class="output"><code>AGAATGAAATCTTGCCATTTG
-AACCAGAGCACACGTAGGCAGCCAT
-ATCCTGCGAGGGGGCCCGAG
-TTTTGCTTTTGTTTCCCTTGGCTCT
-GAGGAGAAAGCAGACAAAAA
-ATGTAATATTATTTANNNNN
-ATCCTTGGAGGTAGAGTCACC
-GTTAAGTCCCGCTGGCTGTCAGA
-GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC
-TCAGCCCCACAGTGAGGAGAAACCAA</code></pre>
-<p>```</p>
+<p>Two files are generated when the <code>--output</code> switch is used, as is the case above: One holds the read names and coordinates and the other one holds the raw nucleotide sequences. When omitting <code>--output</code>, all information is printed in tabular form on the standard output and not saved to distinct files.</p>
+<p>The resulting files look like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/2/volpertinger.coord <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>record  start  end
+B1      2143   2168
+MT      3402   3421
+A3      1413   1436
+A3      5689   5709
+MT      3280   3302
+A3      4936   4960
+A1      1320   1340
+A3      4480   4504
+X       2381   2400</code></pre>
+<pre><code>head data/2/volpertinger.nucl | column -t</code></pre>
+<h2 id="putting-together-the-fastq-file">Putting together the FASTQ file</h2>
+<p>This task needs three input files:</p>
+<ol class="incremental" style="list-style-type: decimal">
+<li>The list of read names</li>
+<li>The list of nucleotide strings</li>
+<li>The list of quality strings</li>
+</ol>
+<p>The first list is extracted from the file <code>volpertinger.coord</code>, the second list exists already (<code>volpertinger.nucl</code>) and the third list is generated using standard UNIX tools from the nucleotide strings</p>
+<h2 id="read-names">Read names</h2>
+<p>In this tutorial we generate read names consisting of the organism name (<em>volpertinger</em>) followed by an underscore and a counting number.</p>
+<p>To have the origin information of the reads available along with their newly-generated reads, it is advisable to add the read names to the <code>volpertinger.coord</code> file generated above.</p>
+<p>There is a script included for adding this kind of column, which is shown in the next code example. You can as well use <code>awk</code> or whichever tool you like to accomplish this task if you need more sophisticated read names.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/index-column</span>  --prefix volpertinger_ \
+                      --colname name  \
+                      --inplace data/2/volpertinger.coord
+
+<span class="kw">head</span> data/2/volpertinger.coord <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>name            record  start  end
+volpertinger_0  B1      2143   2168
+volpertinger_1  MT      3402   3421
+volpertinger_2  A3      1413   1436
+volpertinger_3  A3      5689   5709
+volpertinger_4  MT      3280   3302
+volpertinger_5  A3      4936   4960
+volpertinger_6  A1      1320   1340
+volpertinger_7  A3      4480   4504
+volpertinger_8  X       2381   2400</code></pre>
+<p>To use the read names to generate a FASTQ file, they must be available as a raw list without additional columns or a header. <code>awk</code> can be used to perform this task:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> \
+      data/2/volpertinger.coord \
+    <span class="kw">&gt;</span> data/2/volpertinger.i
+
+<span class="kw">head</span> data/2/volpertinger.i</code></pre></div>
+<pre class="output"><code>volpertinger_0
+volpertinger_1
+volpertinger_2
+volpertinger_3
+volpertinger_4
+volpertinger_5
+volpertinger_6
+volpertinger_7
+volpertinger_8
+volpertinger_9</code></pre>
 <h2 id="quality-strings">Quality strings</h2>
-<p>Currently, the effect of quality strings on the mapping result has not been investigated. Currently only strings of constant quality score are used. This can be done by the sed tool, which replaces every character by an F:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">sed</span> <span class="st">&#39;s/./F/g&#39;</span> data/2/sample.n <span class="kw">&gt;</span> data/2/sample.q
-<span class="kw">head</span> data/2/sample.q</code></pre>
-<pre class="output"><code>FFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFF
+<p>Currently, the effect of quality strings on the mapping result has not been investigated. Currently only strings of constant quality score are used. This can be done by the UNIX <code>sed</code> tool, which replaces every character by an F:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">sed</span> <span class="st">&#39;s/./F/g&#39;</span> \
+      data/2/volpertinger.nucl \
+    <span class="kw">&gt;</span> data/2/volpertinger.q
+
+<span class="kw">head</span> data/2/volpertinger.q</code></pre></div>
+<pre class="output"><code>FFFFFFFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
-<h2 id="creating-a-fastq-file">Creating a FASTQ file</h2>
-<p>The <code>synth-fastq.py</code> tool creates a FASTQ file from its components, nucleotide string, quality string and read name (ID line). If the file containing the read lines is omitted, the reads are numbered sequentially.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/generate-reads/synth-fastq.py</span> data/2/sample.<span class="dt">{n,q,i}</span> \
-    <span class="kw">&gt;</span> data/2/sample.fastq
-
-<span class="kw">head</span> data/2/sample.fastq</code></pre>
-<pre class="output"><code>@sample_0
-AGAATGAAATCTTGCCATTTG
-+
-FFFFFFFFFFFFFFFFFFFFF
-@sample_1
-AACCAGAGCACACGTAGGCAGCCAT
-+
 FFFFFFFFFFFFFFFFFFFFFFFFF
-@sample_2
-ATCCTGCGAGGGGGCCCGAG</code></pre>
+FFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
+<p>If you want to generate more elaborate quality strings, you are free to do so using whichever tools you desire. Just generate a list with as many lines as there are nucleotide strings in <code>volpertinger.nucl</code> to input them into the pipeline.</p>
+<h2 id="putting-the-fastq-file-together">Putting the FASTQ file together</h2>
+<p>The <code>synth-fastq</code> tool creates a FASTQ file from its components, nucleotide string, quality string and read name (ID line). If the file containing the read lines is omitted, the reads are numbered sequentially.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/synth-fastq</span> data/2/volpertinger.nucl \
+                    data/2/volpertinger.q    \
+                    data/2/volpertinger.i    \
+    <span class="kw">&gt;</span> data/2/volpertinger.fastq
+
+<span class="kw">head</span> data/2/volpertinger.fastq</code></pre></div>
+<pre class="output"><code>@volpertinger_0
+TTCCACAAGATATTAGCCAACCAGAT
++
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_1
+TCTATTTAATAACTTCTCCC
++
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+TTGAACTCTATCTTCCGGGGCTCA</code></pre>
 <h2 id="repeat-the-above-steps-to-generate-contaminant-reads">Repeat the above steps to generate contaminant reads</h2>
-<p>This commands generate some reads from a truncated Rhizobium etli genome, to supply reads which are not supposed to map. This way, contamination with non-endogenous reads are simulated.</p>
-<p>The endogenous (<code>sample.fastq</code>) and contaminant (<code>retli.fastq</code>) read will be merged into one fastq file (<code>all.fastq</code>) once the sample reads have undergone mutation simulation. This will be done in the next section.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/genome/mfasta-idlist.sh</span> data/retli/retli_tr.fasta retli \
-    <span class="kw">&gt;</span> data/2/retli.recids
+<p>This commands generate some reads from a truncated <em>Rhizobium etli</em> genome, to supply reads which are not supposed to map. This way, contamination with non-endogenous reads are simulated.</p>
+<p>The endogenous (<code>volpertinger.fastq</code>) and contaminant (<code>retli.fastq</code>) read will be merged into one fastq file (<code>all.fastq</code>) once the sample reads have undergone mutation simulation. This will be done in the next section.</p>
+<p>Note that two kinds of abbreviations are used here:</p>
+<ul class="incremental">
+<li>Terms like <code>const_{a,b,c}</code> are expanded by <code>bash</code> to <code>const_a const_b const_c</code> and can therefore be used to specify mulitple paths which share some parts.</li>
+<li>The temporary files (similar to <code>volpertinger.q</code> and <code>volpertinger.i</code> above) are omitted here by using <code>bash</code>'s <em>process substitution</em> (<code>&lt;(...)</code>) which uses the output of one argument instead of a file name which the other command expects.</li>
+</ul>
+<p>If you do not understand why these commands are equivalent to the commands listed above used to generate <code>reads.fastq</code>, you can use these as well without problems.</p>
+<p>Index genome and sample nucleotide seqences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">samtools</span> faidx data/retli/retli_tr.fasta
 
-<span class="kw">scripts/generate-reads/nucl/uniform.py</span> \
+<span class="kw">scripts/uniform</span> \
     data/retli/retli_tr.fasta \
-    25 20 5 234 \
-    <span class="kw">&gt;</span> data/2/retli.tab
-
-<span class="kw">scripts/general/index-column.py</span>  --prefix retli_ \
-                                 --colname name  \
-                                 --inplace data/2/retli.tab
-
-<span class="kw">awk</span> <span class="st">&#39;(NR!=1){</span>
-<span class="st">       print $1 &gt; &quot;data/2/retli.i&quot;;</span>
-<span class="st">       print $5 &gt; &quot;data/2/retli.n&quot;;</span>
-<span class="st">     }&#39;</span> \
-    <span class="kw">&lt;</span> data/2/retli.tab
-
-<span class="kw">sed</span> <span class="st">&#39;s/./F/g&#39;</span> <span class="kw">&lt;</span> data/2/retli.n \
-              <span class="kw">&gt;</span> data/2/retli.q
-
-<span class="kw">scripts/generate-reads/synth-fastq.py</span> \
-    data/2/retli.n \
-    data/2/retli.q \
-    data/2/retli.i \
-    <span class="kw">&gt;</span> data/2/retli.fastq</code></pre>
+    --seed 2345 \
+    --output data/2/retli.<span class="dt">{coord,nucl}</span> \
+    25 20 5</code></pre></div>
 <pre class="output"><code></code></pre>
-<h1 id="mutation-of-reads">Mutation of reads</h1>
+<p>Read names:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/index-column</span>  --prefix retli_ \
+                      --colname name  \
+                      --inplace data/2/retli.coord</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Put the FASTQ together * Quality strings are generated without an intermediate file using <code>sed</code> * Read names are extracted without an intermediate file using <code>awk</code></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/synth-fastq</span> \
+    data/2/retli.nucl \
+    <span class="kw">&lt;(sed</span> <span class="st">&#39;s/./F/g&#39;</span>           data/2/retli.nucl<span class="kw">)</span> \
+    <span class="kw">&lt;(awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> data/2/retli.coord<span class="kw">)</span> \
+    <span class="kw">&gt;</span> data/2/retli.fastq
+
+<span class="kw">head</span> data/2/retli.fastq</code></pre></div>
+<pre class="output"><code>@retli_0
+TCGTTCTTGTAGCCTTCCGGGAA
++
+FFFFFFFFFFFFFFFFFFFFFFF
+@retli_1
+ACTGAAGCGCAAGCTCTGAA
++
+FFFFFFFFFFFFFFFFFFFF
+@retli_2
+TGGCCGAGGGACGCTTGCGTCG</code></pre>
+<p>vim:tw=70 Mutation of reads =================</p>
 <h2 id="mutation-probabilities">Mutation probabilities</h2>
-<p>The reads are mutated using per base probabilities derived from the geometric distribution. The mutation probabiltiy at the read ends is the highest. By this, the chemical damage near read ends can be modelled. For this, three parameters are important:</p>
+<p>The reads are mutated using per base probabilities derived from the geometric distribution. The mutation probability at the read ends is the highest. By this, the chemical damage near read ends can be modelled. For this, three parameters are important:</p>
 <ul class="incremental">
 <li><p>The base-independent mutation probability <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>t</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0&lt;t&lt;1</annotation></semantics></math>). This is the probability of any base to mutate, regardless of its proximity to the end of the read. This can be used to model evolutionary distance.</p></li>
 <li><p>The steepness <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>p</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0&lt;p&lt;1</annotation></semantics></math>) of the mutation probability decline when moving away from the read end. The higher this parameter the steeper is the decline of mutation probability when moving away from the read end.</p></li>
@@ -373,7 +338,7 @@ ATCCTGCGAGGGGGCCCGAG</code></pre>
 <p><img src="fig/mut.svg" width="800" /></p>
 <h2 id="specifying-the-parameters">Specifying the parameters</h2>
 <p>The mutation probabilities are saved as a text table. It looks like this:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cat</span> data/mut-tables/mut.tab</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cat</span> data/mut-tables/mut.tab</code></pre></div>
 <pre class="output"><code>strand   from   to   factor  geom_prob  intercept
 3        C      T    0.3     0.4        0.1
 5        C      T    0.1     0.2        0.0
@@ -387,100 +352,95 @@ ATCCTGCGAGGGGGCCCGAG</code></pre>
 <li>geom_prob: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> from the previous section</li>
 <li>intercept: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> from the previous section</li>
 </ul>
-<p>In the example above, a base is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> bp away from the 5' end of a read of length l. That means, it is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(l-x)</annotation></semantics></math> bp away from the 3' end of the read. The exchage probability depends on the type of the nucleotide and on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>:</p>
+<p>In the example above, a base is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> bp away from the 5' end of a read of length l. That means, it is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(l-x)</annotation></semantics></math> bp away from the 3' end of the read. The exchange probability depends on the type of the nucleotide and on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>:</p>
 <p>Base at position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> is not Cytosine:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0</mn><mo>.</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0</mn><mo>.</mo><mn>12</mn><mo>=</mo><mn>0</mn><mo>.</mo><mn>12</mn><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub></mrow><annotation encoding="application/x-tex">P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0.1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.12</mn><mo>=</mo><mn>0.12</mn><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub></mrow><annotation encoding="application/x-tex">P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
 P_{\ast\rightarrow\ast}</annotation></semantics></math></p>
 <p>Base at position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> is Cytosine (C):</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mi>C</mi><mo accent="false">→</mo><mi>T</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>.</mo><mn>3</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0</mn><mo>.</mo><mn>4</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0</mn><mo>.</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>.</mo><mn>1</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>;</mo><mn>0</mn><mo>.</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0</mn><mo>.</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mi>C</mi><mo accent="false">→</mo><mi>T</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0.3</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0.4</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0.1</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>;</mo><mn>0.2</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
           (0.3\times dgeom(x;0.4) + 0.1) + 
           (0.1\times dgeom((l-x);0.2) + 0.0) </annotation></semantics></math></p>
 <h2 id="mutate-a-sequence">Mutate a sequence</h2>
 <p>The <code>multiple-mutate.py</code> tool takes a table of the previous section as input and mutates strings provided to it on standard input accordingly.</p>
-<p>Mutations can be inserted either before a FASTQ file is assembled (<code>synth-fastq.py</code>, see previous section):</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/induce-errors/multiple_mutate.py</span> data/mut-tables/mut.tab \
-    <span class="kw">&lt;</span> data/2/sample.n</code></pre>
-<pre class="output"><code>AGAcTGAAAgTTTGCCATTTG
-AACCAGAGCACACGTAGGCAGCTAc
-ATCCTGCGAGGGGGCCCGAG
-TTTTGCTTTTGTaTCCTTTGGaTCT
-tAGaAGgAAGCAcACAAAAA
-ATtTAATATcATTTANNNNN
-ATCCTTGaAGtTAGAtTgcCT
-GTTAAGTCCCtCTGcCTGTCAGA
-tCTTTGAAATGAACCTATTAGTCATCATCCCCATCC
-TCAGgCCCACAGaGAacAcgAACCAA
-TcGTCACAGAACTAGAAcAAAT
-GGGAAGAGTGTGGTTGCTGTGa
-CAAcCAAGAATATCCAATTcTTGc
-TGAGTCCAGGAGTTCAGGGT
-GATAGCgACTgTgGgCTAGGgAT
-ACCATAAAATACCTAGGggTAA
-NNNNNNNNNNNNNNNNNNNNNNNN
-NNNNNNNNNNNNNNNNNNNNNN
-gTCTAAGCAAGgCTTcCAGACgT
-AAcATcGCACCcCTATCAATCT
-ttATTCTGTGGTTtCACAGACAGG
-aATaTACTaagAcTAAATTACG
-NNNNNNNNNNNNNNNNNNNNNNN
-GAAGGATtgAaGGCAAAAAT
-TcGTTaATcatAGcAGAAGGTgA</code></pre>
-<p>Alternatively, a already existant FASTQ file can be mutated using the <code>filter-fastq.py</code> tool in cooperation with <code>multiple-mutate.py</code>:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/filter-fastq.py</span> --nucleotide \
-  @ scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab @ \
-  <span class="kw">&lt;</span> data/2/sample.fastq <span class="kw">&gt;</span> data/3/sample_mut.fastq
-
-<span class="kw">head</span> data/3/sample_mut.fastq</code></pre>
-<pre class="output"><code>@sample_0
-AGAATGAAAaCTTGCCATTTG
+<p>Mutations can be inserted either before a FASTQ file is assembled (<code>synth-fastq.py</code>, see previous section), or afterwards. This example uses raw nucleotide strings generate during the creation of our <em>volpertinger</em> samples. This serves well as an example how nucleotide strings are processed line by line and mutated. You can see the mutations in this example showing up as lower-case letters.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts</span>/<span class="kw">multiple_mutate</span>\
+    data/mut-tables/mut.tab \
+    <span class="kw">&lt;</span> data/2/volpertinger.nucl \
+    <span class="kw">|</span> <span class="kw">head</span></code></pre></div>
+<pre class="output"><code>TTCTACAAGtTATTcGCCtACCAGAT
+TCTATgaAATAACTTCTCgC
+aTtAACcTTATCTTCTGGGGCTCA
+TCcTGgGGcTTTCTATTTAGA
+TATGtCCgCGATGTTcGATCAGG
+ACCCAgGcGCCCCCAGCCtaGTTGa
+TGccAATAGCaCTGaGTTTcT
+AATAAACTTAAAtAAATTAGTGGCA
+ACGATGACCATCTTtTTGCG
+cATGaTATTTGccATATATGgAGcTTGTGTG</code></pre>
+<p>An already existent FASTQ file can be mutated using the <code>filter-fastq</code> tool in cooperation with <code>multiple-mutate</code>. The tool <code>filter-fastq</code> enables you to apply transformations to existing fastq files. To this effect, <code>filter-fastq</code> extracts one part out of a FASTQ file (read name, nucleotide string or quality string) and feeds it into another sub-program specified between two <code>@</code>-signs. The sub-program is required to take lines of text as input and return the same number of lines on standard output. The output of the sub-program is then placed into the output fastq file. By combining <code>filter-fastq</code> and <code>multiple_mutate</code>, the tool which applies mutations to strings of nucleotides, a FASTQ file can be mutated:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/filter-fastq</span> --nucleotide \
+  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  <span class="kw">&lt;</span> data/2/volpertinger.fastq \
+  <span class="kw">&gt;</span> data/3/volpertinger_mut.fastq</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Note how the nucleotide strings of the output FASTQ file now carry mutations (lower-case letters):</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/3/volpertinger_mut.fastq</code></pre></div>
+<pre class="output"><code>@volpertinger_0
+TTCCAaAAGATATTAGCCAACCAGAg
 +
-FFFFFFFFFFFFFFFFFFFFF
-@sample_1
-AACCAtgGCcCACaTAGGCAGgCAT
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_1
+TgTATTTgATAACTTaTCCC
 +
-FFFFFFFFFFFFFFFFFFFFFFFFF
-@sample_2
-ATCCTGCGAaGGaGCCCGAG</code></pre>
-<p>The <code>filter-fastq.py</code> script enables you to apply an arbitrary script on just one part of a FASTQ file (ID line, nucleotide line, quality line). The used script must accept the respective part on standard input and prints the modified version on standard output. The modified FASTQ file is assembled by <code>filter-fastq.py</code> from the output of its children scripts and printed on standard output.</p>
-<p>On the <code>filter-fastq.py</code> call, the @ sign serves as a sentinel character, which determines start and end of the child scripts' command line. It can be an arbitrary character, as long as it doesn't occur inside the child scripts' command line.</p>
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+TTGAACTCTATCTTCCGGGGTgCA</code></pre>
+<p>The <code>filter-fastq.py</code> script enables you to apply an arbitrary script or program on just one part of a FASTQ file (ID line, nucleotide line, quality line). The used script must accept the respective part on standard input and print the modified version on standard output. The modified FASTQ file is assembled by <code>filter-fastq.py</code> from the output of its children scripts and printed on standard output.</p>
+<p>On the <code>filter-fastq.py</code> call, the @ sign serves as a sentinel character, which determines start and end of the sub-program's command line. It can also be any arbitrary other character, as long as it doesn't occur inside the child script's command line but only at the beginning and the end.</p>
 <h2 id="combining-endogenous-and-non-endogenous-reads">Combining endogenous and non-endogenous reads</h2>
-<p>In this example, the endogenous reads undergo simulated mutation and damage prior to mapping, while the contaminant reads do not.</p>
-<p>Therefore, now is the time to combine the mutated sample reads and the contaminant reads generated in the last section to one file. For this purpose, the UNIX tool <code>cat</code> is used:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cat</span> data/3/sample_mut.fastq data/2/retli.fastq \
-    <span class="kw">&gt;</span> data/3/all.fastq</code></pre>
+<p>In this example, the endogenous reads from <em>volptertinger</em> undergo simulated mutation and damage prior to mapping, while the contaminant reads from <em>R. etli</em> do not.</p>
+<p>Therefore only now, after applying mutations to our <em>volpertinger</em> reads, is the time to combine the mutated sample reads and the contaminant reads generated in the last section to one file. For this purpose, the UNIX tool <code>cat</code> is used:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cat</span> data/3/volpertinger_mut.fastq data/2/retli.fastq \
+    <span class="kw">&gt;</span> data/3/all.fastq</code></pre></div>
 <pre class="output"><code></code></pre>
 <h2 id="obtaining-mutation-rates-from-mapdamage">Obtaining mutation rates from mapDamage</h2>
 <p>Damage patterns from mapDamage can be converted into a table with mutation parameters by least-squares fitting. For this purpose, the mapDamage output files ending with <code>... _freq.txt</code> are needed.</p>
 <p>The following command fits a geometric distribution to mapDamage data, shows the derived parameters and plots the data with the fitted curve.</p>
 <p>The <code>cut</code> command is used only to limit the output to a width acceptable for this manual. Use the bash <code>&gt;</code> redirection operator to write this output into a file suitable for <code>multiple_mutate.py</code>.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/distribution-parametrization/mapdamage2geomparam.py</span> \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/mapdamage2geomparam</span> \
     --fit-plots data/3/fit_ \
     data/mapdamage/*.txt <span class="kw">|</span> <span class="kw">\</span>
     <span class="kw">cut</span> -f1-6 <span class="kw">|</span> <span class="kw">\</span>
-    <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>strand  from  to  factor      geom_prob   intercept
-3       G     A   0.79513996  0.26918746  0.039386893
-5       C     T   0.43360246  0.35249167  0.027965522</code></pre>
+    <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>strand                                from  to  factor      geom_prob   intercept
+3                                     G     A   0.79513996  0.26918746  0.039386893
+data/mapdamage/GS136_3pGtoA_freq.txt
+5                                     C     T   0.43360246  0.35249167  0.027965522
+data/mapdamage/GS136_5pCtoT_freq.txt</code></pre>
 <p>The generated plots can be viewed <a href="data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and <a href="data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>. fit_000_GS136_3pGtoA_freq.txt.pdf</p>
 <h2 id="generating-multiple-damage-patterns-using-a-parameter-table">Generating multiple damage patterns using a parameter table</h2>
+<p>Sometimes, multiple damage patterns need to be compared. There is a possibility to generate the <code>multiple_mutate</code> input files from one table which lists all different values of the different mutation parameters.</p>
+<p>This approach will be seen again later, where there is a possibility to generate many short read mapper calls from exactly the same kind of parameter table. You can therefore generate appropriate input files as well as appropriate short read mapper calls out of only one table which lists all the parameters.</p>
 <p>The <code>fill_template.py</code> script expects a table, where each row is used to fill a prespecified template with values.</p>
 <p>For example, if a template is written which looks like this:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">column</span> -t data/mut-tmpl/mut-tmpl</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cp</span> data/mut-tmpl/mut-tmpl data/3
+<span class="kw">column</span> -t data/3/mut-tmpl</code></pre></div>
 <pre class="output"><code>strand  from  to  factor  geom_prob  intercept
 5       C     T   {fac}   {geom}     0
 3       G     A   {fac}   {geom}     0
 3       *     *   0       0          {all_intercept}</code></pre>
 <p>And a table is created which looks like this:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">column</span> -t data/mut-tmpl/tab</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cp</span> data/mut-tmpl/tab data/3/mut-tab
+<span class="kw">column</span> -t data/3/mut-tab</code></pre></div>
 <pre class="output"><code>fac  geom  all_intercept
 0    0.1   0
 0    0.1   0.3
 0.5  0.1   0
 0.5  0.1   0.3</code></pre>
 <p>several files can be generated with</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/fill_template.py</span> \
-    data/mut-tmpl/mut-tmpl \
-    <span class="kw">&lt;</span> data/mut-tmpl/tab</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/fill_template</span> \
+    data/3/mut-tmpl \
+    <span class="kw">&lt;</span> data/3/mut-tab</code></pre></div>
 <pre class="output"><code>strand  from    to  factor  geom_prob   intercept
 5   C   T   0   0.1 0
 3   G   A   0   0.1 0
@@ -502,25 +462,27 @@ strand  from    to  factor  geom_prob   intercept
 3   *   *   0   0   0.3
 </code></pre>
 <p>Use the <code>--output</code> switch of this script to write each file in a separate file. The argument of <code>--output</code> can (and should!) contain column names of the table, enclosed in braces {...}. This creates a separate filename per input row.</p>
-<p>For example, the mentioned-above table can be prepended with an index column:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/index-column.py</span> <span class="kw">&lt;</span>data/mut-tmpl/tab <span class="kw">&gt;</span>data/3/tab-i
+<p>We will now write each of the tables shown above to its own file. We want to name the files using a counting number, but our input table doesn't yet contain a column with that counter. Therefore we must first add one.</p>
+<p>The mentioned-above table can be prepended with an index column:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/index-column</span> --inplace data/3/mut-tab
 
-<span class="kw">head</span> data/3/tab-i <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
+<span class="kw">head</span> data/3/mut-tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
 <pre class="output"><code>index  fac  geom  all_intercept
 0      0    0.1   0
 1      0    0.1   0.3
 2      0.5  0.1   0
 3      0.5  0.1   0.3</code></pre>
-<p>Now, each output of <code>fill_template.py</code> can be written to its own output file:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/fill_template.py</span> \
+<p>Now, each output of <code>fill_template.py</code> can be written to its own output file, using the information from the newly-generated <code>index</code> column:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/fill_template</span> \
     --output <span class="st">&quot;data/3/{index}_filled&quot;</span> \
-    data/mut-tmpl/mut-tmpl \
-    <span class="kw">&lt;</span> data/3/tab-i
+    data/3/mut-tmpl \
+    <span class="kw">&lt;</span> data/3/mut-tab
 
+<span class="co"># Show all the generated files</span>
 <span class="kw">for</span> <span class="kw">f</span> in data/3/*_filled<span class="kw">;</span> <span class="kw">do</span>
     <span class="kw">echo</span> <span class="st">&quot; === </span><span class="ot">$f</span><span class="st"> === &quot;</span>
     <span class="kw">column</span> -t <span class="ot">$f</span>
-<span class="kw">done</span></code></pre>
+<span class="kw">done</span></code></pre></div>
 <pre class="output"><code> === data/3/0_filled ===
 strand  from  to  factor  geom_prob  intercept
 5       C     T   0       0.1        0
@@ -546,23 +508,23 @@ strand  from  to  factor  geom_prob  intercept
 <p>To generate the calls to the mapper using different combinations of parameters, several files holding the values of the different parameters are first combined to a table holding all possible combinations of them.</p>
 <p>Subsequently, every line is given a unique index which can be referred to e.g. when writing output files of the mapping process. By this index, each run writes to a different output file.</p>
 <p>The parameter values are saved in several files, one per parameter. In this example, the BWA parameters n and k are varied which results in two files:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">ls</span> data/mapping/*.par</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">ls</span> data/mapping/*.par</code></pre></div>
 <pre class="output"><code>data/mapping/k.par
 data/mapping/n.par</code></pre>
 <p>The files can have arbitrary filenames, they are in a tabular format where the column names relate to variables which are set automatically later in the process.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">column</span> -t data/mapping/n.par</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">column</span> -t data/mapping/n.par</code></pre></div>
 <pre class="output"><code>n
 0
 4
 8</code></pre>
 <p>To generate all combinations of parameters, two scripts are used:</p>
 <ul class="incremental">
-<li><p><code>scripts/general/cross_tab.py</code> expects multiple files and outputs all possible combinations of their lines.</p></li>
-<li><p><code>scripts/general/index-column.py</code> This script prepends a counting number to each input line. It can be used to generate index columns for text tables.</p></li>
+<li><p><code>scripts/cross_tab</code> expects multiple files and outputs all possible combinations of their lines.</p></li>
+<li><p><code>scripts/index-column</code> This script prepends a counting number to each input line. It can be used to generate index columns for text tables.</p></li>
 </ul>
 <p>Generate all possible combinations of parameters, retaining 1 header line:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/cross_tab.py</span> --head 1 data/mapping/*.par <span class="kw">&gt;</span> data/4/partab
-<span class="kw">head</span> data/4/partab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/cross_tab</span> --head 1 data/mapping/*.par <span class="kw">&gt;</span> data/4/partab
+<span class="kw">head</span> data/4/partab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
 <pre class="output"><code>k   n
 2   0
 2   4
@@ -571,8 +533,8 @@ data/mapping/n.par</code></pre>
 10  4
 10  8</code></pre>
 <p>Add an index column called runidx:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/index-column.py</span> --colname runidx --inplace data/4/partab
-<span class="kw">head</span> data/4/partab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/index-column</span> --colname runidx --inplace data/4/partab
+<span class="kw">head</span> data/4/partab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
 <pre class="output"><code>runidx  k   n
 0       2   0
 1       2   4
@@ -580,8 +542,9 @@ data/mapping/n.par</code></pre>
 3       10  0
 4       10  4
 5       10  8</code></pre>
-<p>Read now the script <code>data/mapping/map-bwa.sh</code> and see how the variables used there correspond to the column names of partab. The script is shown in the next code block. There is an additional variable there, <code>$fastq</code>. This variable needs to be set and exported before executing the calls, which will be done in the next section.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/bash</span>
+<p>Read now the script <code>data/mapping/map-bwa.sh</code> and see how the variables used there correspond to the column names of partab. The script is shown in the next code block.</p>
+<p>This is a script which can be called using different parameter combinations: It calls the mapper <code>bwa</code> and forwards the values of the variables set via <code>data/4/partab</code> as command line arguments to the mapper.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/bash</span>
 
 <span class="co">## This script performs a mapping using BWA.</span>
 <span class="co">## It requires the variables k, n, runidx and fastq be set </span>
@@ -590,51 +553,49 @@ data/mapping/n.par</code></pre>
 <span class="co"># Fail if any needed variable is not set</span>
 <span class="kw">set</span> <span class="kw">-ue</span>
 
-<span class="kw">bwa</span> aln -n <span class="ot">$n</span> -k <span class="ot">$k</span>        \
-    data/genome/sample     \
-    <span class="ot">$fastq</span>                 \
-    <span class="kw">&gt;</span> data/4/<span class="ot">${runidx}</span>.sai \
-    <span class="kw">2&gt;</span> data/4/<span class="ot">${runidx}</span>.log <span class="kw">&amp;&amp;</span>
+<span class="kw">bwa</span> aln -n <span class="ot">${n}</span> -k <span class="ot">${k}</span>      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    <span class="kw">&gt;</span> data/4/<span class="ot">${runidx}</span>.sai   \
+    <span class="kw">2&gt;</span> data/4/<span class="ot">${runidx}</span>.log   <span class="kw">&amp;&amp;</span>
 
-<span class="kw">bwa</span> samse data/genome/sample \
-      data/4/<span class="ot">${runidx}</span>.sai   \
-      <span class="ot">$fastq</span>                 \
-      <span class="kw">&gt;</span> data/4/<span class="ot">${runidx}</span>.sam \
-     <span class="kw">2&gt;&gt;</span> data/4/<span class="ot">${runidx}</span>.log</code></pre>
+<span class="kw">bwa</span> samse                      \
+      data/genome/volpertinger \
+      data/4/<span class="ot">${runidx}</span>.sai     \
+      data/3/all.fastq         \
+      <span class="kw">&gt;</span> data/4/<span class="ot">${runidx}</span>.sam   \
+      <span class="kw">2&gt;&gt;</span> data/4/<span class="ot">${runidx}</span>.log</code></pre></div>
 <p>Below the calls are generated.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Convert the table into calls that can be executed in the next section</span>
-<span class="kw">scripts/general/table2calls.py</span>  data/4/partab \
-                                data/mapping/map-bwa.sh \
-                              <span class="kw">&gt;</span> data/4/calls
-<span class="kw">head</span> data/4/calls</code></pre>
-<pre class="output"><code>(n=0; runidx=0; k=2; source data/mapping/map-bwa.sh);
-(n=4; runidx=1; k=2; source data/mapping/map-bwa.sh);
-(n=8; runidx=2; k=2; source data/mapping/map-bwa.sh);
-(n=0; runidx=3; k=10; source data/mapping/map-bwa.sh);
-(n=4; runidx=4; k=10; source data/mapping/map-bwa.sh);
-(n=8; runidx=5; k=10; source data/mapping/map-bwa.sh);</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Convert the table into calls that can be executed in the next section</span>
+<span class="kw">scripts/table2calls</span>  data/4/partab \
+                    data/mapping/map-bwa.sh \
+                  <span class="kw">&gt;</span> data/4/calls
+<span class="kw">cat</span> data/4/calls</code></pre></div>
+<pre class="output"><code>runidx=0 n=0 k=2 data/mapping/map-bwa.sh
+runidx=1 n=4 k=2 data/mapping/map-bwa.sh
+runidx=2 n=8 k=2 data/mapping/map-bwa.sh
+runidx=3 n=0 k=10 data/mapping/map-bwa.sh
+runidx=4 n=4 k=10 data/mapping/map-bwa.sh
+runidx=5 n=8 k=10 data/mapping/map-bwa.sh</code></pre>
 <h1 id="executing-multiple-mapping-runs-in-parallel">Executing multiple mapping runs in parallel</h1>
-<p>For this task, many programs can be used, from simple shell background spawning using &amp; (in bash) to job managers orchestrating a big network of worker machines. In this package, a simple programm is implemented which executes a user-definable number of jobs in parallel and waits with spawning new ones until another of its already started jobs finishes.</p>
-<p>Note that it is possible to use user-defined shell functions or variables, if they are made available using the <code>export VARIABLE</code> or <code>export -f FUNCTION</code> bash commands (replace UPPERCASE letters by actual name). Refer to the manual of your shell if you're using a different shell than bash.</p>
-<p>Note as well that more CPU cores than started parallel processes are needed if the mappers run on multiple cores themselves. Whether to exploit parallelism implemented in the mappers or to use <code>mcall.py</code> is up to you.</p>
-<p>Invoke <code>scripts/general/mcall.py --help</code> to get more information about this tool.</p>
+<p>For this task, many programs can be used, from simple shell background spawning using &amp; (in bash) to job managers orchestrating a big network of worker machines. In this package, a simple program is implemented which executes a user-definable number of jobs in parallel and waits with spawning new ones until another of its already started jobs finishes.</p>
+<p>Note that some mappers can use more than one processor core themselves. Therefore if you spawn multiple mapper processes where each mapper process utilizes multiple cores, the total number of utilized cores is the number of cores used per mapper multiplied with the number of mapper processes launched in parallel.</p>
+<p>Invoke <code>scripts/mcall --help</code> to get more information about this tool.</p>
 <p>Example: Run the previously generated mapper calls.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash">    <span class="co"># Export variable for use in mcall.py</span>
-    <span class="kw">export</span> <span class="ot">fastq=</span><span class="st">&quot;</span><span class="ot">$(</span><span class="kw">pwd</span><span class="ot">)</span><span class="st">/data/3/all.fastq&quot;</span>
-    <span class="co"># Execute calls, at 2 cores</span>
-    <span class="kw">scripts/general/mcall.py</span> -c data/4/calls -t 2 \
-                             --status
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">    <span class="co"># Execute calls, at 2 cores</span>
+    <span class="kw">scripts/mcall</span> -c data/4/calls -t 2 \
+                  --status
     <span class="co"># Standard error was piped to log files,</span>
     <span class="co"># Standard output was piped to sam files, as specified in the</span>
     <span class="co"># `tmpl` file.</span>
     <span class="kw">head</span> data/4/0.log
-    <span class="kw">head</span> -n15 data/4/0.sam</code></pre>
+    <span class="kw">head</span> -n15 data/4/0.sam</code></pre></div>
 <pre class="output"><code>[bwa_aln_core] calculate SA coordinate... 0.00 sec
 [bwa_aln_core] write to the disk... 0.00 sec
 [bwa_aln_core] 50 sequences have been processed.
-[main] Version: 0.7.12-r1039
-[main] CMD: bwa aln -n 0 -k 2 data/genome/sample /home/motschow/Studium/Hiwi/hiwiwork/manual/data/3/all.fastq
-[main] Real time: 0.085 sec; CPU: 0.000 sec
+[main] Version: 0.7.13-r1126
+[main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
+[main] Real time: 0.110 sec; CPU: 0.000 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
@@ -648,12 +609,12 @@ data/mapping/n.par</code></pre>
 @SQ SN:B4   LN:6000
 @SQ SN:MT   LN:6000
 @SQ SN:X    LN:6000
-@PG ID:bwa  PN:bwa  VN:0.7.12-r1039 CL:bwa samse data/genome/sample data/4/0.sai /home/motschow/Studium/Hiwi/hiwiwork/manual/data/3/all.fastq
-sample_0    4   *   0   0   *   *   0   0   AGAATGAAAACTTGCCATTTG   FFFFFFFFFFFFFFFFFFFFF
-sample_1    4   *   0   0   *   *   0   0   AACCATGGCCCACATAGGCAGGCAT   FFFFFFFFFFFFFFFFFFFFFFFFF
-sample_2    4   *   0   0   *   *   0   0   ATCCTGCGAAGGAGCCCGAG    FFFFFFFFFFFFFFFFFFFF
-sample_3    4   *   0   0   *   *   0   0   TGTTGCTTTTGTTTCCCTAGGCATA   FFFFFFFFFFFFFFFFFFFFFFFFF
-sample_4    4   *   0   0   *   *   0   0   GAGGAGAAAGTAGATAAAAA    FFFFFFFFFFFFFFFFFFFF</code></pre>
+@PG ID:bwa  PN:bwa  VN:0.7.13-r1126 CL:bwa samse data/genome/volpertinger data/4/0.sai data/3/all.fastq
+volpertinger_0  4   *   0   0   *   *   0   0   TTCCAAAAGATATTAGCCAACCAGAG  FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_1  4   *   0   0   *   *   0   0   TGTATTTGATAACTTATCCC    FFFFFFFFFFFFFFFFFFFF
+volpertinger_2  4   *   0   0   *   *   0   0   TTGAACTCTATCTTCCGGGGTGCA    FFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_3  4   *   0   0   *   *   0   0   GCATGAGGGTTTCTATTTAGA   FFFFFFFFFFFFFFFFFFFFF
+volpertinger_4  4   *   0   0   *   *   0   0   TACTGGCTCGCTGTAGGAACAGG FFFFFFFFFFFFFFFFFFFFFFF</code></pre>
 <h1 id="parsing-of-sam-files">Parsing of SAM files</h1>
 <p>With the following tools, SAM files can be parsed to gain information of read names, where they were mapped, which quality score the mapping was assigned and so on.</p>
 <p>The procedures in this chapter may vary more than the previous ones, depending on the research question.</p>
@@ -668,135 +629,119 @@ sample_4    4   *   0   0   *   *   0   0   GAGGAGAAAGTAGATAAAAA    FFFFFFFFFFFF
 <li>cigar: CIGAR String: Information about gaps and mismatches in the alignment read -- reference</li>
 </ul>
 <p>Take care not to put any spaces in the argument of --sam-fields.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/sam-extract.R</span> --sam-fields qname,rname,pos,mapq \
-    data/4/1.sam  <span class="kw">&gt;</span>  data/5/1.tab</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/sam-extract</span> --sam-fields qname,rname,pos,mapq \
+    data/4/1.sam  <span class="kw">&gt;</span>  data/5/1.tab</code></pre></div>
 <pre class="output"><code></code></pre>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/5/1.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>qname     rname  pos   mapq
-sample_0  B1     755   0
-sample_1  *      0     0
-sample_2  X      3674  37
-sample_3  *      0     0
-sample_4  B1     3675  23
-sample_5  *      0     0
-sample_6  B2     4974  37
-sample_7  A3     1510  37
-sample_8  *      0     0</code></pre>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">tail</span> data/5/1.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>retli_15  *  0  0
-retli_16  *  0  0
-retli_17  *  0  0
-retli_18  *  0  0
-retli_19  *  0  0
-retli_20  *  0  0
-retli_21  *  0  0
-retli_22  *  0  0
-retli_23  *  0  0
-retli_24  *  0  0</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> data/5/1.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>qname           rname  pos   mapq
+volpertinger_0  B1     2143  37
+volpertinger_1  MT     3402  37
+volpertinger_2  A3     1413  37
+volpertinger_3  A3     5689  37
+volpertinger_4  *      0     0
+volpertinger_5  *      0     0
+volpertinger_6  A1     1320  23
+volpertinger_7  *      0     0
+volpertinger_8  X      2381  37</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">tail</span> data/5/1.tab <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>retli_15  *   0     0
+retli_16  MT  2791  25
+retli_17  *   0     0
+retli_18  *   0     0
+retli_19  *   0     0
+retli_20  *   0     0
+retli_21  *   0     0
+retli_22  *   0     0
+retli_23  *   0     0
+retli_24  *   0     0</code></pre>
 <h2 id="bring-together-true-read-information-from-all-origin-organisms">Bring together true read information from all origin organisms</h2>
-<p>This can be done by concatenating the tabular files generated during the read sampling process (Section 2). <code>awk</code> is used to concatenate the files while not repeating the header line of the second file:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR==1 || FNR!=1)&#39;</span> \
-      data/2/sample.tab \
-      data/2/retli.tab  \
-    <span class="kw">&gt;</span> data/5/all.tab</code></pre>
+<p>This can be done by concatenating the tabular files generated during the read sampling process (Section 2). <code>awk</code> is used to concatenate the files while not repeating the header line of the second file.</p>
+<p>Prior to this we append a column to the tables which indicates the organism of each read. This enables us to group the reads by origin organism later.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Add column &#39;organism&#39; with value &#39;volpertinger&#39;</span>
+<span class="kw">scripts/add_const_column</span> \
+    data/2/volpertinger.coord \
+    organism        \
+    volpertinger    \
+    <span class="kw">&gt;</span> data/5/volpertinger_org.coord
+
+<span class="co"># Same for R. etli reads</span>
+<span class="kw">scripts/add_const_column</span> \
+    data/2/retli.coord \
+    organism        \
+    retli    \
+    <span class="kw">&gt;</span> data/5/retli_org.coord</code></pre></div>
 <pre class="output"><code></code></pre>
-<p>Alternatively: Do the same and additionally ensure that the header lines of the two files match.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR==1){</span>
-<span class="st">         header=$0</span>
-<span class="st">     }(FNR==1 &amp;&amp; header!=$0){</span>
-<span class="st">         print &quot;Headers dont match!&quot;|&quot;cat &gt;&amp;2&quot;</span>
-<span class="st">         exit 1</span>
-<span class="st">     }(NR==1 || FNR!=1){</span>
-<span class="st">        print</span>
-<span class="st">     }&#39;</span> \
-     data/2/sample.tab \
-     data/2/retli.tab  \
-   <span class="kw">&gt;</span> data/5/all.tab</code></pre>
+<p>This yields files like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">head</span> -n5 data/5/volpertinger_org.coord <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>name            record  start  end   organism
+volpertinger_0  B1      2143   2168  volpertinger
+volpertinger_1  MT      3402   3421  volpertinger
+volpertinger_2  A3      1413   1436  volpertinger
+volpertinger_3  A3      5689   5709  volpertinger</code></pre>
+<p>Now the tables can be concatenated. Make sure both tables contain the same columns in the same order or else you will get invalid data!</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR==1 || FNR!=1)&#39;</span> \
+      data/5/volpertinger_org.coord \
+      data/5/retli_org.coord  \
+    <span class="kw">&gt;</span> data/5/all.coord</code></pre></div>
 <pre class="output"><code></code></pre>
 <h2 id="identify-correctly-mapped-reads">Identify correctly mapped reads</h2>
 <p>One possibility is the script used below, <code>exactmap.R</code></p>
 <p>This script relies on the input table columns having specific names. For details see the help of the script by calling <code>scripts/eval/exactmap.R -h</code>.</p>
 <p>Use the <code>--qthresh</code> parameter to declare all reads with a mapping quality below a certain threshold as not mapped.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/exactmap.R</span> data/5/all.tab \
-                        data/5/1.tab  \
-                      <span class="kw">&gt;</span> data/5/1.crct
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/exactmap</span>   data/5/all.tab \
+                   data/5/1.tab  \
+                   <span class="kw">&gt;</span> data/5/1.crct
 
-<span class="kw">cat</span> data/5/1.crct <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>read       m.orig  t.orig    mapq  correct
-retli_0    *       retli_tr  0     FALSE
-retli_1    *       retli_tr  0     FALSE
-retli_10   *       retli_tr  0     FALSE
-retli_11   *       retli_tr  0     FALSE
-retli_12   X       retli_tr  25    FALSE
-retli_13   *       retli_tr  0     FALSE
-retli_14   *       retli_tr  0     FALSE
-retli_15   *       retli_tr  0     FALSE
-retli_16   *       retli_tr  0     FALSE
-retli_17   *       retli_tr  0     FALSE
-retli_18   *       retli_tr  0     FALSE
-retli_19   *       retli_tr  0     FALSE
-retli_2    *       retli_tr  0     FALSE
-retli_20   *       retli_tr  0     FALSE
-retli_21   *       retli_tr  0     FALSE
-retli_22   *       retli_tr  0     FALSE
-retli_23   *       retli_tr  0     FALSE
-retli_24   *       retli_tr  0     FALSE
-retli_3    *       retli_tr  0     FALSE
-retli_4    *       retli_tr  0     FALSE
-retli_5    *       retli_tr  0     FALSE
-retli_6    *       retli_tr  0     FALSE
-retli_7    *       retli_tr  0     FALSE
-retli_8    *       retli_tr  0     FALSE
-retli_9    *       retli_tr  0     FALSE
-sample_0   B1      A2        0     FALSE
-sample_1   *       B2        0     FALSE
-sample_10  *       A2        0     FALSE
-sample_11  B4      B4        37    TRUE
-sample_12  A2      A2        37    TRUE
-sample_13  B1      B2        37    FALSE
-sample_14  B3      B3        37    TRUE
-sample_15  B1      B1        37    TRUE
-sample_16  *       B4        0     FALSE
-sample_17  *       X         0     FALSE
-sample_18  MT      MT        37    TRUE
-sample_19  MT      MT        37    TRUE
-sample_2   X       X         37    TRUE
-sample_20  B3      B3        37    TRUE
-sample_21  A1      A1        37    TRUE
-sample_22  *       B4        0     FALSE
-sample_23  B4      B4        37    TRUE
-sample_24  *       B4        0     FALSE
-sample_3   *       B2        0     FALSE
-sample_4   B1      B1        23    TRUE
-sample_5   *       A2        0     FALSE
-sample_6   B2      B2        37    TRUE
-sample_7   A3      A3        37    TRUE
-sample_8   *       MT        0     FALSE
-sample_9   B3      B3        25    TRUE</code></pre>
+<span class="kw">cat</span> data/5/1.crct <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
+<p><strong><em>TODO:</em></strong> Organism column</p>
+<p>This script can also deal with an additional organism column in the input tables. This may be important if multiple of the organisms have FASTA records of the same name. A common case of this is multiple eukaryotes with similarly named chromosomes.</p>
+<h2 id="custom-determination-of-correct-match">Custom determination of correct match</h2>
+<p>If you want to determine correctly mapped reads by your own means, you can merge the two tables, the correct positions of the reads and the actual mapping positions of the reads, to one table which you can inspect afterwards. There is a tool designed to make merging information from two tables as easy as possible. To merge the information, both tables need to share at least one column, which is described as the <em>key column</em>. In this case, the read name is the key because it is present in both tables.</p>
+<p>The <code>merge</code> tool can also rename columns in the process of merging. We will use this functionality to distinguish the true mapping positions from <code>all.tab</code> from the actual mapping positions from <code>1.tab</code> by prepending a 't' to the former.</p>
+<p>Here is an example to match the nominal and actual read positions into one table. <code>-a</code> and <code>-b</code> denote the two tables to be merged. The first argument after those is the file name, followed by the key column and all other columns which shall be merged. If columns shall be renamed, there are arguments of the form <code>oldname=newname</code>.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/merge</span> -a data/5/all.coord name  record=trecord start=tstart \
+                                      organism=torg\
+              -b data/5/1.tab   qname rname=record   pos=start \
+          <span class="kw">&gt;</span> data/5/merge_example.tab
+
+<span class="co"># Show parts of the table</span>
+<span class="kw">(head</span> data/5/merge_example.tab<span class="kw">;</span> <span class="kw">tail</span> data/5/merge_example.tab<span class="kw">)|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code>name             trecord   tstart  torg          record  start
+retli_0          retli_tr  121502  retli         *       0
+retli_1          retli_tr  133167  retli         *       0
+retli_10         retli_tr  110631  retli         *       0
+retli_11         retli_tr  82809   retli         *       0
+retli_12         retli_tr  66530   retli         *       0
+retli_13         retli_tr  108831  retli         *       0
+retli_14         retli_tr  109927  retli         *       0
+retli_15         retli_tr  82777   retli         *       0
+retli_16         retli_tr  66982   retli         MT      2791
+volpertinger_22  MT        615     volpertinger  MT      615
+volpertinger_23  B3        608     volpertinger  B3      608
+volpertinger_24  B2        4581    volpertinger  *       0
+volpertinger_3   A3        5689    volpertinger  A3      5689
+volpertinger_4   MT        3280    volpertinger  *       0
+volpertinger_5   A3        4936    volpertinger  *       0
+volpertinger_6   A1        1320    volpertinger  A1      1320
+volpertinger_7   A3        4480    volpertinger  *       0
+volpertinger_8   X         2381    volpertinger  X       2381
+volpertinger_9   A1        2751    volpertinger  A1      2751</code></pre>
+<h2 id="grouping-of-reads">Grouping of reads</h2>
 <p>For the next steps, the reads must be grouped by the original organism and the organism they were mapped to. This can be done by merging the table <code>idlist</code> from Section 1 two times:</p>
 <p>The last two lines of the first command in the following example serve for replacing <code>data/5/5.crct</code> using a temporary file.</p>
 <p>The first argument of <code>merge_organisms.R</code> may be a hypen (-) in which case the first table is read from standard input. This is handy for merging multiple information.</p>
 <p>Note that the information about the true origin organism of the <em>R. etli</em> contaminant reads needs to be merged into the information about the organism of the sample organisms' chromosomes. Speaking in files, <code>data/1/sample.recids</code> must be concatenated with <code>data/2/retli.recids</code></p>
 <p>This is done by:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR==1 || FNR!=1)&#39;</span> \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">awk</span> <span class="st">&#39;(NR==1 || FNR!=1)&#39;</span> \
     data/1/sample.recids \
     data/2/retli.recids \
     <span class="kw">&gt;</span> data/5/all.recids
 
-<span class="kw">cat</span> data/5/all.recids <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>record    organism
-A1        volpertinger
-A2        volpertinger
-A3        volpertinger
-B1        volpertinger
-B2        volpertinger
-B3        volpertinger
-B4        volpertinger
-MT        volpertinger
-X         volpertinger
-retli_tr  retli</code></pre>
+<span class="kw">cat</span> data/5/all.recids <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>This is because the reads weren't mapped against the <em>R. etli</em> reference genome, therefore the <em>R. etli</em> chromosome can not appear as a <code>rname</code> value of the SAM file.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/merge_organisms.R</span> data/5/1.crct \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/merge_organisms.R</span> data/5/1.crct \
                                m.orig \
                                data/5/all.recids \
                                organism=m.org  <span class="kw">|</span>  <span class="kw">\</span>
@@ -807,91 +752,31 @@ retli_tr  retli</code></pre>
                             <span class="kw">&gt;</span> data/5/1.crct.tmp <span class="kw">&amp;&amp;</span>
                             <span class="kw">mv</span> data/5/1.crct<span class="dt">{.tmp,}</span>
 
-<span class="kw">cat</span> data/5/1.crct <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>t.orig    m.orig  read       mapq  correct  m.org         t.org
-A1        A1      sample_21  37    TRUE     volpertinger  volpertinger
-A2        A2      sample_12  37    TRUE     volpertinger  volpertinger
-A2        *       sample_5   0     FALSE    *             volpertinger
-A2        B1      sample_0   0     FALSE    volpertinger  volpertinger
-A2        *       sample_10  0     FALSE    *             volpertinger
-A3        A3      sample_7   37    TRUE     volpertinger  volpertinger
-B1        B1      sample_15  37    TRUE     volpertinger  volpertinger
-B1        B1      sample_4   23    TRUE     volpertinger  volpertinger
-B2        *       sample_3   0     FALSE    *             volpertinger
-B2        B1      sample_13  37    FALSE    volpertinger  volpertinger
-B2        *       sample_1   0     FALSE    *             volpertinger
-B2        B2      sample_6   37    TRUE     volpertinger  volpertinger
-B3        B3      sample_20  37    TRUE     volpertinger  volpertinger
-B3        B3      sample_14  37    TRUE     volpertinger  volpertinger
-B3        B3      sample_9   25    TRUE     volpertinger  volpertinger
-B4        *       sample_16  0     FALSE    *             volpertinger
-B4        *       sample_24  0     FALSE    *             volpertinger
-B4        B4      sample_11  37    TRUE     volpertinger  volpertinger
-B4        *       sample_22  0     FALSE    *             volpertinger
-B4        B4      sample_23  37    TRUE     volpertinger  volpertinger
-MT        MT      sample_19  37    TRUE     volpertinger  volpertinger
-MT        MT      sample_18  37    TRUE     volpertinger  volpertinger
-MT        *       sample_8   0     FALSE    *             volpertinger
-retli_tr  *       retli_0    0     FALSE    *             retli
-retli_tr  *       retli_1    0     FALSE    *             retli
-retli_tr  *       retli_10   0     FALSE    *             retli
-retli_tr  *       retli_11   0     FALSE    *             retli
-retli_tr  *       retli_24   0     FALSE    *             retli
-retli_tr  *       retli_13   0     FALSE    *             retli
-retli_tr  *       retli_14   0     FALSE    *             retli
-retli_tr  *       retli_15   0     FALSE    *             retli
-retli_tr  *       retli_16   0     FALSE    *             retli
-retli_tr  *       retli_17   0     FALSE    *             retli
-retli_tr  *       retli_18   0     FALSE    *             retli
-retli_tr  *       retli_19   0     FALSE    *             retli
-retli_tr  *       retli_2    0     FALSE    *             retli
-retli_tr  *       retli_20   0     FALSE    *             retli
-retli_tr  *       retli_21   0     FALSE    *             retli
-retli_tr  *       retli_22   0     FALSE    *             retli
-retli_tr  *       retli_23   0     FALSE    *             retli
-retli_tr  *       retli_6    0     FALSE    *             retli
-retli_tr  *       retli_3    0     FALSE    *             retli
-retli_tr  *       retli_4    0     FALSE    *             retli
-retli_tr  *       retli_5    0     FALSE    *             retli
-retli_tr  *       retli_7    0     FALSE    *             retli
-retli_tr  *       retli_8    0     FALSE    *             retli
-retli_tr  *       retli_9    0     FALSE    *             retli
-retli_tr  X       retli_12   25    FALSE    volpertinger  retli
-X         X       sample_2   37    TRUE     volpertinger  volpertinger
-X         *       sample_17  0     FALSE    *             volpertinger</code></pre>
+<span class="kw">cat</span> data/5/1.crct <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>As next step, the number of reads are counted which belong to certain categories. Here, the categories are: * Correctly mapped or not * Origin organism * Organism a read was mapped to</p>
 <p>the <code>cbind</code> function is needed in order to name the column containing the read count</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> <span class="st">&#39;</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> <span class="st">&#39;</span>
 <span class="st">    aggregate(cbind(count=read) ~ t.org+m.org+correct,</span>
 <span class="st">        FUN=length, data=input)</span>
 <span class="st">    &#39;</span> \
     data/5/1.crct <span class="kw">&gt;</span> data/5/1.agg
 
-<span class="kw">cat</span> data/5/1.agg <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>t.org         m.org         correct  count
-retli         *             FALSE    24
-volpertinger  *             FALSE    9
-retli         volpertinger  FALSE    1
-volpertinger  volpertinger  FALSE    2
-volpertinger  volpertinger  TRUE     14</code></pre>
+<span class="kw">cat</span> data/5/1.agg <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>Another possibility if you're proficient in dplyr:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> --pkg dplyr <span class="st">&#39;</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> --pkg dplyr <span class="st">&#39;</span>
 <span class="st">    group_by(input, t.org, m.org, correct) %&gt;%</span>
 <span class="st">    summarize(count=n())</span>
 <span class="st">    &#39;</span> \
     data/5/1.crct <span class="kw">&gt;</span> data/5/1.agg
 
-<span class="kw">head</span> data/5/1.agg <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>t.org         m.org         correct  count
-retli         *             FALSE    24
-retli         volpertinger  FALSE    1
-volpertinger  *             FALSE    9
-volpertinger  volpertinger  FALSE    2
-volpertinger  volpertinger  TRUE     14</code></pre>
+<span class="kw">head</span> data/5/1.agg <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>This format may be used to plot the read fate of a single mapper run and to derive the measures sensitivity and specificity:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/plot-read-fate.R</span> t.org        m.org  \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/plot-read-fate.R</span> t.org        m.org  \
                               correct      count \
-                              data/5/1.pdf data/5/1.agg</code></pre>
+                              data/5/1.pdf data/5/1.agg</code></pre></div>
 <pre class="output"><code></code></pre>
 <p><a href="data/5/1.pdf">Click here</a> to see the plot.</p>
 <h2 id="sensitivity-and-specificity">Sensitivity and specificity</h2>
@@ -902,18 +787,17 @@ volpertinger  volpertinger  TRUE     14</code></pre>
 <p>If non-endogenous reads were included in the reads, like we did by including the <em>R. etli</em> reads, both measures can be calculated.</p>
 <p>The following script needs the same kind of input as the <code>plot-read-fate.R</code> script. Additionally, a list of organisms must be specified, whose genomes the mapper used as a reference.</p>
 <p>If you specify multiple organisms, separate them by commas and don't include any spaces.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/sensspec.R</span> data/5/1.agg volpertinger \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/eval/sensspec.R</span> data/5/1.agg volpertinger \
     <span class="kw">&gt;</span> data/5/1.parameters
 
-<span class="kw">column</span> -t data/5/1.parameters</code></pre>
-<pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        14        0.56         25          24          0.96         0.76</code></pre>
+<span class="kw">column</span> -t data/5/1.parameters</code></pre></div>
+<pre class="output"><code></code></pre>
 <h2 id="repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</h2>
 <p>The code needed to evaluate the data generated by the mapper might as well be included in the mapping template script introduced in the last section. If this is done, the data evaluation can be as well parallelized as the mapping process.</p>
 <p>All scripts used here were already introduced in this section.</p>
 <p>The files <code>data/5/all.tab</code> and <code>data/5/all.recids</code> must be calculated prior to execution of this script. This has been done in this section as well.</p>
 <p>Browse the <a href="data/5">directory <code>data/5</code></a> to see the results.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span>
     <span class="co"># Generate output prefix from input name: `4.sam` -&gt; `4`</span>
     <span class="ot">bn=$(</span><span class="kw">basename</span> <span class="ot">$sam)</span>
     <span class="ot">opref=${bn%</span>.sam<span class="ot">}</span>
@@ -957,7 +841,7 @@ volpertinger  volpertinger  TRUE     14</code></pre>
 
     <span class="kw">echo</span> <span class="st">&quot;</span><span class="ot">$sam</span><span class="st"> done. -&gt; Generated data/5/</span><span class="ot">${opref}</span><span class="st">.{tab,agg,crct,pdf,performance}&quot;</span>
 
-<span class="kw">done</span></code></pre>
+<span class="kw">done</span></code></pre></div>
 <pre class="output"><code>data/4/0.sam done. -&gt; Generated data/5/0.{tab,agg,crct,pdf,performance}
 data/4/1.sam done. -&gt; Generated data/5/1.{tab,agg,crct,pdf,performance}
 data/4/2.sam done. -&gt; Generated data/5/2.{tab,agg,crct,pdf,performance}
@@ -967,7 +851,7 @@ data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,crct,pdf,performance}</code
 <h1 id="comparing-multiple-mapper-runs">Comparing multiple mapper runs</h1>
 <p>The file <code>data/4/partab</code> holds the information which parameters were used for which mapping run. By relating the output measures like sensitivity, specificity or balanced accuracy to these parameters, the influence of individual parameters can be assessed.</p>
 <p>First step is to combine the output measures of all runs:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span>
     <span class="ot">i=$(</span><span class="kw">basename</span> <span class="ot">${f%</span>.performance<span class="ot">})</span>
 
     <span class="kw">scripts/general/add_const_column.sh</span> <span class="ot">$f</span> runidx <span class="ot">$i</span> \
@@ -976,37 +860,25 @@ data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,crct,pdf,performance}</code
 
 <span class="kw">awk</span> <span class="st">&#39;(NR==1||FNR!=1)&#39;</span> data/6/*.performance <span class="kw">&gt;</span> data/6/performance
 
-<span class="kw">cat</span> data/6/performance <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        0         0            25          25          1            0.5   0
-25        14        0.56         25          24          0.96         0.76  1
-25        20        0.8          25          5           0.2          0.5   2
-25        0         0            25          25          1            0.5   3
-25        14        0.56         25          24          0.96         0.76  4
-25        21        0.84         25          5           0.2          0.52  5</code></pre>
+<span class="kw">cat</span> data/6/performance <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>Next, the parameter values belonging to the run indices are joined in, appending the parameter columns to <code>data/6/parameters</code> itself.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> <span class="st">&#39;</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">scripts/general/pocketR.R</span> <span class="st">&#39;</span>
 <span class="st">    merge(inputs[[1]], inputs[[2]], by=&quot;runidx&quot;, all.x=TRUE)</span>
 <span class="st">    &#39;</span> \
     data/6/performance data/4/partab <span class="kw">&gt;</span> data/6/performance.tmp <span class="kw">&amp;&amp;</span>
     <span class="kw">mv</span> data/6/performance<span class="dt">{.tmp,}</span>
 
-<span class="kw">head</span> data/6/performance <span class="kw">|</span> <span class="kw">column</span> -t</code></pre>
-<pre class="output"><code>runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        0         0            25          25          1            0.5   2   0
-1       25        14        0.56         25          24          0.96         0.76  2   4
-2       25        20        0.8          25          5           0.2          0.5   2   8
-3       25        0         0            25          25          1            0.5   10  0
-4       25        14        0.56         25          24          0.96         0.76  10  4
-5       25        21        0.84         25          5           0.2          0.52  10  8</code></pre>
+<span class="kw">head</span> data/6/performance <span class="kw">|</span> <span class="kw">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>The value of one parameter can be plotted against some measure. The following command shows plots where the X and Y axis are free to choose. If multiple runs yield a similar score on the Y axis, their data points are merged to form one bigger dot on the plot. Here all numbers are rounded to one significant digit, because only 8 mapping runs are compared in this example. Therefore results must be aggregated coarsely to demonstrate the results.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
 <span class="kw">scripts/eval/plot_parameter_effects.R</span> --signif 1 data/6/performance n bcr \
     data/6/n.pdf
 
 <span class="co"># Plot k versus BCR</span>
 <span class="kw">scripts/eval/plot_parameter_effects.R</span> --signif 1 data/6/performance k bcr \
-    data/6/k.pdf</code></pre>
+    data/6/k.pdf</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and <a href="data/6/k.pdf">k vs. BCR</a>.</p>
 <p>It can be seen that n seems to have an impact on the BCR whereas k does not. The BCR rises and falls again because the gain in sensitivity is offset by the loss in specificity if n rises too high.</p>
@@ -1028,11 +900,13 @@ data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,crct,pdf,performance}</code
 </ol></li>
 <li>Biological sequence data, IUPAC one-character-code. Should not be wider than 80 characters and may contain whitespace. E.g. nucleotides: ACCTCTCTACCT...</li>
 </ol>
-<p>~FASTA identifier: -&gt; FASTA record ~FASTA description: -&gt; FASTA record</p>
+<p>~FASTA identifier: -&gt; FASTA record</p>
+<p>~FASTA description: -&gt; FASTA record</p>
 <p>~file offset: This is the distance in bytes from the beginning of a file. The first character of a file has the offset 0.</p>
 <p>~offset: -&gt; file offset</p>
 <p>~i-based index: An index is i-based if it starts counting with number i. For example, the mapping position (pos) field of a SAM file is a 1-based index. If the position 1 is written there, the read maps to the first base of the genome. Conversely, if the index were 0-based, the first base of the genome would be referenced with the number 0.</p>
-<p>~0-based: -&gt; i-based index ~1-based: -&gt; i-based index</p>
+<p>~0-based: -&gt; i-based index</p>
+<p>~1-based: -&gt; i-based index</p>
 <p>~standard input: Many commands expect input on this stream. Input can be provided either by typing into the console, by using the &lt; operator to provide input from a file or by the | operator, which forwards the content on standard output of a previous command to standard input of this command. Refer to the &quot;Redirection&quot; section of your shell for more information.</p>
 <p>~standard output: All output a command writes is by default redirected to the standard output or standard error streams. Per convention, standard output is used for the results of the program, whereas standard error is used for status and error messages. Content on standard output can be written in a file by using the &gt; operator or redirected to standard input of another command by using the | operator. Standard error output can be redirected to a file using the 2&gt; operator. Consult the &quot;Redirection&quot; section of your shell for more information.</p>
 <p>~standard error: -&gt; standard output</p>

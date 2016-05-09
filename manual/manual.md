@@ -1,109 +1,33 @@
+<span class="title">The TAPAS manual</span>
+
+Dependencies of the scripts
+===========================
+
+The scripts consisting this software depend on 
+
+  * A Python 3 installation
+  * R
+
+Furthermore, the scripts depend on several packages which are
+included.
+
+
+
+vim:tw=70
 Genome Preparation
 ==================
- 
 
-Prior to extraction of reads, the original genomes must be 
-preprocessed. This encompasses three steps:
  
 Record index table
 ------------------
-The FASTA record identifiers must be written in a table.
-This enables to assign different chromosomes to the same organism
-later on in the analysis (Section 5)
 
-In this example, the reads stem from our sample organism
-'volpertinger':
-
+First, index the genome using `samtools`. This is needed for several
+downstream tools:
 ```{.bash}
-scripts/genome/mfasta-idlist.sh data/genome/sample.fasta volpertinger \
-    > data/1/sample.recids
-head data/1/sample.recids
+samtools faidx data/genome/sample.fasta
 ```
 ```{.output}
-record	organism
-A1	volpertinger
-A2	volpertinger
-A3	volpertinger
-B1	volpertinger
-B2	volpertinger
-B3	volpertinger
-B4	volpertinger
-MT	volpertinger
-X	volpertinger
 ```
-
-The second parameter is optional, but handy if the target genome is
-comprised of multiple FASTA records. It adds a column called
-"organism" which holds the string of the second argument (in this
-case, "sample"). The resulting table can be used to associate all the
-FASTA records of this FASTA file to the same organism in subsequent
-analysis steps.
-
-Linearization
--------------
-
-The genome files must be linearized. This means the deletion of
-all whitespace and newline characters in the data section of
-each FASTA record. This is needed because this makes it much
-quicker to jump to a specific base in the FASTA file.
-
-In the following example the output lines are truncated for better
-readability
-
-```{.bash}
-scripts/generate-reads/nucl/linearize_fasta \
-    data/genome/sample.fasta > data/1/sample.fasta.lin
-
-# Show output, partially
-cut -c-80 data/1/sample.fasta.lin
-```
-```{.output}
->A1 dna:chromosome chromosome:Felis_catus_6.2:A1:1:239302903:1 REF
-CCAAACAATAAAGACTCTTAAAAACTGAGAACAATGAGGGTTGATGGGGGGTGGGAGAGGAGGGGAGGGTGGGTGATGGG
->A2 dna:chromosome chromosome:Felis_catus_6.2:A2:1:169043629:1 REF
-CCGTACCAGCAGAACCCAACCCCAACCCCAACCCCAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAAC
->A3 dna:chromosome chromosome:Felis_catus_6.2:A3:1:142459683:1 REF
-TCACTGGATCCCCCTTAGGATCTCTTGTAGGGCTGGTTTAGTGGTGATGAATTCCTTCAGTTTTTGTTTGTTTGGGAAGA
->B1 dna:chromosome chromosome:Felis_catus_6.2:B1:1:205241052:1 REF
-ATCTAGACTTTAAAATAAAGACTGCAACAAGAGATGAAGAATGGTGTTGTATCATAATTAAGGGAGTCTATCCACCAAAA
->B2 dna:chromosome chromosome:Felis_catus_6.2:B2:1:154261789:1 REF
-AAAAAAAAAGAAAGAAAAGAAAAGAAAATCTGGATCTCAAAAAGGTATCTGCACTCCTGTGTGATAATACTGTGTTACAG
->B3 dna:chromosome chromosome:Felis_catus_6.2:B3:1:148491654:1 REF
-GCACTGGGTGATTGAATAAAAATATAGGACCCACATATCTTCTACCTACAAGAGACTAATTATAGAACTGAAGTATCAAA
->B4 dna:chromosome chromosome:Felis_catus_6.2:B4:1:144259557:1 REF
-CTGGTCTGAAGAGCCTGGAAAGGATGACAGGACATGGGCCTATTCCTTTTTCCCACTCAGACTCAATGTGAAGACTTTAG
->MT dna:chromosome chromosome:Felis_catus_6.2:MT:1:17009:1 REF
-GGACTAATGACTAATCAGCCCATGATCACACATAACTGTGGTGTCATGCATTTGGTATTTTTTATTTTTAGGGGGTCGAA
->X dna:chromosome chromosome:Felis_catus_6.2:X:1:126427096:1 REF
-CACCACTTCCTTGTTCCCCATCTATCACATCCGGCCATTAGGAGAAAATTACAGGGTATACTGACAGGTGACAAACGTGA
-```
-
-Record offset index
--------------------
-
-To efficiently know the location of a specific FASTA record in a
-FASTA-file, an index of file offsets of these records must be saved. 
-
-```{.bash}
-scripts/generate-reads/nucl/fasta_record_index \
-    data/1/sample.fasta.lin > data/1/sample.idx
-
-# Show output, partially
-head data/1/sample.idx
-```
-```{.output}
-head 0
-data 67
-len 6000
-head 6068
-data 6135
-len 6000
-head 12136
-data 12203
-len 6000
-head 18204
-```
-
 
 
 
@@ -122,162 +46,145 @@ mapped correctly.
 Generate nucleotide strings and read names
 ------------------------------------------
 
-The uniform.py script can be used to sample reads from a reference
+The `uniform` script can be used to sample reads from a reference
 genome. The script needs a FASTA file as input, as well as the desired
 amount of reads to be generated, the minimum length and the decay
 length. The read lengths are exponentially distributed; the decay
 length parameter specifies the length by which half of the reads are
 longer than the minimum read length.
 
-The input genome is linearized and an offset index is created by default, 
-as described in the previous section. This can be suppressed by the 
-command line switches `--linearized` and `--index`, if these steps are
-executed manually previously.
+For the FASTA file, an index file must exist which was generated in
+the previous section using samtools.
 
 Example: Extract 25 reads, with minimum length 20 basepairs, where
 half of the reads have a length longer than 25 bp. The value 123 
 is used to initialize the random number generator, i.e. can be used to
 obtain reproducible reads. This last parameter can be omitted.
 
-The resulting output is a table containing four columns:
+The resulting output will be a raw list of nucleotide sequences and a
+table containing three columns:
 
  1. The FASTA record name (e.g. chromosome) where the read originated.
  2. 1-based base number of the reads' first base.
  3. 1-based base number of the reads' last base.
- 4. The nucleotides of the read
+
 
 The base indices are 1-based because base indices are 1-based in
-SAM-files as well. (whereas in BAM-files, they are 0-based, but that
-is not of interest here.)
+SAM-files as well. (whereas in BAM-files, they are 0-based, but we
+don't need to deal with BAM-files here.)
 
-Generate reads without prior genome processing steps:
+We will generate sample reads from our sample genome of a
+volpertinger.
 
-```{.bash}
-scripts/generate-reads/nucl/uniform.py data/genome/sample.fasta \
-    25 20 5 123  >  data/2/sample.tab
-# Show output
-head data/2/sample.tab | column -t
-```
-```{.output}
-record  start  end   read
-A2      498    518   AGAATGAAATCTTGCCATTTG
-B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-A2      4682   4701  ATGTAATATTATTTANNNNN
-B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC
-```
-
-Generate reads while using a pre-processed genome (linearized and
-indexed). See previous section for generation of the used input files.
-
+Execute the following script to generate random nucleotide sequences:
 
 ```{.bash}
-scripts/generate-reads/nucl/uniform.py \
-    --index data/1/sample.idx \
-    --linearized data/1/sample.fasta.lin \
-    25 20 5 123 >  data/2/sample.tab
-# Show output
-head data/2/sample.tab | column -t
-```
-```{.output}
-record  start  end   read
-A2      498    518   AGAATGAAATCTTGCCATTTG
-B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-A2      4682   4701  ATGTAATATTATTTANNNNN
-B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC
-```
-
-As a last step, the output table is given an index column which
-assigns a unique name to each read:
-
-```{.bash}
-scripts/general/index-column.py --prefix "sample_" \
-                                --colname name \
-                                --inplace data/2/sample.tab
-
-head data/2/sample.tab | column -t
-```
-```{.output}
-name      record  start  end   read
-sample_0  A2      498    518   AGAATGAAATCTTGCCATTTG
-sample_1  B2      4899   4923  AACCAGAGCACACGTAGGCAGCCAT
-sample_2  X       3674   3693  ATCCTGCGAGGGGGCCCGAG
-sample_3  B2      3616   3640  TTTTGCTTTTGTTTCCCTTGGCTCT
-sample_4  B1      3675   3694  GAGGAGAAAGCAGACAAAAA
-sample_5  A2      4682   4701  ATGTAATATTATTTANNNNN
-sample_6  B2      4974   4994  ATCCTTGGAGGTAGAGTCACC
-sample_7  A3      1510   1532  GTTAAGTCCCGCTGGCTGTCAGA
-sample_8  MT      4875   4910  GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC
-```
-
-
-Splitting the read sampler output
----------------------------------
-
-The first two columns of the output will be included in a table which
-lists the true positions of the reads. Therefore the column names will
-start with 't' (true) in this case, but the names are arbitrary.
-
-This table will also list the future read names, which are generated
-using awk. 
-
-The last column will be the nucleotide strings of the new FASTQ file.
-This column will be written to an extra file.
-
-Generate the table with true read positons and add the FASTA record
-name (tail -n+2 ... removes the first line (header line)):
-
-```{.bash}
-awk '(NR!=1){
-        print $1 > "data/2/sample.i";
-        print $5 > "data/2/sample.n";
-     }' \
-     data/2/sample.tab
+scripts/uniform data/genome/volpertinger.fasta \
+    --seed 1234 \
+    --output data/2/volpertinger.coord data/2/volpertinger.nucl \
+    25 20 5
 ```
 ```{.output}
 ```
-Show output
-```{.bash}
-head data/2/sample.i
-```
-```{.output}
-sample_0
-sample_1
-sample_2
-sample_3
-sample_4
-sample_5
-sample_6
-sample_7
-sample_8
-sample_9
-```
+
+Two files are generated when the `--output` switch is used, as is the
+case above: One holds the read names and coordinates and the other one 
+holds the raw nucleotide sequences. When omitting ``--output``, all
+information is printed in tabular form on the standard output and not
+saved to distinct files.
+
+The resulting files look like this:
 
 ```{.bash}
-head data/2/sample.n
+head data/2/volpertinger.coord | column -t
 ```
 ```{.output}
-AGAATGAAATCTTGCCATTTG
-AACCAGAGCACACGTAGGCAGCCAT
-ATCCTGCGAGGGGGCCCGAG
-TTTTGCTTTTGTTTCCCTTGGCTCT
-GAGGAGAAAGCAGACAAAAA
-ATGTAATATTATTTANNNNN
-ATCCTTGGAGGTAGAGTCACC
-GTTAAGTCCCGCTGGCTGTCAGA
-GCTTTGAAATGAACCTATTAGCCATCATCCCCATCC
-TCAGCCCCACAGTGAGGAGAAACCAA
+record  start  end
+B1      2143   2168
+MT      3402   3421
+A3      1413   1436
+A3      5689   5709
+MT      3280   3302
+A3      4936   4960
+A1      1320   1340
+A3      4480   4504
+X       2381   2400
 ```
 
+```
+head data/2/volpertinger.nucl | column -t
+```
+
+Putting together the FASTQ file
+-------------------------------
+
+This task needs three input files: 
+
+  1. The list of read names
+  2. The list of nucleotide strings 
+  3. The list of quality strings
+
+The first list is extracted from the file `volpertinger.coord`, the second
+list exists already (`volpertinger.nucl`) and the third list is generated
+using standard UNIX tools from the nucleotide strings
+
+Read names
+----------
+
+In this tutorial we generate read names consisting of the organism
+name (*volpertinger*) followed by an underscore and a counting number.
+
+To have the origin information of the reads available along with their
+newly-generated reads, it is advisable to add the read names to the
+`volpertinger.coord` file generated above.
+
+There is a script included for adding this kind of column, which is
+shown in the next code example. You can as well use `awk` or whichever
+tool you like to accomplish this task if you need more sophisticated
+read names. 
+
+```{.bash}
+scripts/index-column  --prefix volpertinger_ \
+                      --colname name  \
+                      --inplace data/2/volpertinger.coord
+
+head data/2/volpertinger.coord | column -t
+```
+```{.output}
+name            record  start  end
+volpertinger_0  B1      2143   2168
+volpertinger_1  MT      3402   3421
+volpertinger_2  A3      1413   1436
+volpertinger_3  A3      5689   5709
+volpertinger_4  MT      3280   3302
+volpertinger_5  A3      4936   4960
+volpertinger_6  A1      1320   1340
+volpertinger_7  A3      4480   4504
+volpertinger_8  X       2381   2400
+```
+
+To use the read names to generate a FASTQ file, they must be available
+as a raw list without additional columns or a header. `awk` can be
+used to perform this task:
+
+```{.bash}
+awk '(NR!=1){print $1}' \
+      data/2/volpertinger.coord \
+    > data/2/volpertinger.i
+
+head data/2/volpertinger.i
+```
+```{.output}
+volpertinger_0
+volpertinger_1
+volpertinger_2
+volpertinger_3
+volpertinger_4
+volpertinger_5
+volpertinger_6
+volpertinger_7
+volpertinger_8
+volpertinger_9
 ```
 
 Quality strings
@@ -285,97 +192,143 @@ Quality strings
 
 Currently, the effect of quality strings on the mapping result has not
 been investigated. Currently only strings of constant quality score
-are used. This can be done by the sed tool, which replaces every 
+are used. This can be done by the UNIX `sed` tool, which replaces every 
 character by an F:
 
 ```{.bash}
-sed 's/./F/g' data/2/sample.n > data/2/sample.q
-head data/2/sample.q
+sed 's/./F/g' \
+      data/2/volpertinger.nucl \
+    > data/2/volpertinger.q
+
+head data/2/volpertinger.q
 ```
 ```{.output}
-FFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 ```
 
-Creating a FASTQ file
----------------------
+If you want to generate more elaborate quality strings, you are free
+to do so using whichever tools you desire. Just generate a list with as
+many lines as there are nucleotide strings in `volpertinger.nucl` to input them 
+into the pipeline.
 
-The `synth-fastq.py` tool creates a FASTQ file from its components,
+Putting the FASTQ file together
+-------------------------------
+
+The `synth-fastq` tool creates a FASTQ file from its components,
 nucleotide string, quality string and read name (ID line). If the file
 containing the read lines is omitted, the reads are numbered
 sequentially.
 
 ```{.bash}
-scripts/generate-reads/synth-fastq.py data/2/sample.{n,q,i} \
-    > data/2/sample.fastq
+scripts/synth-fastq data/2/volpertinger.nucl \
+                    data/2/volpertinger.q    \
+                    data/2/volpertinger.i    \
+    > data/2/volpertinger.fastq
 
-head data/2/sample.fastq
+head data/2/volpertinger.fastq
 ```
 ```{.output}
-@sample_0
-AGAATGAAATCTTGCCATTTG
+@volpertinger_0
+TTCCACAAGATATTAGCCAACCAGAT
 +
-FFFFFFFFFFFFFFFFFFFFF
-@sample_1
-AACCAGAGCACACGTAGGCAGCCAT
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_1
+TCTATTTAATAACTTCTCCC
 +
-FFFFFFFFFFFFFFFFFFFFFFFFF
-@sample_2
-ATCCTGCGAGGGGGCCCGAG
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+TTGAACTCTATCTTCCGGGGCTCA
 ```
 
 Repeat the above steps to generate contaminant reads
 ----------------------------------------------------
 
-This commands generate some reads from a truncated Rhizobium etli
+This commands generate some reads from a truncated *Rhizobium etli*
 genome, to supply reads which are not supposed to map. This way,
 contamination with non-endogenous reads are simulated.
 
-The endogenous (`sample.fastq`) and contaminant (`retli.fastq`) 
+The endogenous (`volpertinger.fastq`) and contaminant (`retli.fastq`) 
 read will be merged into one fastq file (`all.fastq`) once the
 sample reads have undergone mutation simulation. This will be 
 done in the next section.
 
+Note that two kinds of abbreviations are used here:
+
+ *  Terms like `const_{a,b,c}` are expanded by `bash` to `const_a
+    const_b const_c` and can therefore be used to specify mulitple
+    paths which share some parts. 
+ *  The temporary files (similar to `volpertinger.q` and `volpertinger.i` 
+    above) are omitted here by using `bash`'s *process substitution*
+    (`<(...)`) which uses the output of one argument instead of a file
+    name which the other command expects.
+
+If you do not understand why these commands are equivalent to the
+commands listed above used to generate `reads.fastq`, you can use
+these as well without problems.
+
+Index genome and sample nucleotide seqences:
 ```{.bash}
-scripts/genome/mfasta-idlist.sh data/retli/retli_tr.fasta retli \
-    > data/2/retli.recids
+samtools faidx data/retli/retli_tr.fasta
 
-scripts/generate-reads/nucl/uniform.py \
+scripts/uniform \
     data/retli/retli_tr.fasta \
-    25 20 5 234 \
-    > data/2/retli.tab
-
-scripts/general/index-column.py  --prefix retli_ \
-                                 --colname name  \
-                                 --inplace data/2/retli.tab
-
-awk '(NR!=1){
-       print $1 > "data/2/retli.i";
-       print $5 > "data/2/retli.n";
-     }' \
-    < data/2/retli.tab
-
-sed 's/./F/g' < data/2/retli.n \
-              > data/2/retli.q
-
-scripts/generate-reads/synth-fastq.py \
-    data/2/retli.n \
-    data/2/retli.q \
-    data/2/retli.i \
-    > data/2/retli.fastq
-
+    --seed 2345 \
+    --output data/2/retli.{coord,nucl} \
+    25 20 5
 ```
 ```{.output}
 ```
 
+Read names:
+
+```{.bash}
+scripts/index-column  --prefix retli_ \
+                      --colname name  \
+                      --inplace data/2/retli.coord
+```
+```{.output}
+```
+
+Put the FASTQ together
+ * Quality strings are generated without an intermediate file using 
+   `sed`
+ * Read names are extracted without an intermediate file using `awk`
+
+
+```{.bash}
+scripts/synth-fastq \
+    data/2/retli.nucl \
+    <(sed 's/./F/g'           data/2/retli.nucl) \
+    <(awk '(NR!=1){print $1}' data/2/retli.coord) \
+    > data/2/retli.fastq
+
+head data/2/retli.fastq
+```
+```{.output}
+@retli_0
+TCGTTCTTGTAGCCTTCCGGGAA
++
+FFFFFFFFFFFFFFFFFFFFFFF
+@retli_1
+ACTGAAGCGCAAGCTCTGAA
++
+FFFFFFFFFFFFFFFFFFFF
+@retli_2
+TGGCCGAGGGACGCTTGCGTCG
+```
+
+
+
+vim:tw=70
 Mutation of reads
 =================
 
@@ -383,7 +336,7 @@ Mutation probabilities
 ----------------------
 
 The reads are mutated using per base probabilities derived from the
-geometric distribution. The mutation probabiltiy at the read ends is
+geometric distribution. The mutation probability at the read ends is
 the highest. By this, the chemical damage near read ends can be
 modelled. For this, three parameters are important:
 
@@ -447,7 +400,7 @@ The columns have the following meaning:
 
 In the example above, a base is $x$ bp away from the 5' end of
 a read of length l. That means, it is $(l-x)$ bp away from the 3' end
-of the read. The exchage probability depends on the type of the
+of the read. The exchange probability depends on the type of the
 nucleotide and on $x$:
 
 Base at position $x$ is not Cytosine:
@@ -469,87 +422,98 @@ input and mutates strings provided to it on standard input
 accordingly. 
 
 Mutations can be inserted either before a FASTQ file is assembled
-(`synth-fastq.py`, see previous section):
-```{.bash}
-scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab \
-    < data/2/sample.n
-```
-```{.output}
-AGAcTGAAAgTTTGCCATTTG
-AACCAGAGCACACGTAGGCAGCTAc
-ATCCTGCGAGGGGGCCCGAG
-TTTTGCTTTTGTaTCCTTTGGaTCT
-tAGaAGgAAGCAcACAAAAA
-ATtTAATATcATTTANNNNN
-ATCCTTGaAGtTAGAtTgcCT
-GTTAAGTCCCtCTGcCTGTCAGA
-tCTTTGAAATGAACCTATTAGTCATCATCCCCATCC
-TCAGgCCCACAGaGAacAcgAACCAA
-TcGTCACAGAACTAGAAcAAAT
-GGGAAGAGTGTGGTTGCTGTGa
-CAAcCAAGAATATCCAATTcTTGc
-TGAGTCCAGGAGTTCAGGGT
-GATAGCgACTgTgGgCTAGGgAT
-ACCATAAAATACCTAGGggTAA
-NNNNNNNNNNNNNNNNNNNNNNNN
-NNNNNNNNNNNNNNNNNNNNNN
-gTCTAAGCAAGgCTTcCAGACgT
-AAcATcGCACCcCTATCAATCT
-ttATTCTGTGGTTtCACAGACAGG
-aATaTACTaagAcTAAATTACG
-NNNNNNNNNNNNNNNNNNNNNNN
-GAAGGATtgAaGGCAAAAAT
-TcGTTaATcatAGcAGAAGGTgA
-```
-
-Alternatively, a already existant FASTQ file can be mutated using the
-`filter-fastq.py` tool in cooperation with `multiple-mutate.py`:
+(`synth-fastq.py`, see previous section), or afterwards. This example
+uses raw nucleotide strings generate during the creation of our
+*volpertinger* samples. This serves well as an example how nucleotide
+strings are processed line by line and mutated. You can see the
+mutations in this example showing up as lower-case letters. 
 
 ```{.bash}
-scripts/general/filter-fastq.py --nucleotide \
-  @ scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab @ \
-  < data/2/sample.fastq > data/3/sample_mut.fastq
-
-head data/3/sample_mut.fastq
+scripts/multiple_mutate\
+    data/mut-tables/mut.tab \
+    < data/2/volpertinger.nucl \
+    | head
 ```
 ```{.output}
-@sample_0
-AGAATGAAAaCTTGCCATTTG
+TTCTACAAGtTATTcGCCtACCAGAT
+TCTATgaAATAACTTCTCgC
+aTtAACcTTATCTTCTGGGGCTCA
+TCcTGgGGcTTTCTATTTAGA
+TATGtCCgCGATGTTcGATCAGG
+ACCCAgGcGCCCCCAGCCtaGTTGa
+TGccAATAGCaCTGaGTTTcT
+AATAAACTTAAAtAAATTAGTGGCA
+ACGATGACCATCTTtTTGCG
+cATGaTATTTGccATATATGgAGcTTGTGTG
+```
+
+An already existent FASTQ file can be mutated using the `filter-fastq`
+tool in cooperation with `multiple-mutate`. The tool `filter-fastq`
+enables you to apply transformations to existing fastq files. To this
+effect, `filter-fastq` extracts one part out of a FASTQ file (read
+name, nucleotide string or quality string) and feeds it into another
+sub-program specified between two `@`-signs. The sub-program is required to
+take lines of text as input and return the same number of lines on
+standard output. The output of the sub-program is then placed into the output
+fastq file. By combining `filter-fastq` and `multiple_mutate`, the tool
+which applies mutations to strings of nucleotides, a FASTQ file can be
+mutated:
+
+```{.bash}
+scripts/filter-fastq --nucleotide \
+  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  < data/2/volpertinger.fastq \
+  > data/3/volpertinger_mut.fastq
+```
+```{.output}
+```
+Note how the nucleotide strings of the output FASTQ file now carry
+mutations (lower-case letters):
+
+```{.bash}
+head data/3/volpertinger_mut.fastq
+```
+```{.output}
+@volpertinger_0
+TTCCAaAAGATATTAGCCAACCAGAg
 +
-FFFFFFFFFFFFFFFFFFFFF
-@sample_1
-AACCAtgGCcCACaTAGGCAGgCAT
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_1
+TgTATTTgATAACTTaTCCC
 +
-FFFFFFFFFFFFFFFFFFFFFFFFF
-@sample_2
-ATCCTGCGAaGGaGCCCGAG
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+TTGAACTCTATCTTCCGGGGTgCA
 ```
 
 The `filter-fastq.py` script enables you to apply an arbitrary script
-on just one part of a FASTQ file (ID line, nucleotide line, quality
-line). The used script must accept the respective part on standard
-input and prints the modified version on standard output. The modified
-FASTQ file is assembled by `filter-fastq.py` from the output of its
-children scripts and printed on standard output. 
+or program on just one part of a FASTQ file (ID line, nucleotide line,
+quality line). The used script must accept the respective part on
+standard input and print the modified version on standard output. The
+modified FASTQ file is assembled by `filter-fastq.py` from the output
+of its children scripts and printed on standard output. 
 
-On the `filter-fastq.py` call, the @ sign serves as a sentinel character,
-which determines start and end of the child scripts' command line. It
-can be an arbitrary character, as long as it doesn't occur inside the
-child scripts' command line.
+On the `filter-fastq.py` call, the @ sign serves as a sentinel
+character, which determines start and end of the sub-program's
+command line. It can also be any arbitrary other character, as long as
+it doesn't occur inside the child script's command line but only at
+the beginning and the end.
 
 
 Combining endogenous and non-endogenous reads
 ---------------------------------------------
 
-In this example, the endogenous reads undergo simulated mutation
-and damage prior to mapping, while the contaminant reads do not.
+In this example, the endogenous reads from *volptertinger* undergo 
+simulated mutation and damage prior to mapping, while the contaminant
+reads from *R. etli* do not.
 
-Therefore, now is the time to combine the mutated sample reads
+Therefore only now, after applying mutations to our *volpertinger*
+reads, is the time to combine the mutated sample reads
 and the contaminant reads generated in the last section to one
 file. For this purpose, the UNIX tool `cat` is used:
 
 ```{.bash}
-cat data/3/sample_mut.fastq data/2/retli.fastq \
+cat data/3/volpertinger_mut.fastq data/2/retli.fastq \
     > data/3/all.fastq
 ```
 ```{.output}
@@ -571,16 +535,18 @@ operator to write this output into a file suitable for
 `multiple_mutate.py`.
 
 ```{.bash}
-scripts/distribution-parametrization/mapdamage2geomparam.py \
+scripts/mapdamage2geomparam \
     --fit-plots data/3/fit_ \
     data/mapdamage/*.txt | \
     cut -f1-6 | \
     column -t
 ```
 ```{.output}
-strand  from  to  factor      geom_prob   intercept
-3       G     A   0.79513996  0.26918746  0.039386893
-5       C     T   0.43360246  0.35249167  0.027965522
+strand                                from  to  factor      geom_prob   intercept
+3                                     G     A   0.79513996  0.26918746  0.039386893
+data/mapdamage/GS136_3pGtoA_freq.txt
+5                                     C     T   0.43360246  0.35249167  0.027965522
+data/mapdamage/GS136_5pCtoT_freq.txt
 ```
 
 The generated plots can be viewed 
@@ -591,13 +557,24 @@ fit_000_GS136_3pGtoA_freq.txt.pdf
 Generating multiple damage patterns using a parameter table
 -----------------------------------------------------------
 
+Sometimes, multiple damage patterns need to be compared. There is a
+possibility to generate the `multiple_mutate` input files from one table
+which lists all different values of the different mutation parameters. 
+
+This approach will be seen again later, where there is a possibility
+to generate many short read mapper calls from exactly the same kind of
+parameter table. You can therefore generate appropriate input files
+as well as appropriate short read mapper calls out of only one table
+which lists all the parameters.
+
 The `fill_template.py` script expects a table, where each row is used
 to fill a prespecified template with values. 
 
 For example, if a template is written which looks like this:
 
 ```{.bash}
-column -t data/mut-tmpl/mut-tmpl
+cp data/mut-tmpl/mut-tmpl data/3
+column -t data/3/mut-tmpl
 ```
 ```{.output}
 strand  from  to  factor  geom_prob  intercept
@@ -609,7 +586,8 @@ strand  from  to  factor  geom_prob  intercept
 And a table is created which looks like this:
 
 ```{.bash}
-column -t data/mut-tmpl/tab
+cp data/mut-tmpl/tab data/3/mut-tab
+column -t data/3/mut-tab
 ```
 ```{.output}
 fac  geom  all_intercept
@@ -622,9 +600,9 @@ fac  geom  all_intercept
 several files can be generated with 
 
 ```{.bash}
-scripts/general/fill_template.py \
-    data/mut-tmpl/mut-tmpl \
-    < data/mut-tmpl/tab
+scripts/fill_template \
+    data/3/mut-tmpl \
+    < data/3/mut-tab
 ```
 ```{.output}
 strand	from	to	factor	geom_prob	intercept
@@ -654,13 +632,18 @@ separate file. The argument of `--output` can (and should!) contain
 column names of the table, enclosed in braces {...}. This creates a
 separate filename per input row. 
 
-For example, the mentioned-above table can be prepended with an index
+We will now write each of the tables shown above to its own file. We
+want to name the files using a counting number, but our input table
+doesn't yet contain a column with that counter. Therefore we must
+first add one.
+
+The mentioned-above table can be prepended with an index
 column:
 
 ```{.bash}
-scripts/general/index-column.py <data/mut-tmpl/tab >data/3/tab-i
+scripts/index-column --inplace data/3/mut-tab
 
-head data/3/tab-i | column -t
+head data/3/mut-tab | column -t
 ```
 ```{.output}
 index  fac  geom  all_intercept
@@ -671,14 +654,16 @@ index  fac  geom  all_intercept
 ```
 
 Now, each output of `fill_template.py` can be written to its own 
-output file:
+output file, using the information from the newly-generated `index`
+column:
 
 ```{.bash}
-scripts/general/fill_template.py \
+scripts/fill_template \
     --output "data/3/{index}_filled" \
-    data/mut-tmpl/mut-tmpl \
-    < data/3/tab-i
+    data/3/mut-tmpl \
+    < data/3/mut-tab
 
+# Show all the generated files
 for f in data/3/*_filled; do
     echo " === $f === "
     column -t $f
@@ -753,17 +738,18 @@ n
 
 To generate all combinations of parameters, two scripts are used:
 
-  * `scripts/general/cross_tab.py` expects multiple files and outputs all
+  * `scripts/cross_tab` expects multiple files and outputs all
     possible combinations of their lines. 
 
-  * `scripts/general/index-column.py` This script prepends a counting number 
+  * `scripts/index-column` This script prepends a counting number 
     to each input line. It can be used to generate index columns for text 
     tables.
 
 Generate all possible combinations of parameters, retaining 1 header
 line:
+
 ```{.bash}
-scripts/general/cross_tab.py --head 1 data/mapping/*.par > data/4/partab
+scripts/cross_tab --head 1 data/mapping/*.par > data/4/partab
 head data/4/partab | column -t
 ```
 ```{.output}
@@ -778,7 +764,7 @@ k   n
 
 Add an index column called runidx:
 ```{.bash}
-scripts/general/index-column.py --colname runidx --inplace data/4/partab
+scripts/index-column --colname runidx --inplace data/4/partab
 head data/4/partab | column -t
 ```
 ```{.output}
@@ -793,9 +779,12 @@ runidx  k   n
 
 Read now the script `data/mapping/map-bwa.sh` and see how the variables
 used there correspond to the column names of partab. The script is
-shown in the next code block. There is an additional
-variable there, `$fastq`. This variable needs to be set and exported before
-executing the calls, which will be done in the next section.
+shown in the next code block. 
+
+This is a script which can be called using different parameter
+combinations: It calls the mapper `bwa` and forwards the values of the
+variables set via `data/4/partab` as command line arguments to the
+mapper. 
 
 ```{.bash}
 #!/usr/bin/bash
@@ -807,17 +796,18 @@ executing the calls, which will be done in the next section.
 # Fail if any needed variable is not set
 set -ue
 
-bwa aln -n $n -k $k        \
-    data/genome/sample     \
-    $fastq                 \
-    > data/4/${runidx}.sai \
-    2> data/4/${runidx}.log &&
+bwa aln -n ${n} -k ${k}      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    > data/4/${runidx}.sai   \
+    2> data/4/${runidx}.log   &&
 
-bwa samse data/genome/sample \
-      data/4/${runidx}.sai   \
-      $fastq                 \
-      > data/4/${runidx}.sam \
-     2>> data/4/${runidx}.log
+bwa samse                      \
+      data/genome/volpertinger \
+      data/4/${runidx}.sai     \
+      data/3/all.fastq         \
+      > data/4/${runidx}.sam   \
+      2>> data/4/${runidx}.log
 
 ```
 
@@ -825,18 +815,18 @@ Below the calls are generated.
 
 ```{.bash}
 # Convert the table into calls that can be executed in the next section
-scripts/general/table2calls.py  data/4/partab \
-                                data/mapping/map-bwa.sh \
-                              > data/4/calls
-head data/4/calls
+scripts/table2calls  data/4/partab \
+                    data/mapping/map-bwa.sh \
+                  > data/4/calls
+cat data/4/calls
 ```
 ```{.output}
-(n=0; runidx=0; k=2; source data/mapping/map-bwa.sh);
-(n=4; runidx=1; k=2; source data/mapping/map-bwa.sh);
-(n=8; runidx=2; k=2; source data/mapping/map-bwa.sh);
-(n=0; runidx=3; k=10; source data/mapping/map-bwa.sh);
-(n=4; runidx=4; k=10; source data/mapping/map-bwa.sh);
-(n=8; runidx=5; k=10; source data/mapping/map-bwa.sh);
+runidx=0 n=0 k=2 data/mapping/map-bwa.sh
+runidx=1 n=4 k=2 data/mapping/map-bwa.sh
+runidx=2 n=8 k=2 data/mapping/map-bwa.sh
+runidx=3 n=0 k=10 data/mapping/map-bwa.sh
+runidx=4 n=4 k=10 data/mapping/map-bwa.sh
+runidx=5 n=8 k=10 data/mapping/map-bwa.sh
 ```
 
 Executing multiple mapping runs in parallel
@@ -844,33 +834,26 @@ Executing multiple mapping runs in parallel
 
 For this task, many programs can be used, from simple shell background
 spawning using & (in bash) to job managers orchestrating a big network
-of worker machines. In this package, a simple programm is implemented
+of worker machines. In this package, a simple program is implemented
 which executes a user-definable number of jobs in parallel and
 waits with spawning new ones until another of its already started jobs
 finishes.
 
-Note that it is possible to use user-defined shell functions or
-variables, if they are made available using the `export VARIABLE` or
-`export -f FUNCTION` bash commands (replace UPPERCASE letters by 
-actual name). Refer to the manual of your shell if you're using a 
-different shell than bash.
+Note that some mappers can use more than one processor core
+themselves. Therefore if you spawn multiple mapper processes where
+each mapper process utilizes multiple cores, the total number of
+utilized cores is the number of cores used per mapper multiplied with
+the number of mapper processes launched in parallel.
 
-Note as well that more CPU cores than started parallel processes are
-needed if the mappers run on multiple cores themselves. Whether to
-exploit parallelism implemented in the mappers or to use
-`mcall.py` is up to you.
-
-Invoke `scripts/general/mcall.py --help` to get more information about
+Invoke `scripts/mcall --help` to get more information about
 this tool.
 
 Example: Run the previously generated mapper calls. 
 
 ```{.bash}
-    # Export variable for use in mcall.py
-    export fastq="$(pwd)/data/3/all.fastq"
     # Execute calls, at 2 cores
-    scripts/general/mcall.py -c data/4/calls -t 2 \
-                             --status
+    scripts/mcall -c data/4/calls -t 2 \
+                  --status
     # Standard error was piped to log files,
     # Standard output was piped to sam files, as specified in the
     # `tmpl` file.
@@ -881,9 +864,9 @@ Example: Run the previously generated mapper calls.
 [bwa_aln_core] calculate SA coordinate... 0.00 sec
 [bwa_aln_core] write to the disk... 0.00 sec
 [bwa_aln_core] 50 sequences have been processed.
-[main] Version: 0.7.12-r1039
-[main] CMD: bwa aln -n 0 -k 2 data/genome/sample /home/motschow/Studium/Hiwi/hiwiwork/manual/data/3/all.fastq
-[main] Real time: 0.085 sec; CPU: 0.000 sec
+[main] Version: 0.7.13-r1126
+[main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
+[main] Real time: 0.110 sec; CPU: 0.000 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
@@ -897,12 +880,12 @@ Example: Run the previously generated mapper calls.
 @SQ	SN:B4	LN:6000
 @SQ	SN:MT	LN:6000
 @SQ	SN:X	LN:6000
-@PG	ID:bwa	PN:bwa	VN:0.7.12-r1039	CL:bwa samse data/genome/sample data/4/0.sai /home/motschow/Studium/Hiwi/hiwiwork/manual/data/3/all.fastq
-sample_0	4	*	0	0	*	*	0	0	AGAATGAAAACTTGCCATTTG	FFFFFFFFFFFFFFFFFFFFF
-sample_1	4	*	0	0	*	*	0	0	AACCATGGCCCACATAGGCAGGCAT	FFFFFFFFFFFFFFFFFFFFFFFFF
-sample_2	4	*	0	0	*	*	0	0	ATCCTGCGAAGGAGCCCGAG	FFFFFFFFFFFFFFFFFFFF
-sample_3	4	*	0	0	*	*	0	0	TGTTGCTTTTGTTTCCCTAGGCATA	FFFFFFFFFFFFFFFFFFFFFFFFF
-sample_4	4	*	0	0	*	*	0	0	GAGGAGAAAGTAGATAAAAA	FFFFFFFFFFFFFFFFFFFF
+@PG	ID:bwa	PN:bwa	VN:0.7.13-r1126	CL:bwa samse data/genome/volpertinger data/4/0.sai data/3/all.fastq
+volpertinger_0	4	*	0	0	*	*	0	0	TTCCAAAAGATATTAGCCAACCAGAG	FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_1	4	*	0	0	*	*	0	0	TGTATTTGATAACTTATCCC	FFFFFFFFFFFFFFFFFFFF
+volpertinger_2	4	*	0	0	*	*	0	0	TTGAACTCTATCTTCCGGGGTGCA	FFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_3	4	*	0	0	*	*	0	0	GCATGAGGGTTTCTATTTAGA	FFFFFFFFFFFFFFFFFFFFF
+volpertinger_4	4	*	0	0	*	*	0	0	TACTGGCTCGCTGTAGGAACAGG	FFFFFFFFFFFFFFFFFFFFFFF
 ```
 
 
@@ -942,7 +925,7 @@ the most important ones are:
 Take care not to put any spaces in the argument of --sam-fields.
 
 ```{.bash}
-scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
+scripts/sam-extract --sam-fields qname,rname,pos,mapq \
     data/4/1.sam  >  data/5/1.tab
 ```
 ```{.output}
@@ -952,32 +935,32 @@ scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
 head data/5/1.tab | column -t
 ```
 ```{.output}
-qname     rname  pos   mapq
-sample_0  B1     755   0
-sample_1  *      0     0
-sample_2  X      3674  37
-sample_3  *      0     0
-sample_4  B1     3675  23
-sample_5  *      0     0
-sample_6  B2     4974  37
-sample_7  A3     1510  37
-sample_8  *      0     0
+qname           rname  pos   mapq
+volpertinger_0  B1     2143  37
+volpertinger_1  MT     3402  37
+volpertinger_2  A3     1413  37
+volpertinger_3  A3     5689  37
+volpertinger_4  *      0     0
+volpertinger_5  *      0     0
+volpertinger_6  A1     1320  23
+volpertinger_7  *      0     0
+volpertinger_8  X      2381  37
 ```
 
 ```{.bash}
 tail data/5/1.tab | column -t
 ```
 ```{.output}
-retli_15  *  0  0
-retli_16  *  0  0
-retli_17  *  0  0
-retli_18  *  0  0
-retli_19  *  0  0
-retli_20  *  0  0
-retli_21  *  0  0
-retli_22  *  0  0
-retli_23  *  0  0
-retli_24  *  0  0
+retli_15  *   0     0
+retli_16  MT  2791  25
+retli_17  *   0     0
+retli_18  *   0     0
+retli_19  *   0     0
+retli_20  *   0     0
+retli_21  *   0     0
+retli_22  *   0     0
+retli_23  *   0     0
+retli_24  *   0     0
 ```
 
 Bring together true read information from all origin organisms
@@ -985,36 +968,52 @@ Bring together true read information from all origin organisms
 
 This can be done by concatenating the tabular files generated during
 the read sampling process (Section 2). `awk` is used to concatenate
-the files while not repeating the header line of the second file:
+the files while not repeating the header line of the second file.
 
+Prior to this we append a column to the tables which indicates the
+organism of each read. This enables us to group the reads by origin
+organism later.
+
+```{.bash}
+# Add column 'organism' with value 'volpertinger'
+scripts/add_const_column \
+    data/2/volpertinger.coord \
+    organism        \
+    volpertinger    \
+    > data/5/volpertinger_org.coord
+
+# Same for R. etli reads
+scripts/add_const_column \
+    data/2/retli.coord \
+    organism        \
+    retli    \
+    > data/5/retli_org.coord
+```
+```{.output}
+```
+
+This yields files like this:
+```{.bash}
+head -n5 data/5/volpertinger_org.coord | column -t
+```
+```{.output}
+name            record  start  end   organism
+volpertinger_0  B1      2143   2168  volpertinger
+volpertinger_1  MT      3402   3421  volpertinger
+volpertinger_2  A3      1413   1436  volpertinger
+volpertinger_3  A3      5689   5709  volpertinger
+```
+
+Now the tables can be concatenated. Make sure both tables contain the
+same columns in the same order or else you will get invalid data!
 ```{.bash}
 awk '(NR==1 || FNR!=1)' \
-      data/2/sample.tab \
-      data/2/retli.tab  \
-    > data/5/all.tab
+      data/5/volpertinger_org.coord \
+      data/5/retli_org.coord  \
+    > data/5/all.coord
 ```
 ```{.output}
 ```
-
-Alternatively: Do the same and additionally ensure that the header 
-lines of the two files match.
-
-```{.bash}
-awk '(NR==1){
-         header=$0
-     }(FNR==1 && header!=$0){
-         print "Headers dont match!"|"cat >&2"
-         exit 1
-     }(NR==1 || FNR!=1){
-        print
-     }' \
-     data/2/sample.tab \
-     data/2/retli.tab  \
-   > data/5/all.tab
-```
-```{.output}
-```
-
 
 Identify correctly mapped reads
 -------------------------------
@@ -1029,66 +1028,80 @@ Use the `--qthresh` parameter to declare all reads with a mapping
 quality below a certain threshold as not mapped. 
 
 ```{.bash}
-scripts/eval/exactmap.R data/5/all.tab \
-                        data/5/1.tab  \
-                      > data/5/1.crct
+scripts/exactmap   data/5/all.tab \
+                   data/5/1.tab  \
+                   > data/5/1.crct
 
 cat data/5/1.crct | column -t
 ```
 ```{.output}
-read       m.orig  t.orig    mapq  correct
-retli_0    *       retli_tr  0     FALSE
-retli_1    *       retli_tr  0     FALSE
-retli_10   *       retli_tr  0     FALSE
-retli_11   *       retli_tr  0     FALSE
-retli_12   X       retli_tr  25    FALSE
-retli_13   *       retli_tr  0     FALSE
-retli_14   *       retli_tr  0     FALSE
-retli_15   *       retli_tr  0     FALSE
-retli_16   *       retli_tr  0     FALSE
-retli_17   *       retli_tr  0     FALSE
-retli_18   *       retli_tr  0     FALSE
-retli_19   *       retli_tr  0     FALSE
-retli_2    *       retli_tr  0     FALSE
-retli_20   *       retli_tr  0     FALSE
-retli_21   *       retli_tr  0     FALSE
-retli_22   *       retli_tr  0     FALSE
-retli_23   *       retli_tr  0     FALSE
-retli_24   *       retli_tr  0     FALSE
-retli_3    *       retli_tr  0     FALSE
-retli_4    *       retli_tr  0     FALSE
-retli_5    *       retli_tr  0     FALSE
-retli_6    *       retli_tr  0     FALSE
-retli_7    *       retli_tr  0     FALSE
-retli_8    *       retli_tr  0     FALSE
-retli_9    *       retli_tr  0     FALSE
-sample_0   B1      A2        0     FALSE
-sample_1   *       B2        0     FALSE
-sample_10  *       A2        0     FALSE
-sample_11  B4      B4        37    TRUE
-sample_12  A2      A2        37    TRUE
-sample_13  B1      B2        37    FALSE
-sample_14  B3      B3        37    TRUE
-sample_15  B1      B1        37    TRUE
-sample_16  *       B4        0     FALSE
-sample_17  *       X         0     FALSE
-sample_18  MT      MT        37    TRUE
-sample_19  MT      MT        37    TRUE
-sample_2   X       X         37    TRUE
-sample_20  B3      B3        37    TRUE
-sample_21  A1      A1        37    TRUE
-sample_22  *       B4        0     FALSE
-sample_23  B4      B4        37    TRUE
-sample_24  *       B4        0     FALSE
-sample_3   *       B2        0     FALSE
-sample_4   B1      B1        23    TRUE
-sample_5   *       A2        0     FALSE
-sample_6   B2      B2        37    TRUE
-sample_7   A3      A3        37    TRUE
-sample_8   *       MT        0     FALSE
-sample_9   B3      B3        25    TRUE
 ```
 
+***TODO:*** Organism column 
+
+This script can also deal with an additional organism column in the
+input tables. This may be important if multiple of the organisms have
+FASTA records of the same name. A common case of this is multiple
+eukaryotes with similarly named chromosomes. 
+
+Custom determination of correct match
+--------------------------------------
+
+If you want to determine correctly mapped reads by your own means, you
+can merge the two tables, the correct positions of the reads and the
+actual mapping positions of the reads, to one table which you can
+inspect afterwards. There is a tool designed to make merging
+information from two tables as easy as possible. To merge the
+information, both tables need to share at least one column, which is
+described as the *key column*. In this case, the read name is the key
+because it is present in both tables. 
+
+The `merge` tool can also rename columns in the process of merging. We
+will use this functionality to distinguish the true mapping positions
+from `all.tab` from the actual mapping positions from `1.tab` by
+prepending a 't' to the former. 
+
+Here is an example to match the nominal and actual read positions into
+one table. `-a` and `-b` denote the two tables to be merged. The first
+argument after those is the file name, followed by the key column and
+all other columns which shall be merged. If columns shall be renamed,
+there are arguments of the form `oldname=newname`. 
+
+```{.bash}
+scripts/merge -a data/5/all.coord name  record=trecord start=tstart \
+                                      organism=torg\
+              -b data/5/1.tab   qname rname=record   pos=start \
+          > data/5/merge_example.tab
+
+# Show parts of the table
+(head data/5/merge_example.tab; tail data/5/merge_example.tab)| column -t
+
+```
+```{.output}
+name             trecord   tstart  torg          record  start
+retli_0          retli_tr  121502  retli         *       0
+retli_1          retli_tr  133167  retli         *       0
+retli_10         retli_tr  110631  retli         *       0
+retli_11         retli_tr  82809   retli         *       0
+retli_12         retli_tr  66530   retli         *       0
+retli_13         retli_tr  108831  retli         *       0
+retli_14         retli_tr  109927  retli         *       0
+retli_15         retli_tr  82777   retli         *       0
+retli_16         retli_tr  66982   retli         MT      2791
+volpertinger_22  MT        615     volpertinger  MT      615
+volpertinger_23  B3        608     volpertinger  B3      608
+volpertinger_24  B2        4581    volpertinger  *       0
+volpertinger_3   A3        5689    volpertinger  A3      5689
+volpertinger_4   MT        3280    volpertinger  *       0
+volpertinger_5   A3        4936    volpertinger  *       0
+volpertinger_6   A1        1320    volpertinger  A1      1320
+volpertinger_7   A3        4480    volpertinger  *       0
+volpertinger_8   X         2381    volpertinger  X       2381
+volpertinger_9   A1        2751    volpertinger  A1      2751
+```
+
+Grouping of reads
+-----------------
 
 For the next steps, the reads must be grouped by the original organism
 and the organism they were mapped to. This can be done by merging 
@@ -1118,17 +1131,6 @@ awk '(NR==1 || FNR!=1)' \
 cat data/5/all.recids | column -t
 ```
 ```{.output}
-record    organism
-A1        volpertinger
-A2        volpertinger
-A3        volpertinger
-B1        volpertinger
-B2        volpertinger
-B3        volpertinger
-B4        volpertinger
-MT        volpertinger
-X         volpertinger
-retli_tr  retli
 ```
 
 This is because the reads weren't mapped
@@ -1150,57 +1152,6 @@ scripts/eval/merge_organisms.R - \
 cat data/5/1.crct | column -t
 ```
 ```{.output}
-t.orig    m.orig  read       mapq  correct  m.org         t.org
-A1        A1      sample_21  37    TRUE     volpertinger  volpertinger
-A2        A2      sample_12  37    TRUE     volpertinger  volpertinger
-A2        *       sample_5   0     FALSE    *             volpertinger
-A2        B1      sample_0   0     FALSE    volpertinger  volpertinger
-A2        *       sample_10  0     FALSE    *             volpertinger
-A3        A3      sample_7   37    TRUE     volpertinger  volpertinger
-B1        B1      sample_15  37    TRUE     volpertinger  volpertinger
-B1        B1      sample_4   23    TRUE     volpertinger  volpertinger
-B2        *       sample_3   0     FALSE    *             volpertinger
-B2        B1      sample_13  37    FALSE    volpertinger  volpertinger
-B2        *       sample_1   0     FALSE    *             volpertinger
-B2        B2      sample_6   37    TRUE     volpertinger  volpertinger
-B3        B3      sample_20  37    TRUE     volpertinger  volpertinger
-B3        B3      sample_14  37    TRUE     volpertinger  volpertinger
-B3        B3      sample_9   25    TRUE     volpertinger  volpertinger
-B4        *       sample_16  0     FALSE    *             volpertinger
-B4        *       sample_24  0     FALSE    *             volpertinger
-B4        B4      sample_11  37    TRUE     volpertinger  volpertinger
-B4        *       sample_22  0     FALSE    *             volpertinger
-B4        B4      sample_23  37    TRUE     volpertinger  volpertinger
-MT        MT      sample_19  37    TRUE     volpertinger  volpertinger
-MT        MT      sample_18  37    TRUE     volpertinger  volpertinger
-MT        *       sample_8   0     FALSE    *             volpertinger
-retli_tr  *       retli_0    0     FALSE    *             retli
-retli_tr  *       retli_1    0     FALSE    *             retli
-retli_tr  *       retli_10   0     FALSE    *             retli
-retli_tr  *       retli_11   0     FALSE    *             retli
-retli_tr  *       retli_24   0     FALSE    *             retli
-retli_tr  *       retli_13   0     FALSE    *             retli
-retli_tr  *       retli_14   0     FALSE    *             retli
-retli_tr  *       retli_15   0     FALSE    *             retli
-retli_tr  *       retli_16   0     FALSE    *             retli
-retli_tr  *       retli_17   0     FALSE    *             retli
-retli_tr  *       retli_18   0     FALSE    *             retli
-retli_tr  *       retli_19   0     FALSE    *             retli
-retli_tr  *       retli_2    0     FALSE    *             retli
-retli_tr  *       retli_20   0     FALSE    *             retli
-retli_tr  *       retli_21   0     FALSE    *             retli
-retli_tr  *       retli_22   0     FALSE    *             retli
-retli_tr  *       retli_23   0     FALSE    *             retli
-retli_tr  *       retli_6    0     FALSE    *             retli
-retli_tr  *       retli_3    0     FALSE    *             retli
-retli_tr  *       retli_4    0     FALSE    *             retli
-retli_tr  *       retli_5    0     FALSE    *             retli
-retli_tr  *       retli_7    0     FALSE    *             retli
-retli_tr  *       retli_8    0     FALSE    *             retli
-retli_tr  *       retli_9    0     FALSE    *             retli
-retli_tr  X       retli_12   25    FALSE    volpertinger  retli
-X         X       sample_2   37    TRUE     volpertinger  volpertinger
-X         *       sample_17  0     FALSE    *             volpertinger
 ```
 
 As next step, the number of reads are counted which belong to 
@@ -1222,12 +1173,6 @@ scripts/general/pocketR.R '
 cat data/5/1.agg | column -t
 ```
 ```{.output}
-t.org         m.org         correct  count
-retli         *             FALSE    24
-volpertinger  *             FALSE    9
-retli         volpertinger  FALSE    1
-volpertinger  volpertinger  FALSE    2
-volpertinger  volpertinger  TRUE     14
 ```
 
 Another possibility if you're proficient in dplyr:
@@ -1242,12 +1187,6 @@ scripts/general/pocketR.R --pkg dplyr '
 head data/5/1.agg | column -t
 ```
 ```{.output}
-t.org         m.org         correct  count
-retli         *             FALSE    24
-retli         volpertinger  FALSE    1
-volpertinger  *             FALSE    9
-volpertinger  volpertinger  FALSE    2
-volpertinger  volpertinger  TRUE     14
 ```
 
 This format may be used to plot the read fate of a single mapper run
@@ -1289,8 +1228,6 @@ scripts/eval/sensspec.R data/5/1.agg volpertinger \
 column -t data/5/1.parameters
 ```
 ```{.output}
-map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        14        0.56         25          24          0.96         0.76
 ```
 
 
@@ -1392,13 +1329,6 @@ awk '(NR==1||FNR!=1)' data/6/*.performance > data/6/performance
 cat data/6/performance | column -t
 ```
 ```{.output}
-map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        0         0            25          25          1            0.5   0
-25        14        0.56         25          24          0.96         0.76  1
-25        20        0.8          25          5           0.2          0.5   2
-25        0         0            25          25          1            0.5   3
-25        14        0.56         25          24          0.96         0.76  4
-25        21        0.84         25          5           0.2          0.52  5
 ```
 
 Next, the parameter values belonging to the run indices are joined in, 
@@ -1414,13 +1344,6 @@ scripts/general/pocketR.R '
 head data/6/performance | column -t
 ```
 ```{.output}
-runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        0         0            25          25          1            0.5   2   0
-1       25        14        0.56         25          24          0.96         0.76  2   4
-2       25        20        0.8          25          5           0.2          0.5   2   8
-3       25        0         0            25          25          1            0.5   10  0
-4       25        14        0.56         25          24          0.96         0.76  10  4
-5       25        21        0.84         25          5           0.2          0.52  10  8
 ```
 
 The value of one parameter can be plotted against some measure. The
@@ -1479,6 +1402,7 @@ delimited by two > signs. It consists of the following parts:
     E.g. nucleotides: ACCTCTCTACCT...
 
 ~FASTA identifier: -> FASTA record
+
 ~FASTA description: -> FASTA record
 
 ~file offset: This is the
@@ -1495,6 +1419,7 @@ to the first base of the genome. Conversely, if the index were
 the first base of the genome would be referenced with the number 0.
 
 ~0-based: -> i-based index
+
 ~1-based: -> i-based index
 
 ~standard input: Many commands expect input on this stream. Input can

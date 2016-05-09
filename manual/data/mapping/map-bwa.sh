@@ -7,15 +7,16 @@
 # Fail if any needed variable is not set
 set -ue
 
-bwa aln -n $n -k $k        \
-    data/genome/sample     \
-    $fastq                 \
-    > data/4/${runidx}.sai \
-    2> data/4/${runidx}.log &&
+bwa aln -n ${n} -k ${k}      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    > data/4/${runidx}.sai   \
+    2> data/4/${runidx}.log   &&
 
-bwa samse data/genome/sample \
-      data/4/${runidx}.sai   \
-      $fastq                 \
-      > data/4/${runidx}.sam \
-     2>> data/4/${runidx}.log
+bwa samse                      \
+      data/genome/volpertinger \
+      data/4/${runidx}.sai     \
+      data/3/all.fastq         \
+      > data/4/${runidx}.sam   \
+      2>> data/4/${runidx}.log
 
