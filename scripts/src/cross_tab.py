@@ -8,18 +8,17 @@ from itertools import product
 helpText=r"""
 Usage: cross_tab.py [options] FILES...
 
---skip INT  [default: 0] 
-        Skip this number of lines from the top of each 
-        specified file.
-
---head INT  [default: 0] 
-        The specified files contain the specified number 
-        of lines as header; don't print combinations of these but 
-        print them only once at the beginning
-
---sep CHAR  [Default: \t] 
-        A character which separates the contents
-        of the input files in the output columns
+Options:
+    --skip INT  [default: 0] 
+                Skip this number of lines from the top of each 
+                specified file.
+    --head INT  [default: 0] 
+                The specified files contain the specified number 
+                of lines as header; don't print combinations of these but 
+                print them only once at the beginning
+    --sep CHAR  [Default: \t] 
+                A character which separates the contents
+                of the input files in the output columns
 """
 
 

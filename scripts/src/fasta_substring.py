@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 from docopt import docopt
 import sys
@@ -43,6 +44,9 @@ class FastaIndex:
             name = vals[0]
             vals = [(v if i==0 else int(v)) for i,v in enumerate(vals)]
             self.entries[vals[0]] = self.Entry(*vals)
+
+    def getNames(self):
+        return sorted([x for x in self.entries.keys()])
 
 def slice(file, index, record, start, length):
     """Reads a sequence of letters from `file`. record is character: The FASTA

@@ -1,0 +1,11 @@
+# Usage: sh_launch SCRIPT BASEDIR
+#
+# Launch a shell script. SCRIPT is a path relative to BASEDIR
+function sh_launch(){
+    scriptname="$1"
+    basedir="$2"
+    shift 2
+
+    "${basedir}/$scriptname" "$@"
+}
+

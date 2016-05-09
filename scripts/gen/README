@@ -1,0 +1,4 @@
+This directory contains a script to generate launcher scripts.
+Additionally, it contains fragments of launcher files which
+are copied in the generated launchers. 
+

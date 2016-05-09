@@ -4,6 +4,11 @@ import random
 import sys
 from textwrap import dedent
 
+# Don't throw an error if output is piped into a program that doesn't
+# read all of its input, like `head`.
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE, SIG_DFL) 
+
 helpText=dedent("""
     Change one base into another with a probability geometrically dependent 
     on proximity to string beginning or end. The function used to calculate 
@@ -177,4 +182,10 @@ def createMutationChain(filename):
 
 
 
+
+
 if (__name__== "__main__"): main() 
+
+
+# vim:tw=75
+

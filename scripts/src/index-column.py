@@ -12,30 +12,30 @@ standard input is read and the result is written to standard output.
 If --inplace is specified, the given file will be modified.
 
 Options:
+    --colname NAME, -c NAME  [default: index]
+                             Which column name the added column will have
+                             
+    --no-colname             Suppresses the printing of a column name
 
---colname NAME, -c NAME  [default: index]
-                         Which column name the added column will have
+    --inplace FILE, -i FILE  The specified file will be modified in place
+                             (using a temporary file) instead of reading
+                             from standard input and printing to standard 
+                             output
 
---no-colname             Suppresses the printing of a column name
+    --start I                [default: 0] 
+                             first index to be printed.
 
---inplace FILE, -i FILE  The specified file will be modified in place
-                         (using a temporary file) instead of reading
-                         from standard input and printing to standard 
-                         output
+    --sep S                  [default: \\t] Character to split columns
 
---start I                [default: 0] 
-                         first index to be printed.
+    --skip N                 [default: 0] Prints the first N lines as-is
 
---sep S                  [default: \\t] Character to split columns
-
---skip N                 [default: 0] Prints the first N lines as-is
-
---prefix X               Prepend a string to the index
+    --prefix X               Prepend a string to the index
 
 """
 def main(argv):
     # Assign command line arguments to variables
     args=docopt(help, argv[1:])
+
     colname = args["--colname"]
     if args["--no-colname"]: 
         colname = None

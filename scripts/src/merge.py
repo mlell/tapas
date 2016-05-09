@@ -13,8 +13,10 @@ import atexit
 import time 
 import signal
 
+#import pdb
+
 # Set this to true to enable debugging
-debug = True
+debug = False
 
 doc = """
 Usage: merge.py [options] \\
@@ -67,8 +69,6 @@ def main(argv):
     else:
         llfd_b = os.open(args["b"],os.O_RDONLY)
 
-    print([llfd_a,llfd_b],file=sys.stderr)
-
     if llfd_a == sys.stdin.fileno() and llfd_b == sys.stdin.fileno():
         raise ValueError("-a and -b cannot both read from standard in!")
 
@@ -97,25 +97,32 @@ def main(argv):
                 .join(missing_a + missing_b) + ' specified!'+
                 '\n valid A: {}, B: {}'.format(header_a,header_b))
 
-    # If no columns are specified: add first columns as key (by) columns
-    if len(acols) == 0 : acols.append([header_a[0]]*2)
-    if len(bcols) == 0 : bcols.append([header_b[0]]*2)
+   # pdb.set_trace()
+
+    # If no columns are specified: add first columns as key (by) colums
+    # The columns are appended as 2-tuples: the column name of the input
+    # and the desired column name of the output
+    if len(acols) == 0 : acols.append((header_a[0],header_a[0]))
+    if len(bcols) == 0 : bcols.append((header_b[0],header_b[0]))
     
-    # Output all columns if only by-column (and no additional columns)
-    # is specified
-    if len(acols) == 1 : acols.extend(
-            [(col,col) for col in header_a if col != acols[0][0]])
-    if len(bcols) == 1 : bcols.extend(
-            [(col,col) for col in header_b if col != bcols[0][0]])
+    # Add all input columns which are not specified with equal old and new 
+    # column name if --all-a-cols or --all-b-cols, respectively, is set
+    explicit_old_colnames_a = [ oldcn for oldcn,newcn in acols]
+    explicit_old_colnames_b = [ oldcn for oldcn,newcn in bcols]
+    if args["all_a_cols"] : acols.extend(
+        [(col,col) for col in header_a if col not in explicit_old_colnames_a])
+    if args["all_b_cols"] : bcols.extend(
+        [(col,col) for col in header_b if col not in explicit_old_colnames_b])
 
     # Column indices of columns selected for output
     a_cols_i = [header_a.index(x[0]) for x in acols]
     b_cols_i = [header_b.index(x[0]) for x in bcols]
 
-    a_by = acols[0] 
-    b_by = bcols[0]
-    a_by_i = a_cols_i[0]
-    b_by_i = b_cols_i[0]
+    a_by = acols[0] # Key column name of table 1 (2-tuple)
+    b_by = bcols[0] # Key column name of table 2 (2-tuple)
+
+    a_by_i = a_cols_i[0] # Key column index of table 1 (0-based)
+    b_by_i = b_cols_i[0] # Key column index of table 2 (0-based)
 
     # Add pre-/suffixes to all column names from table 1,
     # except key (a_by) column.
@@ -126,22 +133,21 @@ def main(argv):
     a_cols_print = [a_by[1]] + a_cols_print
 
     # Add pre-/suffixes to cols from table 2, except key column (omitted)
-    b_cols_print = [cn_new for cn_old,cn_new in bcols if cn_old != b_by[0]]
+    b_cols_print = [cn_new for cn_old,cn_new in bcols[1:]]
     b_cols_print = [args["prefix_b"] + cn + args["suffix_b"] 
                        for cn in b_cols_print]
-    
     # Add outer join arguments
     joinargs = []
     joinargs.extend(["-1",str(a_by_i+1)])
     joinargs.extend(["-2",str(b_by_i+1)])
     if "a" in args["all"] : joinargs.extend(["-a","1"])
     if "b" in args["all"] : joinargs.extend(["-a","2"])
-    if args["all"] : # Any join
-        # Old versions of join want this, can't take '-o auto'
-        fieldspec=",".join(["1.{}".format(i+1) for i in range(0,len(acols))]+
-                           ["2.{}".format(i+1) for i in range(1,len(bcols))])
-        joinargs.extend(["-e", args["empty"]])
-        joinargs.extend(["-o", fieldspec])
+    #if args["all"] : # Any join
+    # Old versions of join want this, can't take '-o auto'
+    fieldspec=",".join(["1.{}".format(i+1) for i in a_cols_i]+
+                       ["2.{}".format(i+1) for i in b_cols_i[1:]])
+    joinargs.extend(["-e", args["empty"]])
+    joinargs.extend(["-o", fieldspec])
 
     # #namedpipe_a = os.path.join(tmpf.gettempdir(),rnd_string(40))
     # namedpipe_a = os.path.join(rnd_string(40))
@@ -203,18 +209,14 @@ def main(argv):
 
     # Handle SIGPIPE properly, e.g. when piped to head
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-
+    
     # Execute join
     sp.check_call(cmd, close_fds=False,shell=True, executable="/bin/bash")
 
     sys.stdout.flush() 
+    sys.stderr.flush()
 
     return 0
-
-def read_unbuffered_line(stream):
-    out = []
-    while True:
-        char = stream.read(1)
 
 
 def rnd_string(length):
@@ -279,6 +281,8 @@ def parseArguments(argv):
     empty = "NA"
     a_sorted = False
     b_sorted = False
+    all_a_cols = False
+    all_b_cols = False
     all=set()
 
     while argv:
@@ -307,6 +311,8 @@ def parseArguments(argv):
         elif arg == "--all":   all.update(["a","b"])
         elif arg == "--a-sorted": a_sorted = True
         elif arg == "--b-sorted": b_sorted = True
+        elif arg == "--all-a-cols": all_a_cols = True
+        elif arg == "--all-b-cols": all_b_cols = True
 
         else: raise ValueError("Unknown argument {}".format(arg))
 
@@ -314,11 +320,13 @@ def parseArguments(argv):
         raise ValueError("-a and -b must be supplied!")
 
 
-    return {"a":a, "b":b, "acols":acols, "bcols":bcols,
-            "suffix_a":suffix_a, "suffix_b":suffix_b, 
-            "prefix_a":prefix_a, "prefix_b":prefix_b, 
-            "all":all, "empty":empty,
-            "a_sorted":a_sorted, "b_sorted":b_sorted}
+    return {"a":a,                   "b":b, 
+            "acols":acols,           "bcols":bcols,
+            "suffix_a":suffix_a,     "suffix_b":suffix_b, 
+            "prefix_a":prefix_a,     "prefix_b":prefix_b, 
+            "all":all,               "empty":empty,
+            "a_sorted":a_sorted,     "b_sorted":b_sorted,
+            "all_a_cols":all_a_cols, "all_b_cols":all_b_cols}
 
 
 if __name__=="__main__":

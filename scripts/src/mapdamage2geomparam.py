@@ -37,7 +37,7 @@ PYTHON3 = sys.version_info >= (3,0)
 DIST_FIT_R_SCRIPT = os.path.dirname(
                     os.path.realpath(
                         sys.argv[0])  ) \
-                    + "/fit_geom.R"
+                    + "/../fit_geom"
 
 RResult         = namedtuple("RResult"
                             , ['factor', 'geom_prob', 'intercept' ] )
@@ -57,8 +57,8 @@ def main():
     # List of files to process
     mdfiles=args.mdfiles
 
-    print("strand\tfrom\tto\tfactor    \tgeom_prob  \tintercept \
-            \t filename")
+    print("strand\tfrom\tto\tfactor\tgeom_prob\tintercept\t" + 
+            "filename")
     
     for i,f in enumerate(mdfiles):
         if plot_prefix != None:
@@ -127,12 +127,13 @@ def call_distribution_fitting(probabilities, plotFilename=None):
     " Expects a list of probability scores to be forwarded to the R script. \
     Parses the output"
     # Arguments for R script
-    outformat_arg="ofmt={factor} {geomprob} {intercept}"
+    outformat_arg="ofmt={factor},{geomprob},{intercept}"
     data_arg="data=-"
     plot_arg= None if plotFilename == None \
               else "plot="+plotFilename
     # Call R script
     R_call = [DIST_FIT_R_SCRIPT, data_arg , outformat_arg]
+
     if plot_arg != None: R_call.append(plot_arg)
     R_process=sp.Popen(R_call         , stdin=sp.PIPE
                      , stdout=sp.PIPE , stderr=None)
@@ -145,7 +146,7 @@ def call_distribution_fitting(probabilities, plotFilename=None):
    
     if PYTHON3 : r_out = r_out.decode()
     # split output by whitespace
-    r = r_out.split()
+    r = r_out.split(',')
     
     return RResult( factor    = r[0]       
                   , geom_prob = r[1]
