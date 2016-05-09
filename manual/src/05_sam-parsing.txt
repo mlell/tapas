@@ -33,7 +33,7 @@ the most important ones are:
 Take care not to put any spaces in the argument of --sam-fields.
 
 ```{.sh}
-scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
+scripts/sam-extract --sam-fields qname,rname,pos,mapq \
     data/4/1.sam  >  data/5/1.tab
 ```
 
@@ -50,32 +50,41 @@ Bring together true read information from all origin organisms
 
 This can be done by concatenating the tabular files generated during
 the read sampling process (Section 2). `awk` is used to concatenate
-the files while not repeating the header line of the second file:
+the files while not repeating the header line of the second file.
 
+Prior to this we append a column to the tables which indicates the
+organism of each read. This enables us to group the reads by origin
+organism later.
+
+```{.sh}
+# Add column 'organism' with value 'volpertinger'
+scripts/add_const_column \
+    data/2/volpertinger.coord \
+    organism        \
+    volpertinger    \
+    > data/5/volpertinger_org.coord
+
+# Same for R. etli reads
+scripts/add_const_column \
+    data/2/retli.coord \
+    organism        \
+    retli    \
+    > data/5/retli_org.coord
+```
+
+This yields files like this:
+```{.sh}
+head -n5 data/5/volpertinger_org.coord | column -t
+```
+
+Now the tables can be concatenated. Make sure both tables contain the
+same columns in the same order or else you will get invalid data!
 ```{.sh}
 awk '(NR==1 || FNR!=1)' \
-      data/2/sample.tab \
-      data/2/retli.tab  \
-    > data/5/all.tab
+      data/5/volpertinger_org.coord \
+      data/5/retli_org.coord  \
+    > data/5/all.coord
 ```
-
-Alternatively: Do the same and additionally ensure that the header 
-lines of the two files match.
-
-```{.sh}
-awk '(NR==1){
-         header=$0
-     }(FNR==1 && header!=$0){ 
-         print "Headers dont match!"|"cat >&2"
-         exit 1
-     }(NR==1 || FNR!=1){
-        print
-     }' \
-     data/2/sample.tab \
-     data/2/retli.tab  \
-   > data/5/all.tab
-```
-
 
 Identify correctly mapped reads
 -------------------------------
@@ -90,13 +99,56 @@ Use the `--qthresh` parameter to declare all reads with a mapping
 quality below a certain threshold as not mapped. 
 
 ```{.sh}
-scripts/eval/exactmap.R data/5/all.tab \
-                        data/5/1.tab  \
-                      > data/5/1.crct
+scripts/exactmap   data/5/all.tab \
+                   data/5/1.tab  \
+                   > data/5/1.crct
 
 cat data/5/1.crct | column -t
 ```
 
+***TODO:*** Organism column 
+
+This script can also deal with an additional organism column in the
+input tables. This may be important if multiple of the organisms have
+FASTA records of the same name. A common case of this is multiple
+eukaryotes with similarly named chromosomes. 
+
+Custom determination of correct match
+--------------------------------------
+
+If you want to determine correctly mapped reads by your own means, you
+can merge the two tables, the correct positions of the reads and the
+actual mapping positions of the reads, to one table which you can
+inspect afterwards. There is a tool designed to make merging
+information from two tables as easy as possible. To merge the
+information, both tables need to share at least one column, which is
+described as the *key column*. In this case, the read name is the key
+because it is present in both tables. 
+
+The `merge` tool can also rename columns in the process of merging. We
+will use this functionality to distinguish the true mapping positions
+from `all.tab` from the actual mapping positions from `1.tab` by
+prepending a 't' to the former. 
+
+Here is an example to match the nominal and actual read positions into
+one table. `-a` and `-b` denote the two tables to be merged. The first
+argument after those is the file name, followed by the key column and
+all other columns which shall be merged. If columns shall be renamed,
+there are arguments of the form `oldname=newname`. 
+
+```{.sh}
+scripts/merge -a data/5/all.coord name  record=trecord start=tstart \
+                                      organism=torg\
+              -b data/5/1.tab   qname rname=record   pos=start \
+          > data/5/merge_example.tab
+              
+# Show parts of the table
+(head data/5/merge_example.tab; tail data/5/merge_example.tab)| column -t
+
+```
+
+Grouping of reads
+-----------------
 
 For the next steps, the reads must be grouped by the original organism
 and the organism they were mapped to. This can be done by merging 

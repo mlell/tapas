@@ -4,32 +4,12 @@ Genome Preparation
  
 Record index table
 ------------------
-The FASTA record identifiers must be written in a table.
-This enables to assign different chromosomes to the same organism
-later on in the analysis (Section 5)
 
-In this example, the reads stem from our sample organism
-'volpertinger':
-
-First, index the genome using samtools:
+First, index the genome using `samtools`. This is needed for several
+downstream tools:
 ```{.sh}
 samtools faidx data/genome/sample.fasta
 ```
-
-```{.sh}
-scripts/genome/mfasta-idlist.sh data/genome/sample.fasta.fai volpertinger \
-    > data/1/sample.recids
-head data/1/sample.recids
-```
-
-The second parameter is optional, but handy if the target genome is
-comprised of multiple FASTA records. It adds a column called
-"organism" which holds the string of the second argument (in this
-case, "sample"). The resulting table can be used to associate all the
-FASTA records of this FASTA file to the same organism in subsequent
-analysis steps.
-
-
 
 
 

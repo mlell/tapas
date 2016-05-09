@@ -26,6 +26,7 @@ delimited by two > signs. It consists of the following parts:
     E.g. nucleotides: ACCTCTCTACCT...
 
 ~FASTA identifier: -> FASTA record
+
 ~FASTA description: -> FASTA record
 
 ~file offset: This is the
@@ -42,6 +43,7 @@ to the first base of the genome. Conversely, if the index were
 the first base of the genome would be referenced with the number 0.
 
 ~0-based: -> i-based index
+
 ~1-based: -> i-based index
 
 ~standard input: Many commands expect input on this stream. Input can

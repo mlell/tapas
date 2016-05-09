@@ -5,7 +5,7 @@ Mutation probabilities
 ----------------------
 
 The reads are mutated using per base probabilities derived from the
-geometric distribution. The mutation probabiltiy at the read ends is
+geometric distribution. The mutation probability at the read ends is
 the highest. By this, the chemical damage near read ends can be
 modelled. For this, three parameters are important:
 
@@ -63,7 +63,7 @@ The columns have the following meaning:
 
 In the example above, a base is $x$ bp away from the 5' end of
 a read of length l. That means, it is $(l-x)$ bp away from the 3' end
-of the read. The exchage probability depends on the type of the
+of the read. The exchange probability depends on the type of the
 nucleotide and on $x$:
 
 Base at position $x$ is not Cytosine:
@@ -85,48 +85,72 @@ input and mutates strings provided to it on standard input
 accordingly. 
 
 Mutations can be inserted either before a FASTQ file is assembled
-(`synth-fastq.py`, see previous section):
+(`synth-fastq.py`, see previous section), or afterwards. This example
+uses raw nucleotide strings generate during the creation of our
+*volpertinger* samples. This serves well as an example how nucleotide
+strings are processed line by line and mutated. You can see the
+mutations in this example showing up as lower-case letters. 
+
 ```{.sh}
-scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab \
-    < data/2/sample.n
+scripts/multiple_mutate\
+    data/mut-tables/mut.tab \
+    < data/2/volpertinger.nucl \
+    | head
 ```
 
-Alternatively, a already existant FASTQ file can be mutated using the
-`filter-fastq.py` tool in cooperation with `multiple-mutate.py`:
+An already existent FASTQ file can be mutated using the `filter-fastq`
+tool in cooperation with `multiple-mutate`. The tool `filter-fastq`
+enables you to apply transformations to existing fastq files. To this
+effect, `filter-fastq` extracts one part out of a FASTQ file (read
+name, nucleotide string or quality string) and feeds it into another
+sub-program specified between two `@`-signs. The sub-program is required to
+take lines of text as input and return the same number of lines on
+standard output. The output of the sub-program is then placed into the output
+fastq file. By combining `filter-fastq` and `multiple_mutate`, the tool
+which applies mutations to strings of nucleotides, a FASTQ file can be
+mutated:
 
 ```{.sh}
-scripts/general/filter-fastq.py --nucleotide \
-  @ scripts/induce-errors/multiple_mutate.py data/mut-tables/mut.tab @ \
-  < data/2/sample.fastq > data/3/sample_mut.fastq
+scripts/filter-fastq --nucleotide \
+  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  < data/2/volpertinger.fastq \
+  > data/3/volpertinger_mut.fastq
+```
+Note how the nucleotide strings of the output FASTQ file now carry
+mutations (lower-case letters):
 
-head data/3/sample_mut.fastq
+```{.sh}
+head data/3/volpertinger_mut.fastq
 ```
 
 The `filter-fastq.py` script enables you to apply an arbitrary script
-on just one part of a FASTQ file (ID line, nucleotide line, quality
-line). The used script must accept the respective part on standard
-input and prints the modified version on standard output. The modified
-FASTQ file is assembled by `filter-fastq.py` from the output of its
-children scripts and printed on standard output. 
+or program on just one part of a FASTQ file (ID line, nucleotide line,
+quality line). The used script must accept the respective part on
+standard input and print the modified version on standard output. The
+modified FASTQ file is assembled by `filter-fastq.py` from the output
+of its children scripts and printed on standard output. 
 
-On the `filter-fastq.py` call, the @ sign serves as a sentinel character,
-which determines start and end of the child scripts' command line. It
-can be an arbitrary character, as long as it doesn't occur inside the
-child scripts' command line.
+On the `filter-fastq.py` call, the @ sign serves as a sentinel
+character, which determines start and end of the sub-program's
+command line. It can also be any arbitrary other character, as long as
+it doesn't occur inside the child script's command line but only at
+the beginning and the end.
 
 
 Combining endogenous and non-endogenous reads
 ---------------------------------------------
 
-In this example, the endogenous reads undergo simulated mutation
-and damage prior to mapping, while the contaminant reads do not.
+In this example, the endogenous reads from *volptertinger* undergo 
+simulated mutation and damage prior to mapping, while the contaminant
+reads from *R. etli* do not.
 
-Therefore, now is the time to combine the mutated sample reads
+Therefore only now, after applying mutations to our *volpertinger*
+reads, is the time to combine the mutated sample reads
 and the contaminant reads generated in the last section to one
 file. For this purpose, the UNIX tool `cat` is used:
 
 ```{.sh}
-cat data/3/sample_mut.fastq data/2/retli.fastq \
+cat data/3/volpertinger_mut.fastq data/2/retli.fastq \
     > data/3/all.fastq
 ```
 
@@ -146,7 +170,7 @@ operator to write this output into a file suitable for
 `multiple_mutate.py`.
 
 ```{.sh}
-scripts/distribution-parametrization/mapdamage2geomparam.py \
+scripts/mapdamage2geomparam \
     --fit-plots data/3/fit_ \
     data/mapdamage/*.txt | \
     cut -f1-6 | \
@@ -161,27 +185,39 @@ fit_000_GS136_3pGtoA_freq.txt.pdf
 Generating multiple damage patterns using a parameter table
 -----------------------------------------------------------
 
+Sometimes, multiple damage patterns need to be compared. There is a
+possibility to generate the `multiple_mutate` input files from one table
+which lists all different values of the different mutation parameters. 
+
+This approach will be seen again later, where there is a possibility
+to generate many short read mapper calls from exactly the same kind of
+parameter table. You can therefore generate appropriate input files
+as well as appropriate short read mapper calls out of only one table
+which lists all the parameters.
+
 The `fill_template.py` script expects a table, where each row is used
 to fill a prespecified template with values. 
 
 For example, if a template is written which looks like this:
 
 ```{.sh}
-column -t data/mut-tmpl/mut-tmpl
+cp data/mut-tmpl/mut-tmpl data/3
+column -t data/3/mut-tmpl
 ```
 
 And a table is created which looks like this:
 
 ```{.sh}
-column -t data/mut-tmpl/tab
+cp data/mut-tmpl/tab data/3/mut-tab
+column -t data/3/mut-tab
 ```
 
 several files can be generated with 
 
 ```{.sh}
-scripts/general/fill_template.py \
-    data/mut-tmpl/mut-tmpl \
-    < data/mut-tmpl/tab
+scripts/fill_template \
+    data/3/mut-tmpl \
+    < data/3/mut-tab
 ```
 
 Use the `--output` switch of this script to write each file in a
@@ -189,24 +225,31 @@ separate file. The argument of `--output` can (and should!) contain
 column names of the table, enclosed in braces {...}. This creates a
 separate filename per input row. 
 
-For example, the mentioned-above table can be prepended with an index
+We will now write each of the tables shown above to its own file. We
+want to name the files using a counting number, but our input table
+doesn't yet contain a column with that counter. Therefore we must
+first add one.
+
+The mentioned-above table can be prepended with an index
 column:
 
 ```{.sh}
-scripts/general/index-column.py <data/mut-tmpl/tab >data/3/tab-i
+scripts/index-column --inplace data/3/mut-tab
 
-head data/3/tab-i | column -t
+head data/3/mut-tab | column -t
 ```
 
 Now, each output of `fill_template.py` can be written to its own 
-output file:
+output file, using the information from the newly-generated `index`
+column:
 
 ```{.sh}
-scripts/general/fill_template.py \
+scripts/fill_template \
     --output "data/3/{index}_filled" \
-    data/mut-tmpl/mut-tmpl \
-    < data/3/tab-i
+    data/3/mut-tmpl \
+    < data/3/mut-tab
 
+# Show all the generated files
 for f in data/3/*_filled; do
     echo " === $f === "
     column -t $f

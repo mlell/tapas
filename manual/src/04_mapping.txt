@@ -27,31 +27,35 @@ column -t data/mapping/n.par
 
 To generate all combinations of parameters, two scripts are used:
 
-  * `scripts/general/cross_tab.py` expects multiple files and outputs all
+  * `scripts/cross_tab` expects multiple files and outputs all
     possible combinations of their lines. 
 
-  * `scripts/general/index-column.py` This script prepends a counting number 
+  * `scripts/index-column` This script prepends a counting number 
     to each input line. It can be used to generate index columns for text 
     tables.
 
 Generate all possible combinations of parameters, retaining 1 header
 line:
+
 ```{.sh}
-scripts/general/cross_tab.py --head 1 data/mapping/*.par > data/4/partab
+scripts/cross_tab --head 1 data/mapping/*.par > data/4/partab
 head data/4/partab | column -t
 ```
 
 Add an index column called runidx:
 ```{.sh}
-scripts/general/index-column.py --colname runidx --inplace data/4/partab
+scripts/index-column --colname runidx --inplace data/4/partab
 head data/4/partab | column -t
 ```
 
 Read now the script `data/mapping/map-bwa.sh` and see how the variables
 used there correspond to the column names of partab. The script is
-shown in the next code block. There is an additional
-variable there, `$fastq`. This variable needs to be set and exported before
-executing the calls, which will be done in the next section.
+shown in the next code block. 
+
+This is a script which can be called using different parameter
+combinations: It calls the mapper `bwa` and forwards the values of the
+variables set via `data/4/partab` as command line arguments to the
+mapper. 
 
 ```{.bash}
 #!/usr/bin/bash
@@ -63,17 +67,18 @@ executing the calls, which will be done in the next section.
 # Fail if any needed variable is not set
 set -ue
 
-bwa aln -n $n -k $k        \
-    data/genome/sample     \
-    $fastq                 \
-    > data/4/${runidx}.sai \
-    2> data/4/${runidx}.log &&
+bwa aln -n ${n} -k ${k}      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    > data/4/${runidx}.sai   \
+    2> data/4/${runidx}.log   &&
 
-bwa samse data/genome/sample \
-      data/4/${runidx}.sai   \
-      $fastq                 \
-      > data/4/${runidx}.sam \
-     2>> data/4/${runidx}.log
+bwa samse                      \
+      data/genome/volpertinger \
+      data/4/${runidx}.sai     \
+      data/3/all.fastq         \
+      > data/4/${runidx}.sam   \
+      2>> data/4/${runidx}.log
 
 ```
 
@@ -81,10 +86,10 @@ Below the calls are generated.
 
 ```{.sh}
 # Convert the table into calls that can be executed in the next section
-scripts/general/table2calls.py  data/4/partab \
-                                data/mapping/map-bwa.sh \
-                              > data/4/calls
-head data/4/calls
+scripts/table2calls  data/4/partab \
+                    data/mapping/map-bwa.sh \
+                  > data/4/calls
+cat data/4/calls
 ```
 
 Executing multiple mapping runs in parallel
@@ -92,33 +97,26 @@ Executing multiple mapping runs in parallel
 
 For this task, many programs can be used, from simple shell background
 spawning using & (in bash) to job managers orchestrating a big network
-of worker machines. In this package, a simple programm is implemented
+of worker machines. In this package, a simple program is implemented
 which executes a user-definable number of jobs in parallel and
 waits with spawning new ones until another of its already started jobs
 finishes.
 
-Note that it is possible to use user-defined shell functions or
-variables, if they are made available using the `export VARIABLE` or
-`export -f FUNCTION` bash commands (replace UPPERCASE letters by 
-actual name). Refer to the manual of your shell if you're using a 
-different shell than bash.
+Note that some mappers can use more than one processor core
+themselves. Therefore if you spawn multiple mapper processes where
+each mapper process utilizes multiple cores, the total number of
+utilized cores is the number of cores used per mapper multiplied with
+the number of mapper processes launched in parallel.
 
-Note as well that more CPU cores than started parallel processes are
-needed if the mappers run on multiple cores themselves. Whether to
-exploit parallelism implemented in the mappers or to use
-`mcall.py` is up to you.
-
-Invoke `scripts/general/mcall.py --help` to get more information about
+Invoke `scripts/mcall --help` to get more information about
 this tool.
 
 Example: Run the previously generated mapper calls. 
 
 ```{.sh}
-    # Export variable for use in mcall.py
-    export fastq="$(pwd)/data/3/all.fastq"
     # Execute calls, at 2 cores
-    scripts/general/mcall.py -c data/4/calls -t 2 \
-                             --status
+    scripts/mcall -c data/4/calls -t 2 \
+                  --status
     # Standard error was piped to log files, 
     # Standard output was piped to sam files, as specified in the
     # `tmpl` file.

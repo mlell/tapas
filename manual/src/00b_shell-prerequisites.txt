@@ -1,0 +1,14 @@
+Dependencies of the scripts
+===========================
+
+The scripts consisting this software depend on 
+
+  * A Python 3 installation
+  * R
+
+Furthermore, the scripts depend on several packages which are
+included.
+
+
+
+vim:tw=70
