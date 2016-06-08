@@ -19,8 +19,11 @@ gen-tools/pipeweave.py "bash --norc" < manual.merged >manual.md
 sed 's/^```{.sh}/```{.bash}/' manual.md > manual.tmp && 
 mv manual{.tmp,.md}
 
+echo Pandoc...
+
 pandoc --toc --mathml -s \
+       -V toctitle:"Table of contents" \
        --template="pandoc.html.template" \
        --highlight-style=pygments \
-       -V toctitle:"Table of Contents" \
+       -f markdown+simple_tables \
        --css manual.css -i manual.md -o manual.html

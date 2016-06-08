@@ -1,7 +1,7 @@
 body{
-    max-width:50em;
-    font-family: Georgia, sans-serif;
-    font-size: 15px;
+    max-width:40em;
+    font-family: Helvetica, sans-serif;
+    font-size: 16px;
 }
 
 p{
@@ -16,9 +16,16 @@ pre{
     font-size:90%;
     overflow:auto;
     max-height:500px;
+    margin:0.2em 0;
+}
+pre.output, body>pre{
+    border: 1px solid #EEE;
 }
 .sourceCode{
     background:#F9F9E4;
+}
+div.sourceCode{
+    border: 1px solid #E9E9D4;
 }
 
 h1,h2,h3{
@@ -34,11 +41,20 @@ h1 {
     text-align: center;
 }
 
-code {
-    background: #F0F0F0;
+
+p > code {
+    background: #FAFAFA;
+    border: 1px solid #F0F0F0;
+    padding: 1px 5px;
 }
-pre > code{
-    background: none !important;
+
+thead{
+    background: #FAFAFA;
+    padding: 5px;
+}
+td{
+    border-bottom: 1px solid #EEE;
+    padding: 5px 10px;
 }
 
 /* Table of contents 
@@ -51,11 +67,14 @@ pre > code{
     background: white;
     box-shadow: 0px 0px 1em #777;
     border: 1px solid #CCC;
+    max-height:90vh;
+    overflow:auto;
+    padding: 5px 10px;
 }
 
 
 #TOC:hover{
-    padding:5px 0px 20px 0px;
+    padding:5px 20px ;
 }
 
 #TOC:hover > ul{
@@ -89,9 +108,6 @@ pre > code{
     padding: 2px;
     margin: 4px 0px;
 }
-#TOC > ul > li:hover{
-    background: #FCFCFC;
-}
 #TOC > ul > li > a{
     color:black;
     font-weight:bold;
@@ -103,12 +119,12 @@ pre > code{
 }
 
 #TOC > ul > li > ul > li{
-    display: inline;
+    /*display: inline;*/
     line-height:130%;
 }
 #TOC > ul > li > ul > li > a{
-    background:#F9F9F9;
-    border: 1px solid #F3F3F3;
+    /*background:#F9F9F9;*/
+    /*border: 1px solid #F3F3F3;*/
     margin: 0px 5px;
 }
 

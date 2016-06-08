@@ -33,7 +33,7 @@ the most important ones are:
 Take care not to put any spaces in the argument of --sam-fields.
 
 ```{.sh}
-scripts/sam-extract --sam-fields qname,rname,pos,mapq \
+scripts/sam_extract --sam-fields qname,rname,pos,mapq \
     data/4/1.sam  >  data/5/1.tab
 ```
 
@@ -45,157 +45,124 @@ head data/5/1.tab | column -t
 tail data/5/1.tab | column -t
 ```
 
-Bring together true read information from all origin organisms
---------------------------------------------------------------
+Gather all information needed to determine correct mapping
+----------------------------------------------------------
 
-This can be done by concatenating the tabular files generated during
-the read sampling process (Section 2). `awk` is used to concatenate
-the files while not repeating the header line of the second file.
+The script `add_mapped_organisms` adds two columns to the result
+above: The column `true_organism` lists the organism a read stems
+from. This is an important information if the FASTA record names of
+several species used in the analysis overlap. This is sometimes the
+case when multiple eukaryotes are used. The second column,
+`mapped_organism`, infers the organism a read has been assigned to by
+the mapper. This is done by looking up the FASTA record name, which
+the read was mapped to, in all FASTA record names of all species which
+where used as reference genomes by the mapper. This FASTA record names
+must be unique among all organisms used as mapping reference.
 
-Prior to this we append a column to the tables which indicates the
-organism of each read. This enables us to group the reads by origin
-organism later.
+In this example, the organism `volpertinger` provides the endogenous
+reads as all reads were mapped only to the `volpertinger` genome. The
+`retli` reads are therefore exogenous reads.
 
-```{.sh}
-# Add column 'organism' with value 'volpertinger'
-scripts/add_const_column \
-    data/2/volpertinger.coord \
-    organism        \
-    volpertinger    \
-    > data/5/volpertinger_org.coord
+To assign the correct organism names to the reads, the script must be provided
+with
 
-# Same for R. etli reads
-scripts/add_const_column \
-    data/2/retli.coord \
-    organism        \
-    retli    \
-    > data/5/retli_org.coord
-```
+ * The organism names
+ * The FASTA index of the organism's genomes
+ * The read names derived from the organism
+ * Whether the reads are endogenous or exogenous
+ * The table with the mapping information from the previous section
+   which shall be augmented
 
-This yields files like this:
-```{.sh}
-head -n5 data/5/volpertinger_org.coord | column -t
-```
-
-Now the tables can be concatenated. Make sure both tables contain the
-same columns in the same order or else you will get invalid data!
-```{.sh}
-awk '(NR==1 || FNR!=1)' \
-      data/5/volpertinger_org.coord \
-      data/5/retli_org.coord  \
-    > data/5/all.coord
-```
-
-Identify correctly mapped reads
--------------------------------
-
-One possibility is the script used below, `exactmap.R`
-
-This script relies on the input table columns having specific names. 
-For details see the help of the script by calling 
-`scripts/eval/exactmap.R -h`.
-
-Use the `--qthresh` parameter to declare all reads with a mapping
-quality below a certain threshold as not mapped. 
+The call is shown below. The script `write_later` at the end of the
+pipe is to prevent `merge` from overwriting its own input file too
+soon, as the output is meant to replace the input file.
 
 ```{.sh}
-scripts/exactmap   data/5/all.tab \
-                   data/5/1.tab  \
-                   > data/5/1.crct
+scripts/add_mapped_organisms \
+    --endogenous volpertinger \
+                 data/genome/volpertinger.fasta.fai \
+                 data/2/volpertinger.coord \
+    --exogenous  retli \
+                 data/retli/retli.fasta.fai \
+                 data/2/retli.coord \
+    data/5/1.tab \
+    | scripts/write_later data/5/1.tab
 
-cat data/5/1.crct | column -t
+head data/5/1.tab | column -t
 ```
 
-***TODO:*** Organism column 
-
-This script can also deal with an additional organism column in the
-input tables. This may be important if multiple of the organisms have
-FASTA records of the same name. A common case of this is multiple
-eukaryotes with similarly named chromosomes. 
-
-Custom determination of correct match
---------------------------------------
-
-If you want to determine correctly mapped reads by your own means, you
-can merge the two tables, the correct positions of the reads and the
-actual mapping positions of the reads, to one table which you can
-inspect afterwards. There is a tool designed to make merging
-information from two tables as easy as possible. To merge the
-information, both tables need to share at least one column, which is
-described as the *key column*. In this case, the read name is the key
-because it is present in both tables. 
-
-The `merge` tool can also rename columns in the process of merging. We
-will use this functionality to distinguish the true mapping positions
-from `all.tab` from the actual mapping positions from `1.tab` by
-prepending a 't' to the former. 
-
-Here is an example to match the nominal and actual read positions into
-one table. `-a` and `-b` denote the two tables to be merged. The first
-argument after those is the file name, followed by the key column and
-all other columns which shall be merged. If columns shall be renamed,
-there are arguments of the form `oldname=newname`. 
+To determine whether the reads were mapped correctly, two more pieces
+of information are needed besides the true organism: The true FASTA
+record (=chromosome) and the true position. These can be looked up in
+the files generated during the read sampling process. In this example,
+they were named `volpertinger.coord' and `retli.coord`. Because
+information for reads from both origins must be looked up, these two
+files must first be concatenated, but while printing the header line
+only once:
 
 ```{.sh}
-scripts/merge -a data/5/all.coord name  record=trecord start=tstart \
-                                      organism=torg\
-              -b data/5/1.tab   qname rname=record   pos=start \
-          > data/5/merge_example.tab
-              
-# Show parts of the table
-(head data/5/merge_example.tab; tail data/5/merge_example.tab)| column -t
-
+scripts/cat_tables   data/2/volpertinger.coord \
+                     data/2/retli.coord \
+                   > data/5/all.coord
+head data/5/all.coord | column -t
 ```
+
+As can be seen in the output above, the needed information is in the
+columns named `record` and `start`. The correct values are found by
+comparing the `qname` column of `data/5/1.tab` with the `name` 
+column of the freshly-generated `data/5/all.tab`. Additionally we
+want to rename the columns holding the true chromosome and position
+information to make it clear which column holds which information.
+
+This can be done in one go using the `merge` tool, whose invokation is
+written below. The used parameters are explained in the following.
+
+We want to make sure no reads get lost by setting the
+`--all-a` option. If a read name cannot be found in `all.coord`, the
+tool will print `NA` at the respective position (this should not
+happen here). `--all-a-cols` indicates that we want to work on with
+all columns of `1.tab`. The input file `1.tab` is also the output file
+here, therefore the tool `write_later` is used.
+
+```{.sh}
+scripts/merge -a data/5/1.tab qname \
+              -b data/5/all.coord name record=true_record start=true_pos \
+              --all-a-cols \
+              --all-a \
+              | scripts/write_later data/5/1.tab
+
+head data/5/1.tab | column -t
+```
+
+Now all the information is present to determine whether a read has
+been mapped correctly. The last step is writing in a new column
+whether a read was mapped correctly. This can be archieved using any
+means you can imagine, for this example we will use R. The `pocketR`
+tool is a thin wrapper which handles reading and writing of data for
+us. The input data will be available as a `data.frame` called
+`input`, everything written insides the parentheses of the `return(.)`
+statement will be printed. 
+
+The following command adds a new column to the input data which
+indicates whether a read was mapped correctly:
+
+```{.sh}
+scripts/pocketR '
+    within(input, { 
+        correct =    
+            pos == true_pos  &
+            rname == true_record &
+            mapped_organism == true_organism })
+'  data/5/1.tab \
+| scripts/write_later data/5/1.tab
+
+ head data/5/1.tab | column -t
+```
+ 
+
 
 Grouping of reads
 -----------------
-
-For the next steps, the reads must be grouped by the original organism
-and the organism they were mapped to. This can be done by merging 
-the table `idlist` from Section 1 two times:
-
-The last two lines of the first command in the following example serve 
-for replacing `data/5/5.crct` using a temporary file.
-
-The first argument of `merge_organisms.R` may be a hypen (-) in which case
-the first table is read from standard input. This is handy for merging
-multiple information.
-
-Note that the information about the true origin organism of the
-*R. etli* contaminant reads needs to be merged into 
-the information about the organism of the sample organisms'
-chromosomes. Speaking in files, `data/1/sample.recids` must be
-concatenated with `data/2/retli.recids`
-
-This is done by:
-
-```{.sh}
-awk '(NR==1 || FNR!=1)' \
-    data/1/sample.recids \
-    data/2/retli.recids \
-    > data/5/all.recids
-
-cat data/5/all.recids | column -t
-```
-
-This is because the reads weren't mapped
-against the *R. etli* reference genome, therefore the *R. etli*
-chromosome can not appear as a `rname` value of the SAM file.
-
-```{.sh}
-scripts/eval/merge_organisms.R data/5/1.crct \
-                               m.orig \
-                               data/5/all.recids \
-                               organism=m.org  |  \
-scripts/eval/merge_organisms.R - \
-                               t.orig \
-                               data/5/all.recids \
-                               organism=t.org  \
-                            > data/5/1.crct.tmp &&
-                            mv data/5/1.crct{.tmp,}
-
-cat data/5/1.crct | column -t
-```
 
 As next step, the number of reads are counted which belong to 
 certain categories. Here, the categories are:
@@ -203,38 +170,37 @@ certain categories. Here, the categories are:
   * Origin organism
   * Organism a read was mapped to
 
-the `cbind` function is needed in order to name the column containing 
-the read count
+Again, the R language can be used to express our wishes concisely:
+Group the reads by all combinations of:
+
+ * `true_organism`
+ * `mapped_organism`
+ * correctly mapped
+
+... and count the reads belonging to each category:
+
+the `cbind` function is needed in order to rename the column containing 
+the read count. `qname` can be substituted here by any valid input
+column name, as its only used for counting (each column is equal in
+length). 
 
 ```{.sh}
-scripts/general/pocketR.R '
-    aggregate(cbind(count=read) ~ t.org+m.org+correct, 
+scripts/pocketR '
+    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
         FUN=length, data=input)
-    ' \
-    data/5/1.crct > data/5/1.agg
+' data/5/1.tab \
+> data/5/1.agg
 
 cat data/5/1.agg | column -t
-```
-
-Another possibility if you're proficient in dplyr:
-
-```{.sh}
-scripts/general/pocketR.R --pkg dplyr '
-    group_by(input, t.org, m.org, correct) %>%
-    summarize(count=n())
-    ' \
-    data/5/1.crct > data/5/1.agg
-
-head data/5/1.agg | column -t
 ```
 
 This format may be used to plot the read fate of a single mapper run
 and to derive the measures sensitivity and specificity:
 
 ```{.sh}
-scripts/eval/plot-read-fate.R t.org        m.org  \
-                              correct      count \
-                              data/5/1.pdf data/5/1.agg
+scripts/plot_read_fate    true_organism mapped_organism \
+                          correct       count \
+                          data/5/1.pdf  data/5/1.agg
 ```
 
 <a href="data/5/1.pdf">Click here</a> to see the plot.
@@ -247,19 +213,23 @@ Sensitivity and specificity
   * **Specificity** (precision) shows how many reads have been
     correctly identified as non-endogenous and were therefore not
     mapped.
+  * **Balanced control rate*** (BCR) is the mean of sensitivity and
+    specificity
 
 If non-endogenous reads were included in the reads, like we did by
 including the *R. etli* reads, both measures can be calculated.
 
 The following script needs the same kind of input as the
-`plot-read-fate.R` script. Additionally, a list of organisms must be
+`plot-read-fate` script. Additionally, a list of organisms must be
 specified, whose genomes the mapper used as a reference. 
 
 If you specify multiple organisms, separate them by commas and don't
 include any spaces.
 
 ```{.sh}
-scripts/eval/sensspec.R data/5/1.agg volpertinger \
+scripts/sensspec --c-morg mapped_organism \
+                 --c-torg true_organism \
+                 data/5/1.agg volpertinger \
     > data/5/1.parameters
 
 column -t data/5/1.parameters
@@ -285,48 +255,61 @@ Browse the <a href="data/5">directory `data/5`</a> to see the results.
 
 ```{.sh}
 for sam in data/4/*.sam; do
-    # Generate output prefix from input name: `4.sam` -> `4`
+    # Generate output prefix p from input name: `4.sam` -> `4`
     bn=$(basename $sam)
-    opref=${bn%.sam}
+    p=${bn%.sam}
 
     # Extract SAM fields
-    scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
-        ${sam}  >  data/5/${opref}.tab
+    scripts/sam_extract --sam-fields qname,rname,pos,mapq \
+        data/4/${p}.sam  >  data/5/${p}.tab
 
     # Mark correctly/incorrectly mapped reads
-    scripts/eval/exactmap.R data/5/all.tab \
-                            data/5/${opref}.tab  \
-                          > data/5/${opref}.crct
+    scripts/add_mapped_organisms \
+        --endogenous volpertinger \
+                     data/genome/volpertinger.fasta.fai \
+                     data/2/volpertinger.coord \
+        --exogenous  retli \
+                     data/retli/retli.fasta.fai \
+                     data/2/retli.coord \
+        data/5/${p}.tab \
+        | scripts/write_later data/5/${p}.tab
 
-    # Get organisms for chromosome names
-    scripts/eval/merge_organisms.R data/5/${opref}.crct \
-                                   m.orig \
-                                   data/5/all.recids \
-                                   organism=m.org  |  \
-    scripts/eval/merge_organisms.R - \
-                                   t.orig \
-                                   data/5/all.recids \
-                                   organism=t.org  \
-                                > data/5/${opref}.crct.tmp &&
-                                mv data/5/${opref}.crct{.tmp,}
-    
+    # Determine true origin information for each read
+    scripts/merge -a data/5/${p}.tab qname \
+                  -b data/5/all.coord name record=true_record start=true_pos \
+                  --all-a-cols \
+                  --all-a \
+                  | scripts/write_later data/5/${p}.tab
+
+    # Determine whether each read was correctly mapped
+    scripts/pocketR '
+        within(input, { 
+            correct =    
+                pos == true_pos  &
+                rname == true_record &
+                mapped_organism == true_organism })
+    '  data/5/${p}.tab \
+    | scripts/write_later data/5/${p}.tab
+
     # Count reads per origin/target organism and mapping status
-    scripts/general/pocketR.R '
-        aggregate(cbind(count=read) ~ t.org+m.org+correct, 
-            FUN=length, data=input)
-        ' \
-        data/5/${opref}.crct > data/5/${opref}.agg
+    scripts/pocketR '
+        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
+            FUN=length, data=input) ' \
+    data/5/${p}.tab \
+    > data/5/${p}.agg
 
     # Plot mapping targets per origin organism 
-    scripts/eval/plot-read-fate.R t.org        m.org  \
-                                  correct      count \
-                                  data/5/${opref}.pdf data/5/${opref}.agg
+    scripts/plot_read_fate    true_organism    mapped_organism \
+                              correct          count \
+                              data/5/${p}.pdf  data/5/${p}.agg
 
     # Calculate sensitivity, specificity and balanced accuracy
-    scripts/eval/sensspec.R data/5/${opref}.agg volpertinger \
-        > data/5/${opref}.performance
+    scripts/sensspec --c-morg mapped_organism \
+                     --c-torg true_organism \
+                     data/5/${p}.agg volpertinger \
+        > data/5/${p}.performance
 
-    echo "$sam done. -> Generated data/5/${opref}.{tab,agg,crct,pdf,performance}"
+    echo "$sam done. -> Generated data/5/${p}.{tab,agg,pdf,performance}"
 
 done
 ```

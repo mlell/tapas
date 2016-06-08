@@ -8,15 +8,24 @@ influence of individual parameters can be assessed.
 
 First step is to combine the output measures of all runs:
 
+To this effect, to each of the `.performance`-files (contain
+sensitivity, specificity, bcr) generated in the last section, the run
+number is added as a separate column, then the `.performance`-files of
+all runs are concatenated to one table.  Because the run number was
+added before, the origin of all values is still clear.
+
 ```{.sh}
+# Add the run number to each .performance file
 for f in data/5/*.performance; do
     i=$(basename ${f%.performance})
 
-    scripts/general/add_const_column.sh $f runidx $i \
-        > data/6/${i}.performance
+    scripts/add_const_column "$f" runidx "$i" \
+        > "data/6/${i}.performance"
 done
 
-awk '(NR==1||FNR!=1)' data/6/*.performance > data/6/performance
+# Concatenate all tables, but print the header line only once.
+scripts/cat_tables data/6/*.performance \
+                 > data/6/performance
 
 cat data/6/performance | column -t
 ```
@@ -25,11 +34,10 @@ Next, the parameter values belonging to the run indices are joined in,
 appending the parameter columns to `data/6/parameters` itself.
 
 ```{.sh}
-scripts/general/pocketR.R '
-    merge(inputs[[1]], inputs[[2]], by="runidx", all.x=TRUE)
-    ' \
-    data/6/performance data/4/partab > data/6/performance.tmp &&
-    mv data/6/performance{.tmp,}
+scripts/merge -a data/6/performance runidx \
+              -b data/4/partab      runidx \
+              --all-a-cols --all-b-cols --all-a \
+           | scripts/write_later data/6/performance
 
 head data/6/performance | column -t
 ```
@@ -44,11 +52,11 @@ aggregated coarsely to demonstrate the results.
 
 ```{.sh}
 # Plot n versus BCR
-scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance n bcr \
+scripts/plot_parameter_effects --signif 1 data/6/performance n bcr \
     data/6/n.pdf
 
 # Plot k versus BCR
-scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance k bcr \
+scripts/plot_parameter_effects --signif 1 data/6/performance k bcr \
     data/6/k.pdf
 ```
 

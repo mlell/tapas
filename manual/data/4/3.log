@@ -10,4 +10,4 @@
 [bwa_aln_core] 50 sequences have been processed.
 [main] Version: 0.7.13-r1126
 [main] CMD: bwa samse data/genome/volpertinger data/4/3.sai data/3/all.fastq
-[main] Real time: 0.054 sec; CPU: 0.000 sec
+[main] Real time: 0.043 sec; CPU: 0.000 sec

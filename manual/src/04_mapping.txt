@@ -30,7 +30,7 @@ To generate all combinations of parameters, two scripts are used:
   * `scripts/cross_tab` expects multiple files and outputs all
     possible combinations of their lines. 
 
-  * `scripts/index-column` This script prepends a counting number 
+  * `scripts/index_column` This script prepends a counting number 
     to each input line. It can be used to generate index columns for text 
     tables.
 
@@ -44,7 +44,7 @@ head data/4/partab | column -t
 
 Add an index column called runidx:
 ```{.sh}
-scripts/index-column --colname runidx --inplace data/4/partab
+scripts/index_column --colname runidx --inplace data/4/partab
 head data/4/partab | column -t
 ```
 
@@ -58,7 +58,7 @@ variables set via `data/4/partab` as command line arguments to the
 mapper. 
 
 ```{.bash}
-#!/usr/bin/bash
+#!/bin/bash
 
 ## This script performs a mapping using BWA.
 ## It requires the variables k, n, runidx and fastq be set 

@@ -8,12 +8,45 @@ The scripts consisting this software depend on
   * A Python 3 installation
   * R
 
-Furthermore, the scripts depend on several packages which are
-included.
+Furthermore, the scripts depend on several packages for R and Python.
+
+To check whether all dependencies are met, execute the following
+command. It is included in the `scripts/` folder.
+
+```
+scripts/setup_check_dependencies
+```
+
+Check the output of this script to find package names which are not
+installed or can't be loaded because of eventual errors.
+
+Then install these packages manually by using 
+
+Install packages for R
+----------------------
+
+Install missing packages in R by executing the following command
+inside the R command prompt (type `R` into your shell to invoke it)
+
+```{.r}
+install.packages("PACKAGENAME")
+```
+
+Install packages for Python
+---------------------------
+
+Invoke the Python package manager `pip3` to install packages for
+Python:
+
+```
+pip3 install PACKAGENAME...
+```
+
+You may specify multiple package names by writing them one after
+another, separated by whitespace.
 
 
 
-vim:tw=70
 Genome Preparation
 ==================
 
@@ -24,7 +57,7 @@ Record index table
 First, index the genome using `samtools`. This is needed for several
 downstream tools:
 ```{.bash}
-samtools faidx data/genome/sample.fasta
+samtools faidx data/genome/volpertinger.fasta
 ```
 ```{.output}
 ```
@@ -111,10 +144,6 @@ A3      4480   4504
 X       2381   2400
 ```
 
-```
-head data/2/volpertinger.nucl | column -t
-```
-
 Putting together the FASTQ file
 -------------------------------
 
@@ -144,7 +173,7 @@ tool you like to accomplish this task if you need more sophisticated
 read names. 
 
 ```{.bash}
-scripts/index-column  --prefix volpertinger_ \
+scripts/index_column  --prefix volpertinger_ \
                       --colname name  \
                       --inplace data/2/volpertinger.coord
 
@@ -223,13 +252,13 @@ into the pipeline.
 Putting the FASTQ file together
 -------------------------------
 
-The `synth-fastq` tool creates a FASTQ file from its components,
+The `synth_fastq` tool creates a FASTQ file from its components,
 nucleotide string, quality string and read name (ID line). If the file
 containing the read lines is omitted, the reads are numbered
 sequentially.
 
 ```{.bash}
-scripts/synth-fastq data/2/volpertinger.nucl \
+scripts/synth_fastq data/2/volpertinger.nucl \
                     data/2/volpertinger.q    \
                     data/2/volpertinger.i    \
     > data/2/volpertinger.fastq
@@ -291,21 +320,22 @@ scripts/uniform \
 Read names:
 
 ```{.bash}
-scripts/index-column  --prefix retli_ \
+scripts/index_column  --prefix retli_ \
                       --colname name  \
                       --inplace data/2/retli.coord
 ```
 ```{.output}
 ```
 
-Put the FASTQ together
+Put the FASTQ together:
+
  * Quality strings are generated without an intermediate file using 
    `sed`
  * Read names are extracted without an intermediate file using `awk`
 
 
 ```{.bash}
-scripts/synth-fastq \
+scripts/synth_fastq \
     data/2/retli.nucl \
     <(sed 's/./F/g'           data/2/retli.nucl) \
     <(awk '(NR!=1){print $1}' data/2/retli.coord) \
@@ -328,7 +358,6 @@ TGGCCGAGGGACGCTTGCGTCG
 
 
 
-vim:tw=70
 Mutation of reads
 =================
 
@@ -422,7 +451,7 @@ input and mutates strings provided to it on standard input
 accordingly. 
 
 Mutations can be inserted either before a FASTQ file is assembled
-(`synth-fastq.py`, see previous section), or afterwards. This example
+(`synth_fastq.py`, see previous section), or afterwards. This example
 uses raw nucleotide strings generate during the creation of our
 *volpertinger* samples. This serves well as an example how nucleotide
 strings are processed line by line and mutated. You can see the
@@ -435,32 +464,32 @@ scripts/multiple_mutate\
     | head
 ```
 ```{.output}
-TTCTACAAGtTATTcGCCtACCAGAT
-TCTATgaAATAACTTCTCgC
-aTtAACcTTATCTTCTGGGGCTCA
-TCcTGgGGcTTTCTATTTAGA
-TATGtCCgCGATGTTcGATCAGG
-ACCCAgGcGCCCCCAGCCtaGTTGa
-TGccAATAGCaCTGaGTTTcT
-AATAAACTTAAAtAAATTAGTGGCA
-ACGATGACCATCTTtTTGCG
-cATGaTATTTGccATATATGgAGcTTGTGTG
+TTCgACAAGcTATTAGCTAACCAGcT
+aCTATTTcATgtCTTTTCCC
+TTGAgCTCTtTCTTCCGGGGCTCA
+TCATGAGGGTTTtTAcTTctA
+TATGAaCcCGtTGTTGGATCAGG
+ACCgAAGGGCCCCCAGCTAGGTTGt
+TcGGAATAGCCCTGTGTTTAT
+tATAAACTTAgAtcAATTAaTGGCA
+ACGtcGAgCATTTTCTTGTG
+TATGGTATgTGGTATATATGTAGgTgGTGTG
 ```
 
-An already existent FASTQ file can be mutated using the `filter-fastq`
-tool in cooperation with `multiple-mutate`. The tool `filter-fastq`
+An already existent FASTQ file can be mutated using the `filter_fastq`
+tool in cooperation with `multiple-mutate`. The tool `filter_fastq`
 enables you to apply transformations to existing fastq files. To this
-effect, `filter-fastq` extracts one part out of a FASTQ file (read
+effect, `filter_fastq` extracts one part out of a FASTQ file (read
 name, nucleotide string or quality string) and feeds it into another
 sub-program specified between two `@`-signs. The sub-program is required to
 take lines of text as input and return the same number of lines on
 standard output. The output of the sub-program is then placed into the output
-fastq file. By combining `filter-fastq` and `multiple_mutate`, the tool
+fastq file. By combining `filter_fastq` and `multiple_mutate`, the tool
 which applies mutations to strings of nucleotides, a FASTQ file can be
 mutated:
 
 ```{.bash}
-scripts/filter-fastq --nucleotide \
+scripts/filter_fastq --nucleotide \
   @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
   < data/2/volpertinger.fastq \
   > data/3/volpertinger_mut.fastq
@@ -475,25 +504,25 @@ head data/3/volpertinger_mut.fastq
 ```
 ```{.output}
 @volpertinger_0
-TTCCAaAAGATATTAGCCAACCAGAg
+TTCaACAAGATATTAGCTtcCaAGAT
 +
 FFFFFFFFFFFFFFFFFFFFFFFFFF
 @volpertinger_1
-TgTATTTgATAACTTaTCCC
+cCTATTTAggAACTTCTCCc
 +
 FFFFFFFFFFFFFFFFFFFF
 @volpertinger_2
-TTGAACTCTATCTTCCGGGGTgCA
+TTGAACTCTATCTTTCcGGGCTCA
 ```
 
-The `filter-fastq.py` script enables you to apply an arbitrary script
+The `filter_fastq.py` script enables you to apply an arbitrary script
 or program on just one part of a FASTQ file (ID line, nucleotide line,
 quality line). The used script must accept the respective part on
 standard input and print the modified version on standard output. The
-modified FASTQ file is assembled by `filter-fastq.py` from the output
+modified FASTQ file is assembled by `filter_fastq.py` from the output
 of its children scripts and printed on standard output. 
 
-On the `filter-fastq.py` call, the @ sign serves as a sentinel
+On the `filter_fastq.py` call, the @ sign serves as a sentinel
 character, which determines start and end of the sub-program's
 command line. It can also be any arbitrary other character, as long as
 it doesn't occur inside the child script's command line but only at
@@ -542,11 +571,9 @@ scripts/mapdamage2geomparam \
     column -t
 ```
 ```{.output}
-strand                                from  to  factor      geom_prob   intercept
-3                                     G     A   0.79513996  0.26918746  0.039386893
-data/mapdamage/GS136_3pGtoA_freq.txt
-5                                     C     T   0.43360246  0.35249167  0.027965522
-data/mapdamage/GS136_5pCtoT_freq.txt
+strand  fromBase  toBase  factor          geom_prob       intercept
+3       G         A       0.795141407627  0.269186574395  0.0393868749241
+5       C         T       0.433601194732  0.352493013329  0.0279655759856
 ```
 
 The generated plots can be viewed 
@@ -641,7 +668,7 @@ The mentioned-above table can be prepended with an index
 column:
 
 ```{.bash}
-scripts/index-column --inplace data/3/mut-tab
+scripts/index_column --inplace data/3/mut-tab
 
 head data/3/mut-tab | column -t
 ```
@@ -741,7 +768,7 @@ To generate all combinations of parameters, two scripts are used:
   * `scripts/cross_tab` expects multiple files and outputs all
     possible combinations of their lines. 
 
-  * `scripts/index-column` This script prepends a counting number 
+  * `scripts/index_column` This script prepends a counting number 
     to each input line. It can be used to generate index columns for text 
     tables.
 
@@ -764,7 +791,7 @@ k   n
 
 Add an index column called runidx:
 ```{.bash}
-scripts/index-column --colname runidx --inplace data/4/partab
+scripts/index_column --colname runidx --inplace data/4/partab
 head data/4/partab | column -t
 ```
 ```{.output}
@@ -787,7 +814,7 @@ variables set via `data/4/partab` as command line arguments to the
 mapper. 
 
 ```{.bash}
-#!/usr/bin/bash
+#!/bin/bash
 
 ## This script performs a mapping using BWA.
 ## It requires the variables k, n, runidx and fastq be set 
@@ -821,12 +848,12 @@ scripts/table2calls  data/4/partab \
 cat data/4/calls
 ```
 ```{.output}
-runidx=0 n=0 k=2 data/mapping/map-bwa.sh
-runidx=1 n=4 k=2 data/mapping/map-bwa.sh
-runidx=2 n=8 k=2 data/mapping/map-bwa.sh
-runidx=3 n=0 k=10 data/mapping/map-bwa.sh
-runidx=4 n=4 k=10 data/mapping/map-bwa.sh
-runidx=5 n=8 k=10 data/mapping/map-bwa.sh
+k=2 runidx=0 n=0 data/mapping/map-bwa.sh
+k=2 runidx=1 n=4 data/mapping/map-bwa.sh
+k=2 runidx=2 n=8 data/mapping/map-bwa.sh
+k=10 runidx=3 n=0 data/mapping/map-bwa.sh
+k=10 runidx=4 n=4 data/mapping/map-bwa.sh
+k=10 runidx=5 n=8 data/mapping/map-bwa.sh
 ```
 
 Executing multiple mapping runs in parallel
@@ -866,7 +893,7 @@ Example: Run the previously generated mapper calls.
 [bwa_aln_core] 50 sequences have been processed.
 [main] Version: 0.7.13-r1126
 [main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.110 sec; CPU: 0.000 sec
+[main] Real time: 0.074 sec; CPU: 0.003 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
@@ -881,11 +908,11 @@ Example: Run the previously generated mapper calls.
 @SQ	SN:MT	LN:6000
 @SQ	SN:X	LN:6000
 @PG	ID:bwa	PN:bwa	VN:0.7.13-r1126	CL:bwa samse data/genome/volpertinger data/4/0.sai data/3/all.fastq
-volpertinger_0	4	*	0	0	*	*	0	0	TTCCAAAAGATATTAGCCAACCAGAG	FFFFFFFFFFFFFFFFFFFFFFFFFF
-volpertinger_1	4	*	0	0	*	*	0	0	TGTATTTGATAACTTATCCC	FFFFFFFFFFFFFFFFFFFF
-volpertinger_2	4	*	0	0	*	*	0	0	TTGAACTCTATCTTCCGGGGTGCA	FFFFFFFFFFFFFFFFFFFFFFFF
-volpertinger_3	4	*	0	0	*	*	0	0	GCATGAGGGTTTCTATTTAGA	FFFFFFFFFFFFFFFFFFFFF
-volpertinger_4	4	*	0	0	*	*	0	0	TACTGGCTCGCTGTAGGAACAGG	FFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_0	4	*	0	0	*	*	0	0	TTCAACAAGATATTAGCTTCCAAGAT	FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_1	4	*	0	0	*	*	0	0	CCTATTTAGGAACTTCTCCC	FFFFFFFFFFFFFFFFFFFF
+volpertinger_2	4	*	0	0	*	*	0	0	TTGAACTCTATCTTTCCGGGCTCA	FFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_3	4	*	0	0	*	*	0	0	TCATATGGGTATCTATTTTGA	FFFFFFFFFFFFFFFFFFFFF
+volpertinger_4	4	*	0	0	*	*	0	0	TATGTCTTCGAAGTTGGATTTGG	FFFFFFFFFFFFFFFFFFFFFFF
 ```
 
 
@@ -925,7 +952,7 @@ the most important ones are:
 Take care not to put any spaces in the argument of --sam-fields.
 
 ```{.bash}
-scripts/sam-extract --sam-fields qname,rname,pos,mapq \
+scripts/sam_extract --sam-fields qname,rname,pos,mapq \
     data/4/1.sam  >  data/5/1.tab
 ```
 ```{.output}
@@ -936,14 +963,14 @@ head data/5/1.tab | column -t
 ```
 ```{.output}
 qname           rname  pos   mapq
-volpertinger_0  B1     2143  37
+volpertinger_0  *      0     0
 volpertinger_1  MT     3402  37
 volpertinger_2  A3     1413  37
-volpertinger_3  A3     5689  37
+volpertinger_3  A3     5689  25
 volpertinger_4  *      0     0
 volpertinger_5  *      0     0
-volpertinger_6  A1     1320  23
-volpertinger_7  *      0     0
+volpertinger_6  A1     1320  37
+volpertinger_7  A3     4480  25
 volpertinger_8  X      2381  37
 ```
 
@@ -963,196 +990,172 @@ retli_23  *   0     0
 retli_24  *   0     0
 ```
 
-Bring together true read information from all origin organisms
---------------------------------------------------------------
+Gather all information needed to determine correct mapping
+----------------------------------------------------------
 
-This can be done by concatenating the tabular files generated during
-the read sampling process (Section 2). `awk` is used to concatenate
-the files while not repeating the header line of the second file.
+The script `add_mapped_organisms` adds two columns to the result
+above: The column `true_organism` lists the organism a read stems
+from. This is an important information if the FASTA record names of
+several species used in the analysis overlap. This is sometimes the
+case when multiple eukaryotes are used. The second column,
+`mapped_organism`, infers the organism a read has been assigned to by
+the mapper. This is done by looking up the FASTA record name, which
+the read was mapped to, in all FASTA record names of all species which
+where used as reference genomes by the mapper. This FASTA record names
+must be unique among all organisms used as mapping reference.
 
-Prior to this we append a column to the tables which indicates the
-organism of each read. This enables us to group the reads by origin
-organism later.
+In this example, the organism `volpertinger` provides the endogenous
+reads as all reads were mapped only to the `volpertinger` genome. The
+`retli` reads are therefore exogenous reads.
 
-```{.bash}
-# Add column 'organism' with value 'volpertinger'
-scripts/add_const_column \
-    data/2/volpertinger.coord \
-    organism        \
-    volpertinger    \
-    > data/5/volpertinger_org.coord
+To assign the correct organism names to the reads, the script must be provided
+with
 
-# Same for R. etli reads
-scripts/add_const_column \
-    data/2/retli.coord \
-    organism        \
-    retli    \
-    > data/5/retli_org.coord
-```
-```{.output}
-```
+ * The organism names
+ * The FASTA index of the organism's genomes
+ * The read names derived from the organism
+ * Whether the reads are endogenous or exogenous
+ * The table with the mapping information from the previous section
+   which shall be augmented
 
-This yields files like this:
-```{.bash}
-head -n5 data/5/volpertinger_org.coord | column -t
-```
-```{.output}
-name            record  start  end   organism
-volpertinger_0  B1      2143   2168  volpertinger
-volpertinger_1  MT      3402   3421  volpertinger
-volpertinger_2  A3      1413   1436  volpertinger
-volpertinger_3  A3      5689   5709  volpertinger
-```
-
-Now the tables can be concatenated. Make sure both tables contain the
-same columns in the same order or else you will get invalid data!
-```{.bash}
-awk '(NR==1 || FNR!=1)' \
-      data/5/volpertinger_org.coord \
-      data/5/retli_org.coord  \
-    > data/5/all.coord
-```
-```{.output}
-```
-
-Identify correctly mapped reads
--------------------------------
-
-One possibility is the script used below, `exactmap.R`
-
-This script relies on the input table columns having specific names. 
-For details see the help of the script by calling 
-`scripts/eval/exactmap.R -h`.
-
-Use the `--qthresh` parameter to declare all reads with a mapping
-quality below a certain threshold as not mapped. 
+The call is shown below. The script `write_later` at the end of the
+pipe is to prevent `merge` from overwriting its own input file too
+soon, as the output is meant to replace the input file.
 
 ```{.bash}
-scripts/exactmap   data/5/all.tab \
-                   data/5/1.tab  \
-                   > data/5/1.crct
+scripts/add_mapped_organisms \
+    --endogenous volpertinger \
+                 data/genome/volpertinger.fasta.fai \
+                 data/2/volpertinger.coord \
+    --exogenous  retli \
+                 data/retli/retli.fasta.fai \
+                 data/2/retli.coord \
+    data/5/1.tab \
+    | scripts/write_later data/5/1.tab
 
-cat data/5/1.crct | column -t
+head data/5/1.tab | column -t
 ```
 ```{.output}
+qname           rname  pos   mapq  true_organism  mapped_organism
+volpertinger_0  *      0     0     volpertinger   *
+volpertinger_1  MT     3402  37    volpertinger   volpertinger
+volpertinger_2  A3     1413  37    volpertinger   volpertinger
+volpertinger_3  A3     5689  25    volpertinger   volpertinger
+volpertinger_4  *      0     0     volpertinger   *
+volpertinger_5  *      0     0     volpertinger   *
+volpertinger_6  A1     1320  37    volpertinger   volpertinger
+volpertinger_7  A3     4480  25    volpertinger   volpertinger
+volpertinger_8  X      2381  37    volpertinger   volpertinger
 ```
 
-***TODO:*** Organism column 
-
-This script can also deal with an additional organism column in the
-input tables. This may be important if multiple of the organisms have
-FASTA records of the same name. A common case of this is multiple
-eukaryotes with similarly named chromosomes. 
-
-Custom determination of correct match
---------------------------------------
-
-If you want to determine correctly mapped reads by your own means, you
-can merge the two tables, the correct positions of the reads and the
-actual mapping positions of the reads, to one table which you can
-inspect afterwards. There is a tool designed to make merging
-information from two tables as easy as possible. To merge the
-information, both tables need to share at least one column, which is
-described as the *key column*. In this case, the read name is the key
-because it is present in both tables. 
-
-The `merge` tool can also rename columns in the process of merging. We
-will use this functionality to distinguish the true mapping positions
-from `all.tab` from the actual mapping positions from `1.tab` by
-prepending a 't' to the former. 
-
-Here is an example to match the nominal and actual read positions into
-one table. `-a` and `-b` denote the two tables to be merged. The first
-argument after those is the file name, followed by the key column and
-all other columns which shall be merged. If columns shall be renamed,
-there are arguments of the form `oldname=newname`. 
+To determine whether the reads were mapped correctly, two more pieces
+of information are needed besides the true organism: The true FASTA
+record (=chromosome) and the true position. These can be looked up in
+the files generated during the read sampling process. In this example,
+they were named `volpertinger.coord' and `retli.coord`. Because
+information for reads from both origins must be looked up, these two
+files must first be concatenated, but while printing the header line
+only once:
 
 ```{.bash}
-scripts/merge -a data/5/all.coord name  record=trecord start=tstart \
-                                      organism=torg\
-              -b data/5/1.tab   qname rname=record   pos=start \
-          > data/5/merge_example.tab
-
-# Show parts of the table
-(head data/5/merge_example.tab; tail data/5/merge_example.tab)| column -t
-
+scripts/cat_tables   data/2/volpertinger.coord \
+                     data/2/retli.coord \
+                   > data/5/all.coord
+head data/5/all.coord | column -t
 ```
 ```{.output}
-name             trecord   tstart  torg          record  start
-retli_0          retli_tr  121502  retli         *       0
-retli_1          retli_tr  133167  retli         *       0
-retli_10         retli_tr  110631  retli         *       0
-retli_11         retli_tr  82809   retli         *       0
-retli_12         retli_tr  66530   retli         *       0
-retli_13         retli_tr  108831  retli         *       0
-retli_14         retli_tr  109927  retli         *       0
-retli_15         retli_tr  82777   retli         *       0
-retli_16         retli_tr  66982   retli         MT      2791
-volpertinger_22  MT        615     volpertinger  MT      615
-volpertinger_23  B3        608     volpertinger  B3      608
-volpertinger_24  B2        4581    volpertinger  *       0
-volpertinger_3   A3        5689    volpertinger  A3      5689
-volpertinger_4   MT        3280    volpertinger  *       0
-volpertinger_5   A3        4936    volpertinger  *       0
-volpertinger_6   A1        1320    volpertinger  A1      1320
-volpertinger_7   A3        4480    volpertinger  *       0
-volpertinger_8   X         2381    volpertinger  X       2381
-volpertinger_9   A1        2751    volpertinger  A1      2751
+name            record  start  end
+volpertinger_0  B1      2143   2168
+volpertinger_1  MT      3402   3421
+volpertinger_2  A3      1413   1436
+volpertinger_3  A3      5689   5709
+volpertinger_4  MT      3280   3302
+volpertinger_5  A3      4936   4960
+volpertinger_6  A1      1320   1340
+volpertinger_7  A3      4480   4504
+volpertinger_8  X       2381   2400
 ```
+
+As can be seen in the output above, the needed information is in the
+columns named `record` and `start`. The correct values are found by
+comparing the `qname` column of `data/5/1.tab` with the `name` 
+column of the freshly-generated `data/5/all.tab`. Additionally we
+want to rename the columns holding the true chromosome and position
+information to make it clear which column holds which information.
+
+This can be done in one go using the `merge` tool, whose invokation is
+written below. The used parameters are explained in the following.
+
+We want to make sure no reads get lost by setting the
+`--all-a` option. If a read name cannot be found in `all.coord`, the
+tool will print `NA` at the respective position (this should not
+happen here). `--all-a-cols` indicates that we want to work on with
+all columns of `1.tab`. The input file `1.tab` is also the output file
+here, therefore the tool `write_later` is used.
+
+```{.bash}
+scripts/merge -a data/5/1.tab qname \
+              -b data/5/all.coord name record=true_record start=true_pos \
+              --all-a-cols \
+              --all-a \
+              | scripts/write_later data/5/1.tab
+
+head data/5/1.tab | column -t
+```
+```{.output}
+qname     rname  pos   mapq  true_organism  mapped_organism  true_record  true_pos
+retli_0   *      0     0     retli          *                retli_tr     121502
+retli_1   *      0     0     retli          *                retli_tr     133167
+retli_10  *      0     0     retli          *                retli_tr     110631
+retli_11  *      0     0     retli          *                retli_tr     82809
+retli_12  *      0     0     retli          *                retli_tr     66530
+retli_13  *      0     0     retli          *                retli_tr     108831
+retli_14  *      0     0     retli          *                retli_tr     109927
+retli_15  *      0     0     retli          *                retli_tr     82777
+retli_16  MT     2791  25    retli          volpertinger     retli_tr     66982
+```
+
+Now all the information is present to determine whether a read has
+been mapped correctly. The last step is writing in a new column
+whether a read was mapped correctly. This can be archieved using any
+means you can imagine, for this example we will use R. The `pocketR`
+tool is a thin wrapper which handles reading and writing of data for
+us. The input data will be available as a `data.frame` called
+`input`, everything written insides the parentheses of the `return(.)`
+statement will be printed. 
+
+The following command adds a new column to the input data which
+indicates whether a read was mapped correctly:
+
+```{.bash}
+scripts/pocketR '
+    within(input, {
+        correct =
+            pos == true_pos  &
+            rname == true_record &
+            mapped_organism == true_organism })
+'  data/5/1.tab \
+| scripts/write_later data/5/1.tab
+
+ head data/5/1.tab | column -t
+```
+```{.output}
+qname     rname  pos   mapq  true_organism  mapped_organism  true_record  true_pos  correct
+retli_0   *      0     0     retli          *                retli_tr     121502    FALSE
+retli_1   *      0     0     retli          *                retli_tr     133167    FALSE
+retli_10  *      0     0     retli          *                retli_tr     110631    FALSE
+retli_11  *      0     0     retli          *                retli_tr     82809     FALSE
+retli_12  *      0     0     retli          *                retli_tr     66530     FALSE
+retli_13  *      0     0     retli          *                retli_tr     108831    FALSE
+retli_14  *      0     0     retli          *                retli_tr     109927    FALSE
+retli_15  *      0     0     retli          *                retli_tr     82777     FALSE
+retli_16  MT     2791  25    retli          volpertinger     retli_tr     66982     FALSE
+```
+ 
+
 
 Grouping of reads
 -----------------
-
-For the next steps, the reads must be grouped by the original organism
-and the organism they were mapped to. This can be done by merging 
-the table `idlist` from Section 1 two times:
-
-The last two lines of the first command in the following example serve 
-for replacing `data/5/5.crct` using a temporary file.
-
-The first argument of `merge_organisms.R` may be a hypen (-) in which case
-the first table is read from standard input. This is handy for merging
-multiple information.
-
-Note that the information about the true origin organism of the
-*R. etli* contaminant reads needs to be merged into 
-the information about the organism of the sample organisms'
-chromosomes. Speaking in files, `data/1/sample.recids` must be
-concatenated with `data/2/retli.recids`
-
-This is done by:
-
-```{.bash}
-awk '(NR==1 || FNR!=1)' \
-    data/1/sample.recids \
-    data/2/retli.recids \
-    > data/5/all.recids
-
-cat data/5/all.recids | column -t
-```
-```{.output}
-```
-
-This is because the reads weren't mapped
-against the *R. etli* reference genome, therefore the *R. etli*
-chromosome can not appear as a `rname` value of the SAM file.
-
-```{.bash}
-scripts/eval/merge_organisms.R data/5/1.crct \
-                               m.orig \
-                               data/5/all.recids \
-                               organism=m.org  |  \
-scripts/eval/merge_organisms.R - \
-                               t.orig \
-                               data/5/all.recids \
-                               organism=t.org  \
-                            > data/5/1.crct.tmp &&
-                            mv data/5/1.crct{.tmp,}
-
-cat data/5/1.crct | column -t
-```
-```{.output}
-```
 
 As next step, the number of reads are counted which belong to 
 certain categories. Here, the categories are:
@@ -1160,42 +1163,44 @@ certain categories. Here, the categories are:
   * Origin organism
   * Organism a read was mapped to
 
-the `cbind` function is needed in order to name the column containing 
-the read count
+Again, the R language can be used to express our wishes concisely:
+Group the reads by all combinations of:
+
+ * `true_organism`
+ * `mapped_organism`
+ * correctly mapped
+
+... and count the reads belonging to each category:
+
+the `cbind` function is needed in order to rename the column containing 
+the read count. `qname` can be substituted here by any valid input
+column name, as its only used for counting (each column is equal in
+length). 
 
 ```{.bash}
-scripts/general/pocketR.R '
-    aggregate(cbind(count=read) ~ t.org+m.org+correct,
+scripts/pocketR '
+    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
         FUN=length, data=input)
-    ' \
-    data/5/1.crct > data/5/1.agg
+' data/5/1.tab \
+> data/5/1.agg
 
 cat data/5/1.agg | column -t
 ```
 ```{.output}
-```
-
-Another possibility if you're proficient in dplyr:
-
-```{.bash}
-scripts/general/pocketR.R --pkg dplyr '
-    group_by(input, t.org, m.org, correct) %>%
-    summarize(count=n())
-    ' \
-    data/5/1.crct > data/5/1.agg
-
-head data/5/1.agg | column -t
-```
-```{.output}
+true_organism  mapped_organism  correct  count
+retli          *                FALSE    24
+volpertinger   *                FALSE    8
+retli          volpertinger     FALSE    1
+volpertinger   volpertinger     TRUE     17
 ```
 
 This format may be used to plot the read fate of a single mapper run
 and to derive the measures sensitivity and specificity:
 
 ```{.bash}
-scripts/eval/plot-read-fate.R t.org        m.org  \
-                              correct      count \
-                              data/5/1.pdf data/5/1.agg
+scripts/plot_read_fate    true_organism mapped_organism \
+                          correct       count \
+                          data/5/1.pdf  data/5/1.agg
 ```
 ```{.output}
 ```
@@ -1210,24 +1215,30 @@ Sensitivity and specificity
   * **Specificity** (precision) shows how many reads have been
     correctly identified as non-endogenous and were therefore not
     mapped.
+  * **Balanced control rate*** (BCR) is the mean of sensitivity and
+    specificity
 
 If non-endogenous reads were included in the reads, like we did by
 including the *R. etli* reads, both measures can be calculated.
 
 The following script needs the same kind of input as the
-`plot-read-fate.R` script. Additionally, a list of organisms must be
+`plot-read-fate` script. Additionally, a list of organisms must be
 specified, whose genomes the mapper used as a reference. 
 
 If you specify multiple organisms, separate them by commas and don't
 include any spaces.
 
 ```{.bash}
-scripts/eval/sensspec.R data/5/1.agg volpertinger \
+scripts/sensspec --c-morg mapped_organism \
+                 --c-torg true_organism \
+                 data/5/1.agg volpertinger \
     > data/5/1.parameters
 
 column -t data/5/1.parameters
 ```
 ```{.output}
+map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
+25        17        0.68         25          24          0.96         0.82
 ```
 
 
@@ -1250,58 +1261,71 @@ Browse the <a href="data/5">directory `data/5`</a> to see the results.
 
 ```{.bash}
 for sam in data/4/*.sam; do
-    # Generate output prefix from input name: `4.sam` -> `4`
+    # Generate output prefix p from input name: `4.sam` -> `4`
     bn=$(basename $sam)
-    opref=${bn%.sam}
+    p=${bn%.sam}
 
     # Extract SAM fields
-    scripts/eval/sam-extract.R --sam-fields qname,rname,pos,mapq \
-        ${sam}  >  data/5/${opref}.tab
+    scripts/sam_extract --sam-fields qname,rname,pos,mapq \
+        data/4/${p}.sam  >  data/5/${p}.tab
 
     # Mark correctly/incorrectly mapped reads
-    scripts/eval/exactmap.R data/5/all.tab \
-                            data/5/${opref}.tab  \
-                          > data/5/${opref}.crct
+    scripts/add_mapped_organisms \
+        --endogenous volpertinger \
+                     data/genome/volpertinger.fasta.fai \
+                     data/2/volpertinger.coord \
+        --exogenous  retli \
+                     data/retli/retli.fasta.fai \
+                     data/2/retli.coord \
+        data/5/${p}.tab \
+        | scripts/write_later data/5/${p}.tab
 
-    # Get organisms for chromosome names
-    scripts/eval/merge_organisms.R data/5/${opref}.crct \
-                                   m.orig \
-                                   data/5/all.recids \
-                                   organism=m.org  |  \
-    scripts/eval/merge_organisms.R - \
-                                   t.orig \
-                                   data/5/all.recids \
-                                   organism=t.org  \
-                                > data/5/${opref}.crct.tmp &&
-                                mv data/5/${opref}.crct{.tmp,}
+    # Determine true origin information for each read
+    scripts/merge -a data/5/${p}.tab qname \
+                  -b data/5/all.coord name record=true_record start=true_pos \
+                  --all-a-cols \
+                  --all-a \
+                  | scripts/write_later data/5/${p}.tab
+
+    # Determine whether each read was correctly mapped
+    scripts/pocketR '
+        within(input, {
+            correct =
+                pos == true_pos  &
+                rname == true_record &
+                mapped_organism == true_organism })
+    '  data/5/${p}.tab \
+    | scripts/write_later data/5/${p}.tab
 
     # Count reads per origin/target organism and mapping status
-    scripts/general/pocketR.R '
-        aggregate(cbind(count=read) ~ t.org+m.org+correct,
-            FUN=length, data=input)
-        ' \
-        data/5/${opref}.crct > data/5/${opref}.agg
+    scripts/pocketR '
+        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
+            FUN=length, data=input) ' \
+    data/5/${p}.tab \
+    > data/5/${p}.agg
 
     # Plot mapping targets per origin organism
-    scripts/eval/plot-read-fate.R t.org        m.org  \
-                                  correct      count \
-                                  data/5/${opref}.pdf data/5/${opref}.agg
+    scripts/plot_read_fate    true_organism    mapped_organism \
+                              correct          count \
+                              data/5/${p}.pdf  data/5/${p}.agg
 
     # Calculate sensitivity, specificity and balanced accuracy
-    scripts/eval/sensspec.R data/5/${opref}.agg volpertinger \
-        > data/5/${opref}.performance
+    scripts/sensspec --c-morg mapped_organism \
+                     --c-torg true_organism \
+                     data/5/${p}.agg volpertinger \
+        > data/5/${p}.performance
 
-    echo "$sam done. -> Generated data/5/${opref}.{tab,agg,crct,pdf,performance}"
+    echo "$sam done. -> Generated data/5/${p}.{tab,agg,pdf,performance}"
 
 done
 ```
 ```{.output}
-data/4/0.sam done. -> Generated data/5/0.{tab,agg,crct,pdf,performance}
-data/4/1.sam done. -> Generated data/5/1.{tab,agg,crct,pdf,performance}
-data/4/2.sam done. -> Generated data/5/2.{tab,agg,crct,pdf,performance}
-data/4/3.sam done. -> Generated data/5/3.{tab,agg,crct,pdf,performance}
-data/4/4.sam done. -> Generated data/5/4.{tab,agg,crct,pdf,performance}
-data/4/5.sam done. -> Generated data/5/5.{tab,agg,crct,pdf,performance}
+data/4/0.sam done. -> Generated data/5/0.{tab,agg,pdf,performance}
+data/4/1.sam done. -> Generated data/5/1.{tab,agg,pdf,performance}
+data/4/2.sam done. -> Generated data/5/2.{tab,agg,pdf,performance}
+data/4/3.sam done. -> Generated data/5/3.{tab,agg,pdf,performance}
+data/4/4.sam done. -> Generated data/5/4.{tab,agg,pdf,performance}
+data/4/5.sam done. -> Generated data/5/5.{tab,agg,pdf,performance}
 ```
 
     
@@ -1316,34 +1340,56 @@ influence of individual parameters can be assessed.
 
 First step is to combine the output measures of all runs:
 
+To this effect, to each of the `.performance`-files (contain
+sensitivity, specificity, bcr) generated in the last section, the run
+number is added as a separate column, then the `.performance`-files of
+all runs are concatenated to one table.  Because the run number was
+added before, the origin of all values is still clear.
+
 ```{.bash}
+# Add the run number to each .performance file
 for f in data/5/*.performance; do
     i=$(basename ${f%.performance})
 
-    scripts/general/add_const_column.sh $f runidx $i \
-        > data/6/${i}.performance
+    scripts/add_const_column "$f" runidx "$i" \
+        > "data/6/${i}.performance"
 done
 
-awk '(NR==1||FNR!=1)' data/6/*.performance > data/6/performance
+# Concatenate all tables, but print the header line only once.
+scripts/cat_tables data/6/*.performance \
+                 > data/6/performance
 
 cat data/6/performance | column -t
 ```
 ```{.output}
+map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
+25        1         0.04         25          25          1            0.52  0
+25        17        0.68         25          24          0.96         0.82  1
+25        24        0.96         25          6           0.24         0.6   2
+25        1         0.04         25          25          1            0.52  3
+25        17        0.68         25          24          0.96         0.82  4
+25        25        1            25          6           0.24         0.62  5
 ```
 
 Next, the parameter values belonging to the run indices are joined in, 
 appending the parameter columns to `data/6/parameters` itself.
 
 ```{.bash}
-scripts/general/pocketR.R '
-    merge(inputs[[1]], inputs[[2]], by="runidx", all.x=TRUE)
-    ' \
-    data/6/performance data/4/partab > data/6/performance.tmp &&
-    mv data/6/performance{.tmp,}
+scripts/merge -a data/6/performance runidx \
+              -b data/4/partab      runidx \
+              --all-a-cols --all-b-cols --all-a \
+           | scripts/write_later data/6/performance
 
 head data/6/performance | column -t
 ```
 ```{.output}
+runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
+0       25        1         0.04         25          25          1            0.52  2   0
+1       25        17        0.68         25          24          0.96         0.82  2   4
+2       25        24        0.96         25          6           0.24         0.6   2   8
+3       25        1         0.04         25          25          1            0.52  10  0
+4       25        17        0.68         25          24          0.96         0.82  10  4
+5       25        25        1            25          6           0.24         0.62  10  8
 ```
 
 The value of one parameter can be plotted against some measure. The
@@ -1356,11 +1402,11 @@ aggregated coarsely to demonstrate the results.
 
 ```{.bash}
 # Plot n versus BCR
-scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance n bcr \
+scripts/plot_parameter_effects --signif 1 data/6/performance n bcr \
     data/6/n.pdf
 
 # Plot k versus BCR
-scripts/eval/plot_parameter_effects.R --signif 1 data/6/performance k bcr \
+scripts/plot_parameter_effects --signif 1 data/6/performance k bcr \
     data/6/k.pdf
 ```
 ```{.output}
@@ -1372,6 +1418,70 @@ View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and
  It can be seen that n seems to have an impact on the BCR whereas k
  does not. The BCR rises and falls again because the gain in
  sensitivity is offset by the loss in specificity if n rises too high.
+
+
+Overview of the scripts by category
+===================================
+
+Below you find a list of the scripts in this package, grouped by rough
+application situations. 
+
+More specific help for each command can be obtained by invoking the respective
+command with the `--help` or `-h` command line argument.
+
+General file and table manipulation
+-----------------------------------
+
+Name                 Purpose
+----                 -------
+add_const_column     Add a column with a column name and fixed value.
+cat_tables           Concatenate tables with the same headers.
+cross_tab            Print all combinations of input table rows.
+fill_template        Output copies of a file, where placeholders are replaced by values read from a table.
+index_column         Add a column with a name and a counting number to the table.
+merge                Based on values of table 1, look up corresponding rows of table 2 (table join).
+pocketR              Change text tables by R commands.
+write_later          Cache the input and write it only after input completion, to enable file modification without (explicit) temporary files.
+
+Read sampling and fitering
+--------------------------
+
+Name          Purpose
+----          -------
+filter_fastq  Apply a program to ID, nucleotide or quality string of each read.
+uniform       Sample reads from a reference genome.
+synth_fastq   Create a FASTQ file from input IDs, nucleotide strings and quality strings.
+
+Introducing mutations into reads
+--------------------------------
+
+Name                 Purpose
+----                 -------
+geom_induce          Change bases of input nucleotide strings with a probability dependent of proximity to the string beginning or end.
+mapdamage2geomparam  Parse output of mapDamage an output a table of base mutation probabilities.
+multiple_mutate      Based on a table of base mutation probabilities, apply multiple mutation rounds to nucleotide strings.
+plot_mutation_probabilities  Plot mutation probability versus base position.
+
+Parallel program calls (e.g. mappers)
+--------------------------------------
+
+Name             Purpose
+----             -------
+mcall            Read a list of program calls and invoke several of them in parallel.
+table2calls      Based on a table of parameters, generate calls to a script with changing parameters.
+
+
+SAM parsing and result data handling
+------------------------------------
+
+Name                     Purpose
+----                     -------
+add_mapped_organisms     Add organisms relating to FASTA record names in the input tables to the output.
+plot_read_fate           Plot how many reads from which origin were mapped to which target organism correctly or incorrectly.
+plot_parameter_effects   Plot how much mapping parameters influence sensitivity or specificity
+sam_extract              Extract information from a SAM file into a text table.
+sensspec                 Calculate sensitivity and specificity of a mapping run.
+
 
 
 Glossary

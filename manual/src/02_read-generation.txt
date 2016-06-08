@@ -64,10 +64,6 @@ The resulting files look like this:
 head data/2/volpertinger.coord | column -t
 ```
 
-```
-head data/2/volpertinger.nucl | column -t
-```
-
 Putting together the FASTQ file
 -------------------------------
 
@@ -97,7 +93,7 @@ tool you like to accomplish this task if you need more sophisticated
 read names. 
 
 ```{.sh}
-scripts/index-column  --prefix volpertinger_ \
+scripts/index_column  --prefix volpertinger_ \
                       --colname name  \
                       --inplace data/2/volpertinger.coord
 
@@ -140,13 +136,13 @@ into the pipeline.
 Putting the FASTQ file together
 -------------------------------
 
-The `synth-fastq` tool creates a FASTQ file from its components,
+The `synth_fastq` tool creates a FASTQ file from its components,
 nucleotide string, quality string and read name (ID line). If the file
 containing the read lines is omitted, the reads are numbered
 sequentially.
 
 ```{.sh}
-scripts/synth-fastq data/2/volpertinger.nucl \
+scripts/synth_fastq data/2/volpertinger.nucl \
                     data/2/volpertinger.q    \
                     data/2/volpertinger.i    \
     > data/2/volpertinger.fastq
@@ -194,19 +190,20 @@ scripts/uniform \
 Read names:
 
 ```{.sh}
-scripts/index-column  --prefix retli_ \
+scripts/index_column  --prefix retli_ \
                       --colname name  \
                       --inplace data/2/retli.coord
 ```
 
-Put the FASTQ together
+Put the FASTQ together:
+
  * Quality strings are generated without an intermediate file using 
    `sed`
  * Read names are extracted without an intermediate file using `awk`
 
 
 ```{.sh}
-scripts/synth-fastq \
+scripts/synth_fastq \
     data/2/retli.nucl \
     <(sed 's/./F/g'           data/2/retli.nucl) \
     <(awk '(NR!=1){print $1}' data/2/retli.coord) \
@@ -218,4 +215,3 @@ head data/2/retli.fastq
 
 
 vim:tw=70
-

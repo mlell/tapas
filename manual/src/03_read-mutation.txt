@@ -85,7 +85,7 @@ input and mutates strings provided to it on standard input
 accordingly. 
 
 Mutations can be inserted either before a FASTQ file is assembled
-(`synth-fastq.py`, see previous section), or afterwards. This example
+(`synth_fastq.py`, see previous section), or afterwards. This example
 uses raw nucleotide strings generate during the creation of our
 *volpertinger* samples. This serves well as an example how nucleotide
 strings are processed line by line and mutated. You can see the
@@ -98,20 +98,20 @@ scripts/multiple_mutate\
     | head
 ```
 
-An already existent FASTQ file can be mutated using the `filter-fastq`
-tool in cooperation with `multiple-mutate`. The tool `filter-fastq`
+An already existent FASTQ file can be mutated using the `filter_fastq`
+tool in cooperation with `multiple-mutate`. The tool `filter_fastq`
 enables you to apply transformations to existing fastq files. To this
-effect, `filter-fastq` extracts one part out of a FASTQ file (read
+effect, `filter_fastq` extracts one part out of a FASTQ file (read
 name, nucleotide string or quality string) and feeds it into another
 sub-program specified between two `@`-signs. The sub-program is required to
 take lines of text as input and return the same number of lines on
 standard output. The output of the sub-program is then placed into the output
-fastq file. By combining `filter-fastq` and `multiple_mutate`, the tool
+fastq file. By combining `filter_fastq` and `multiple_mutate`, the tool
 which applies mutations to strings of nucleotides, a FASTQ file can be
 mutated:
 
 ```{.sh}
-scripts/filter-fastq --nucleotide \
+scripts/filter_fastq --nucleotide \
   @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
   < data/2/volpertinger.fastq \
   > data/3/volpertinger_mut.fastq
@@ -123,14 +123,14 @@ mutations (lower-case letters):
 head data/3/volpertinger_mut.fastq
 ```
 
-The `filter-fastq.py` script enables you to apply an arbitrary script
+The `filter_fastq.py` script enables you to apply an arbitrary script
 or program on just one part of a FASTQ file (ID line, nucleotide line,
 quality line). The used script must accept the respective part on
 standard input and print the modified version on standard output. The
-modified FASTQ file is assembled by `filter-fastq.py` from the output
+modified FASTQ file is assembled by `filter_fastq.py` from the output
 of its children scripts and printed on standard output. 
 
-On the `filter-fastq.py` call, the @ sign serves as a sentinel
+On the `filter_fastq.py` call, the @ sign serves as a sentinel
 character, which determines start and end of the sub-program's
 command line. It can also be any arbitrary other character, as long as
 it doesn't occur inside the child script's command line but only at
@@ -234,7 +234,7 @@ The mentioned-above table can be prepended with an index
 column:
 
 ```{.sh}
-scripts/index-column --inplace data/3/mut-tab
+scripts/index_column --inplace data/3/mut-tab
 
 head data/3/mut-tab | column -t
 ```

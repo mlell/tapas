@@ -8,7 +8,7 @@ Record index table
 First, index the genome using `samtools`. This is needed for several
 downstream tools:
 ```{.sh}
-samtools faidx data/genome/sample.fasta
+samtools faidx data/genome/volpertinger.fasta
 ```
 
 

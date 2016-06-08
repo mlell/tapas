@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 ## This script performs a mapping using BWA.
 ## It requires the variables k, n, runidx and fastq be set 
