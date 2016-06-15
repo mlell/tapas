@@ -6,13 +6,13 @@ body{
 
 p{
     text-align:justify;
-    line-height:130%;
+    line-height:150%;
 }
 
 pre{
     background:#f9f9f9;
     padding: 1em 1em 1em 1em;
-    font-family:Consolas, DejaVu Sans, Courier, sans;
+    font-family:Consolas, DejaVu Sans, Courier, monospace;
     font-size:90%;
     overflow:auto;
     max-height:500px;
@@ -42,10 +42,14 @@ h1 {
 }
 
 
-p > code {
+code {
     background: #FAFAFA;
     border: 1px solid #F0F0F0;
     padding: 1px 5px;
+}
+pre code{
+    background: none;
+    border: none;
 }
 
 thead{

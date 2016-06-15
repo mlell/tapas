@@ -44,7 +44,7 @@ volpertinger_23	*	0	0	volpertinger	*	B3	608	FALSE
 volpertinger_24	*	0	0	volpertinger	*	B2	4581	FALSE
 volpertinger_3	*	0	0	volpertinger	*	A3	5689	FALSE
 volpertinger_4	*	0	0	volpertinger	*	MT	3280	FALSE
-volpertinger_5	*	0	0	volpertinger	*	A3	4936	FALSE
+volpertinger_5	A3	4936	25	volpertinger	volpertinger	A3	4936	TRUE
 volpertinger_6	*	0	0	volpertinger	*	A1	1320	FALSE
 volpertinger_7	*	0	0	volpertinger	*	A3	4480	FALSE
 volpertinger_8	*	0	0	volpertinger	*	X	2381	FALSE

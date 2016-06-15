@@ -3,7 +3,7 @@
 [bwa_aln_core] 50 sequences have been processed.
 [main] Version: 0.7.13-r1126
 [main] CMD: bwa aln -n 0 -k 10 data/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.042 sec; CPU: 0.000 sec
+[main] Real time: 0.044 sec; CPU: 0.000 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec

@@ -1,38 +1,63 @@
 Generate mapper calls
 =====================
 
+A call is an order to the computer to execute a program. It is a
+string which contains the program name and can include variables which
+will be set in advance to executing the program and which influence
+the program. 
+
+We will in the following generate calls to start our favourite mapper
+(BWA in this tutorial) with different combinations of parameter
+values. The results will be analysed in coming sections to determine
+the effects of the parameter values on the mapping result.
+
+General procedure
+-------------------
+
+Here are the main steps which will be taken in subsequent subsections: 
+
 To generate the calls to the mapper using different combinations of 
 parameters, several files holding the values of the different parameters
 are first combined to a table holding all possible combinations of them.
 
-Subsequently, every line is given a unique index which can be referred to
-e.g. when writing output files of the mapping process. By this index, each
-run writes to a different output file.
+Subsequently, in this tutorial every line is given a unique index.
+Though this is not nessecary, it facilitates tasks like the naming of
+output files.  
+
+Because every mapper is different in how it expects the parameter
+values, you will be expected to write a small script which feeds 
+the parameter values into the mapping program. This will be explained 
+further below.
+
+How the parameter values are stored
+-----------------------------------
 
 The parameter values are saved in several files, one per parameter. 
 In this example, the BWA parameters n and k are varied which results
 in two files:
 
+For your project, you will of course create your own files which hold
+the parameter values you want to compare
+
+Here is a list of the parameter files used in this tutorial:
+
 ```{.sh}
 ls data/mapping/*.par
 ```
-
-The files can have arbitrary filenames, they are in a tabular format
-where the column names relate to variables which are set automatically
-later in the process.
+The files can have arbitrary filenames. They are in a tabular format
+where the column names determine the variable names which will be used in
+the mapping script which is created later on.
 
 ```{.sh}
 column -t data/mapping/n.par
 ```
 
-To generate all combinations of parameters, two scripts are used:
+Generate combinations of parameter values
+-----------------------------------------
 
-  * `scripts/cross_tab` expects multiple files and outputs all
-    possible combinations of their lines. 
-
-  * `scripts/index_column` This script prepends a counting number 
-    to each input line. It can be used to generate index columns for text 
-    tables.
+To generate all combinations of parameters, `scripts/cross_tab` 
+will be used. It expects multiple files and outputs all
+possible combinations of their lines. 
 
 Generate all possible combinations of parameters, retaining 1 header
 line:
@@ -42,20 +67,26 @@ scripts/cross_tab --head 1 data/mapping/*.par > data/4/partab
 head data/4/partab | column -t
 ```
 
+Mark the parameter combinations with a unique index
+----------------------------------------------------
+
+As stated above, this is not nessecary, but facilitates the 
+naming of the output teext files.
+
+Again, `scripts/index_column` can be used for this purpose. 
+This script prepends a counting number to each input line. It can be used to 
+generate index columns for text tables.
+
 Add an index column called runidx:
 ```{.sh}
 scripts/index_column --colname runidx --inplace data/4/partab
 head data/4/partab | column -t
 ```
 
-Read now the script `data/mapping/map-bwa.sh` and see how the variables
-used there correspond to the column names of partab. The script is
-shown in the next code block. 
+The mapping script
+-------------------
 
-This is a script which can be called using different parameter
-combinations: It calls the mapper `bwa` and forwards the values of the
-variables set via `data/4/partab` as command line arguments to the
-mapper. 
+Read now the script `data/mapping/map-bwa.sh`. 
 
 ```{.bash}
 #!/bin/bash
@@ -82,7 +113,26 @@ bwa samse                      \
 
 ```
 
-Below the calls are generated.
+As you can see, the script uses several variables, denoted like this:
+`${variable}`. These are not defined inside the script, but will be
+set from outside at the time this script will be run. 
+
+The variable names are exactly equal to the column names of
+the file `data/4/partab` and therefore to the column names of all the
+files which lie in `data/mapping/*.par`. They are the means how the
+different parameter values will be fed to the mapper.
+
+You will be required to write a script like this for your mapper. All
+it must do is to call the mapper, to specify the output file names
+and to forward the parameters values on to the mapper using the
+`${variable}` syntax.
+
+Generate mapper calls
+---------------------
+
+The script `table2calls` converts the table with the parameter value
+combinations and the filename of the mapping script to calls which
+can be executed on the shell. 
 
 ```{.sh}
 # Convert the table into calls that can be executed in the next section

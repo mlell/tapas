@@ -464,16 +464,16 @@ scripts/multiple_mutate\
     | head
 ```
 ```{.output}
-TTCgACAAGcTATTAGCTAACCAGcT
-aCTATTTcATgtCTTTTCCC
-TTGAgCTCTtTCTTCCGGGGCTCA
-TCATGAGGGTTTtTAcTTctA
-TATGAaCcCGtTGTTGGATCAGG
-ACCgAAGGGCCCCCAGCTAGGTTGt
-TcGGAATAGCCCTGTGTTTAT
-tATAAACTTAgAtcAATTAaTGGCA
-ACGtcGAgCATTTTCTTGTG
-TATGGTATgTGGTATATATGTAGgTgGTGTG
+TTCCACAAGATATTAGCCAAtCAGAT
+TCTAgccAATgACTTTTtCC
+TTGgACTCTATgTTCgtGtGCTtA
+TCATGAtGGTTTCcATTgtGA
+TACGACCTCGATGTTGGATCAGG
+ACCCAAGGcCCTCTAGCCAGGTTGC
+TGGGAATcGCCCTGacTTTAa
+tATActCTTAAAAAAAaTtGTGGCA
+ATcATGACCATaTTCTTGCc
+TATGGTATTTGaTATcTATGTAGTTTGTGgG
 ```
 
 An already existent FASTQ file can be mutated using the `filter_fastq`
@@ -504,15 +504,15 @@ head data/3/volpertinger_mut.fastq
 ```
 ```{.output}
 @volpertinger_0
-TTCaACAAGATATTAGCTtcCaAGAT
+cTCCACAAGATATTAGtCAACCtGAT
 +
 FFFFFFFFFFFFFFFFFFFFFFFFFF
 @volpertinger_1
-cCTATTTAggAACTTCTCCc
+TCTATTTAATAACTTaTCCC
 +
 FFFFFFFFFFFFFFFFFFFF
 @volpertinger_2
-TTGAACTCTATCTTTCcGGGCTCA
+TTGAATTCTATCTTCCGGGGCTCA
 ```
 
 The `filter_fastq.py` script enables you to apply an arbitrary script
@@ -729,17 +729,45 @@ section.
 Generate mapper calls
 =====================
 
+A call is an order to the computer to execute a program. It is a
+string which contains the program name and can include variables which
+will be set in advance to executing the program and which influence
+the program. 
+
+We will in the following generate calls to start our favourite mapper
+(BWA in this tutorial) with different combinations of parameter
+values. The results will be analysed in coming sections to determine
+the effects of the parameter values on the mapping result.
+
+General procedure
+-------------------
+
+Here are the main steps which will be taken in subsequent subsections: 
+
 To generate the calls to the mapper using different combinations of 
 parameters, several files holding the values of the different parameters
 are first combined to a table holding all possible combinations of them.
 
-Subsequently, every line is given a unique index which can be referred to
-e.g. when writing output files of the mapping process. By this index, each
-run writes to a different output file.
+Subsequently, in this tutorial every line is given a unique index.
+Though this is not nessecary, it facilitates tasks like the naming of
+output files.  
+
+Because every mapper is different in how it expects the parameter
+values, you will be expected to write a small script which feeds 
+the parameter values into the mapping program. This will be explained 
+further below.
+
+How the parameter values are stored
+-----------------------------------
 
 The parameter values are saved in several files, one per parameter. 
 In this example, the BWA parameters n and k are varied which results
 in two files:
+
+For your project, you will of course create your own files which hold
+the parameter values you want to compare
+
+Here is a list of the parameter files used in this tutorial:
 
 ```{.bash}
 ls data/mapping/*.par
@@ -748,10 +776,9 @@ ls data/mapping/*.par
 data/mapping/k.par
 data/mapping/n.par
 ```
-
-The files can have arbitrary filenames, they are in a tabular format
-where the column names relate to variables which are set automatically
-later in the process.
+The files can have arbitrary filenames. They are in a tabular format
+where the column names determine the variable names which will be used in
+the mapping script which is created later on.
 
 ```{.bash}
 column -t data/mapping/n.par
@@ -763,14 +790,12 @@ n
 8
 ```
 
-To generate all combinations of parameters, two scripts are used:
+Generate combinations of parameter values
+-----------------------------------------
 
-  * `scripts/cross_tab` expects multiple files and outputs all
-    possible combinations of their lines. 
-
-  * `scripts/index_column` This script prepends a counting number 
-    to each input line. It can be used to generate index columns for text 
-    tables.
+To generate all combinations of parameters, `scripts/cross_tab` 
+will be used. It expects multiple files and outputs all
+possible combinations of their lines. 
 
 Generate all possible combinations of parameters, retaining 1 header
 line:
@@ -789,6 +814,16 @@ k   n
 10  8
 ```
 
+Mark the parameter combinations with a unique index
+----------------------------------------------------
+
+As stated above, this is not nessecary, but facilitates the 
+naming of the output teext files.
+
+Again, `scripts/index_column` can be used for this purpose. 
+This script prepends a counting number to each input line. It can be used to 
+generate index columns for text tables.
+
 Add an index column called runidx:
 ```{.bash}
 scripts/index_column --colname runidx --inplace data/4/partab
@@ -804,14 +839,10 @@ runidx  k   n
 5       10  8
 ```
 
-Read now the script `data/mapping/map-bwa.sh` and see how the variables
-used there correspond to the column names of partab. The script is
-shown in the next code block. 
+The mapping script
+-------------------
 
-This is a script which can be called using different parameter
-combinations: It calls the mapper `bwa` and forwards the values of the
-variables set via `data/4/partab` as command line arguments to the
-mapper. 
+Read now the script `data/mapping/map-bwa.sh`. 
 
 ```{.bash}
 #!/bin/bash
@@ -838,7 +869,26 @@ bwa samse                      \
 
 ```
 
-Below the calls are generated.
+As you can see, the script uses several variables, denoted like this:
+`${variable}`. These are not defined inside the script, but will be
+set from outside at the time this script will be run. 
+
+The variable names are exactly equal to the column names of
+the file `data/4/partab` and therefore to the column names of all the
+files which lie in `data/mapping/*.par`. They are the means how the
+different parameter values will be fed to the mapper.
+
+You will be required to write a script like this for your mapper. All
+it must do is to call the mapper, to specify the output file names
+and to forward the parameters values on to the mapper using the
+`${variable}` syntax.
+
+Generate mapper calls
+---------------------
+
+The script `table2calls` converts the table with the parameter value
+combinations and the filename of the mapping script to calls which
+can be executed on the shell. 
 
 ```{.bash}
 # Convert the table into calls that can be executed in the next section
@@ -848,12 +898,12 @@ scripts/table2calls  data/4/partab \
 cat data/4/calls
 ```
 ```{.output}
-k=2 runidx=0 n=0 data/mapping/map-bwa.sh
-k=2 runidx=1 n=4 data/mapping/map-bwa.sh
-k=2 runidx=2 n=8 data/mapping/map-bwa.sh
-k=10 runidx=3 n=0 data/mapping/map-bwa.sh
-k=10 runidx=4 n=4 data/mapping/map-bwa.sh
-k=10 runidx=5 n=8 data/mapping/map-bwa.sh
+runidx=0 n=0 k=2 data/mapping/map-bwa.sh
+runidx=1 n=4 k=2 data/mapping/map-bwa.sh
+runidx=2 n=8 k=2 data/mapping/map-bwa.sh
+runidx=3 n=0 k=10 data/mapping/map-bwa.sh
+runidx=4 n=4 k=10 data/mapping/map-bwa.sh
+runidx=5 n=8 k=10 data/mapping/map-bwa.sh
 ```
 
 Executing multiple mapping runs in parallel
@@ -893,7 +943,7 @@ Example: Run the previously generated mapper calls.
 [bwa_aln_core] 50 sequences have been processed.
 [main] Version: 0.7.13-r1126
 [main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.074 sec; CPU: 0.003 sec
+[main] Real time: 0.085 sec; CPU: 0.000 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
@@ -908,11 +958,11 @@ Example: Run the previously generated mapper calls.
 @SQ	SN:MT	LN:6000
 @SQ	SN:X	LN:6000
 @PG	ID:bwa	PN:bwa	VN:0.7.13-r1126	CL:bwa samse data/genome/volpertinger data/4/0.sai data/3/all.fastq
-volpertinger_0	4	*	0	0	*	*	0	0	TTCAACAAGATATTAGCTTCCAAGAT	FFFFFFFFFFFFFFFFFFFFFFFFFF
-volpertinger_1	4	*	0	0	*	*	0	0	CCTATTTAGGAACTTCTCCC	FFFFFFFFFFFFFFFFFFFF
-volpertinger_2	4	*	0	0	*	*	0	0	TTGAACTCTATCTTTCCGGGCTCA	FFFFFFFFFFFFFFFFFFFFFFFF
-volpertinger_3	4	*	0	0	*	*	0	0	TCATATGGGTATCTATTTTGA	FFFFFFFFFFFFFFFFFFFFF
-volpertinger_4	4	*	0	0	*	*	0	0	TATGTCTTCGAAGTTGGATTTGG	FFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_0	4	*	0	0	*	*	0	0	CTCCACAAGATATTAGTCAACCTGAT	FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_1	4	*	0	0	*	*	0	0	TCTATTTAATAACTTATCCC	FFFFFFFFFFFFFFFFFFFF
+volpertinger_2	4	*	0	0	*	*	0	0	TTGAATTCTATCTTCCGGGGCTCA	FFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_3	4	*	0	0	*	*	0	0	ACATGAGGGCTTCTAGTTAGA	FFFFFFFFFFFFFFFFFFFFF
+volpertinger_4	4	*	0	0	*	*	0	0	TACTATTTCGCTGTTGGATCGGA	FFFFFFFFFFFFFFFFFFFFFFF
 ```
 
 
@@ -963,14 +1013,14 @@ head data/5/1.tab | column -t
 ```
 ```{.output}
 qname           rname  pos   mapq
-volpertinger_0  *      0     0
+volpertinger_0  B1     2143  37
 volpertinger_1  MT     3402  37
 volpertinger_2  A3     1413  37
-volpertinger_3  A3     5689  25
+volpertinger_3  A3     5689  37
 volpertinger_4  *      0     0
-volpertinger_5  *      0     0
+volpertinger_5  A3     4936  37
 volpertinger_6  A1     1320  37
-volpertinger_7  A3     4480  25
+volpertinger_7  A3     4480  37
 volpertinger_8  X      2381  37
 ```
 
@@ -1037,14 +1087,14 @@ head data/5/1.tab | column -t
 ```
 ```{.output}
 qname           rname  pos   mapq  true_organism  mapped_organism
-volpertinger_0  *      0     0     volpertinger   *
+volpertinger_0  B1     2143  37    volpertinger   volpertinger
 volpertinger_1  MT     3402  37    volpertinger   volpertinger
 volpertinger_2  A3     1413  37    volpertinger   volpertinger
-volpertinger_3  A3     5689  25    volpertinger   volpertinger
+volpertinger_3  A3     5689  37    volpertinger   volpertinger
 volpertinger_4  *      0     0     volpertinger   *
-volpertinger_5  *      0     0     volpertinger   *
+volpertinger_5  A3     4936  37    volpertinger   volpertinger
 volpertinger_6  A1     1320  37    volpertinger   volpertinger
-volpertinger_7  A3     4480  25    volpertinger   volpertinger
+volpertinger_7  A3     4480  37    volpertinger   volpertinger
 volpertinger_8  X      2381  37    volpertinger   volpertinger
 ```
 
@@ -1189,9 +1239,9 @@ cat data/5/1.agg | column -t
 ```{.output}
 true_organism  mapped_organism  correct  count
 retli          *                FALSE    24
-volpertinger   *                FALSE    8
+volpertinger   *                FALSE    4
 retli          volpertinger     FALSE    1
-volpertinger   volpertinger     TRUE     17
+volpertinger   volpertinger     TRUE     21
 ```
 
 This format may be used to plot the read fate of a single mapper run
@@ -1238,7 +1288,7 @@ column -t data/5/1.parameters
 ```
 ```{.output}
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        17        0.68         25          24          0.96         0.82
+25        21        0.84         25          24          0.96         0.9
 ```
 
 
@@ -1363,12 +1413,12 @@ cat data/6/performance | column -t
 ```
 ```{.output}
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        1         0.04         25          25          1            0.52  0
-25        17        0.68         25          24          0.96         0.82  1
-25        24        0.96         25          6           0.24         0.6   2
-25        1         0.04         25          25          1            0.52  3
-25        17        0.68         25          24          0.96         0.82  4
-25        25        1            25          6           0.24         0.62  5
+25        2         0.08         25          25          1            0.54  0
+25        21        0.84         25          24          0.96         0.9   1
+25        23        0.92         25          6           0.24         0.58  2
+25        2         0.08         25          25          1            0.54  3
+25        22        0.88         25          24          0.96         0.92  4
+25        24        0.96         25          6           0.24         0.6   5
 ```
 
 Next, the parameter values belonging to the run indices are joined in, 
@@ -1384,12 +1434,12 @@ head data/6/performance | column -t
 ```
 ```{.output}
 runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        1         0.04         25          25          1            0.52  2   0
-1       25        17        0.68         25          24          0.96         0.82  2   4
-2       25        24        0.96         25          6           0.24         0.6   2   8
-3       25        1         0.04         25          25          1            0.52  10  0
-4       25        17        0.68         25          24          0.96         0.82  10  4
-5       25        25        1            25          6           0.24         0.62  10  8
+0       25        2         0.08         25          25          1            0.54  2   0
+1       25        21        0.84         25          24          0.96         0.9   2   4
+2       25        23        0.92         25          6           0.24         0.58  2   8
+3       25        2         0.08         25          25          1            0.54  10  0
+4       25        22        0.88         25          24          0.96         0.92  10  4
+5       25        24        0.96         25          6           0.24         0.6   10  8
 ```
 
 The value of one parameter can be plotted against some measure. The
