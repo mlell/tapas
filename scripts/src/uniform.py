@@ -15,7 +15,7 @@ import subprocess as sp
 import argparse
 
 # Set this to True to print stack trace on error
-debug = False
+debug = True
 
 description = """Samples reads from the specified (multi-FASTA) file MFASTA. 
 Read positions will be from random FASTA records of the file and 
@@ -53,6 +53,12 @@ def parse_arguments():
             "Specify an alternative location for the FASTA index.")
     p.add_argument('--quiet', action='store_true', help=
             "Don't print a status line")
+    p.add_argument('--name', nargs=1, metavar=('PREFIX',), help=
+            """Create a read name column called 'name'. Generate a name
+            `PREFIX_i` for every read, where i is a counting number""")
+    p.add_argument('--output-fastq', nargs=2, metavar=('COORD','FASTQ'), help=
+            """Create a FASTQ file from the output. The quality score
+            is all F and the read names are specified by `--name`.""")
     p.add_argument('--output', nargs=2, metavar=('COORD','NUCL'), help=
             """ Don't output on standard output, create instead two
             files, named like given in COORD and NUCL. In the file
@@ -60,7 +66,18 @@ def parse_arguments():
             in NUCL the raw sampled nucleotides will be
             written.""")
 
-    return p.parse_args()
+    a = p.parse_args()
+
+    if a.output_fastq and a.output:
+        raise ValueError(
+        '--output-fastq and --output cannot be specified both')
+
+    if a.output_fastq and not a.name:
+        raise ValueError(
+        '--name must be specified if --output-fastq is specified')
+
+
+    return a
 
 
 
@@ -73,9 +90,18 @@ def main(argv):
     rlen_decay = int(args.S)
     seed = args.seed
     quiet = args.quiet
+    name = args.name[0] if args.name else None
+    coord_output_file = None
+    nucl_output_file  = None
+    fastq_output_file = None
     # Set only if --output flag is used
-    coord_output_file = args.output[0] if args.output else None
-    nucl_output_file = args.output[1] if args.output else None
+    if args.output:
+        coord_output_file = args.output[0] 
+        nucl_output_file = args.output[1] 
+    # Set only if --output-fastq flag is used
+    if args.output_fastq:
+        coord_output_file = args.output_fastq[0] 
+        fastq_output_file = args.output_fastq[1]
     
     index_name = args.index
     if not index_name: index_name = mfasta+".fai"
@@ -90,30 +116,70 @@ def main(argv):
         index = f.FastaIndex(index_fd)
 
     # Construct main pipe. 
+    header = ['record','start','end','read']
     pipe = read_sampler(mfasta, index, nreads, rlen_min, rlen_decay,
             seed)
+    if name:
+        pipe = name_adder(pipe, name)
+        header = ['name'] + header
     if not quiet: 
         pipe = status_updater(pipe, num_elem=nreads)
 
+    outfields = len(header)
     # If --output is set, split the output in two files
-    if coord_output_file is not None: 
+    if nucl_output_file:
         with open(coord_output_file,'wt') as coord_fd, \
              open(nucl_output_file,'wt') as nucl_fd:
 
-            print("record\tstart\tend",file=coord_fd)
+            print("\t".join(header[0:outfields-1]),file=coord_fd)
 
             column_splitter(
-                col_ranges=[[0,1,2],[3]],
+                col_ranges=[list(range(0,outfields-1)),[outfields-1]],
                 files = [coord_fd, nucl_fd],
                 table = pipe
             )
+    elif fastq_output_file:
+        from synth_fastq import print_fastq_lines
+        with open(coord_output_file,'wt') as coord_fd , \
+             open(fastq_output_file,'wt') as fastq_fd:
+            nucl_stringio = io.StringIO()
+
+            print("\t".join(header[0:outfields-1]),file=coord_fd)
+
+            column_splitter(
+                col_ranges=[list(range(0,outfields-1)),[outfields-1]],
+                files = [coord_fd, nucl_stringio],
+                table = pipe
+            )
+
+            nucl = nucl_stringio.getvalue().splitlines()
+            qual = constantQualityStrings(nucl)
+            print_fastq_lines\
+                    ( iter(nucl)
+                    , qual
+                    , name_generator(name)
+                    , fastq_fd)
 
     # If --output is not set -> printed all to stdout
     else:
-        print("record\tstart\tend\tread",file=sys.stdout)
+        print("\t".join(header),file=sys.stdout)
         column_splitter(
             table = pipe 
         ) 
+
+def name_generator(prefix):
+    i = 1
+    while True:
+        yield prefix+"_"+str(i)
+        i += 1
+
+def name_adder(table, prefix):
+    """Prefix each tuple with a name `prefix_i`, where i is a counting
+    number"""
+    names = name_generator(prefix)
+    for row,name in zip(table,names):
+        yield (name,) + row
+
 
 def column_splitter(table, col_ranges=None, files=[sys.stdout]):
     """table is expected to be a list of lists (or other iterables).
@@ -205,6 +271,11 @@ def read_sampler(mfasta, index, nreads, rlen_min, rlen_decay,
             yield (record, start, end, read)
 
 
+def constantQualityStrings(iterable):
+    for f in iterable:
+        yield "F"*len(f)
+
+
 def statusMsg(msg,**kwargs):
     """ Print a status message """
     print(msg,file=sys.stderr,**kwargs)
@@ -222,7 +293,14 @@ def statusLine(width, now, end=100):
 
 
 
-if __name__ == "__main__": main(sys.argv)
+if __name__ == "__main__": 
+    try:
+        main(sys.argv)
+    except Exception as e:
+        if debug: raise
+        print('Error: ',end='',file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
 
 

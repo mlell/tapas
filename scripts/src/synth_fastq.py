@@ -42,32 +42,41 @@ def main():
     else:
         idxgen = idx_file_generator(idxfh)
             
-    with open(nclfile,"rt") as nclfd, open(quafile,"rt") as quafd:
-        while(True):
-            # Read one line of files
-            nline=nclfd.readline().rstrip()
-            qline=quafd.readline().rstrip()
-            # Quit if one is EOF
-            if not nline: break
-            if not qline: break
-            # Truncate Quality line to length of nucleotide line
-            nllen=len(nline)
-            qline=qline[0:nllen]
-            # Output
-            try:
-                print(generate_id_line(next(idxgen)))
-                print(nline)
-                print("+")
-                print(qline)
-            except StopIteration:
-                print("")
-                print("ERROR: Provided Index File is too short!")
-                idxfh.close()
-                sys.exit(1)
-    if(idxfh != None):
-        idxfh.close()
+    try:
+        with open(nclfile,"rt") as nclfd, open(quafile,"rt") as quafd:
+            print_fastq_lines(nclfd,quafd,idxgen)
+    
+    finally:
+        if(idxfh != None):
+            idxfh.close()
 
 
+def print_fastq_lines(nclfd, quafd, idxgen, ostream=sys.stdout):
+    while(True):
+        # Read one line of files
+        nline=next(nclfd,None)
+        qline=next(quafd,None)
+        nidx=next(idxgen,None)
+
+        # Quit if one is EOF
+        if not all([nline,qline,nidx]): break
+
+        nline = nline.rstrip()
+        qline = qline.rstrip()
+        # Truncate Quality line to length of nucleotide line
+        nllen=len(nline)
+        qline=qline[0:nllen]
+        # Output
+        print(generate_id_line(nidx), file=ostream)
+        print(nline, file=ostream)
+        print("+", file=ostream)
+        print(qline, file=ostream)
+
+    if bool(nline) != bool(qline):
+        raise Exception('Different number of nucleotide and quality lines, '+
+                 'result is truncated')
+    if not nidx:
+        raise Exception('Too little lines of read indices, result is truncated')
 
 def generate_id_line(id):
     """Generate a FASTQ Short Read ID line using the
@@ -93,4 +102,9 @@ def idx_file_generator(filehandle):
         yield s
 
 
-if (__name__=="__main__"): main()
+if __name__ == "__main__": 
+    try:
+        main()
+    except Exception as e:
+        print('Error: {}'.format(e),file=sys.stderr)
+
