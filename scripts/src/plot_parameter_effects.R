@@ -2,11 +2,8 @@
 
 library(methods)
 library(docopt)
-suppressPackageStartupMessages(
-library(dplyr))
 library(ggplot2)
 library(magrittr)
-library(lazyeval)
 
 help = "
 Usage: plot_mapping_runs.R [options] TABLE X Y PLOT_NAME

@@ -1,9 +1,7 @@
 #! /usr/bin/env Rscript
 
-library(methods)
 library(magrittr)
-#suppressPackageStartupMessages(
-#    library(dplyr))
+library(methods)
 library(docopt)
 
 help = "
