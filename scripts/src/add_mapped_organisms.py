@@ -86,7 +86,6 @@ def main(argv):
                 {'record':record,'mapped_organism':org},
                 ignore_index = True)
 
-
     endoRecordToOrganismTab = endoRecordToOrganismTab.append(
         {'record':NO_ORGANISM,'mapped_organism':NO_ORGANISM},
         ignore_index = True)
@@ -100,48 +99,65 @@ def main(argv):
 
     endoRecordToOrganismTab = endoRecordToOrganismTab.set_index(['record'])
 
-
-
     readnameToTrueOrganismTab = pd.DataFrame()
+
     # Make a lookup table where the true organism of all reads can be
     # looked up
     readname_col = 0
+
     # Endogenous reads
     for org,readlist_name in zip(endoOrgNames, endoReadListNames):
-        with open(readlist_name,'rt') as fd:
-            header = fd.readline().split()
-            readNames = [l.split()[readname_col] for l in fd]
-
-            readnameToTrueOrganismTab = \
+        readnameToTrueOrganismTab = \
                 readnameToTrueOrganismTab.append(
-                    pd.DataFrame({'readname':readNames,'true_organism':org}),
-                    ignore_index=True)
-
+                        prepareReadList(readlist_name, org))
+    # Exogenous reads
     for org,readlist_name in zip(exoOrgNames, exoReadListNames):
-        with open(readlist_name,'rt') as fd:
-            header = fd.readline().split()
-            readNames = [l.split()[readname_col] for l in fd]
-
-            readnameToTrueOrganismTab = \
-                readnameToTrueOrganismTab.append(
-                    pd.DataFrame({'readname':readNames,'true_organism':org}),
-                    ignore_index=True)
+        r = prepareReadList(readlist_name, org)
+        if sorted(r.columns.tolist()) != \
+            sorted(readnameToTrueOrganismTab.columns.tolist()):
+            raise Exception(
+                'All read information tables must have the same columns')
+        readnameToTrueOrganismTab = readnameToTrueOrganismTab.append(r)
 
 
     readnameToTrueOrganismTab = \
         readnameToTrueOrganismTab.set_index('readname')
-    
-    mapped_reads = pd.read_table(args.readtab, delim_whitespace=True)
 
+    mapped_reads = pd.read_table(args.readtab, delim_whitespace=True)
+    c = mapped_reads.columns.tolist()
+    c[1:] = ['mapped_'+x for x in c[1:]]
+    mapped_reads.columns = c
+    mapped_reads = mapped_reads.merge(endoRecordToOrganismTab, \
+            how='left', left_on=['mapped_rname'], right_index=True)
     mapped_reads = mapped_reads.merge(readnameToTrueOrganismTab, 
             how='left', left_on=['qname'], right_index=True)
-    mapped_reads = mapped_reads.merge(endoRecordToOrganismTab, 
-            how='left', left_on=['rname'], right_index=True)
 
 
     mapped_reads.to_csv(sys.stdout, sep="\t", index=False)
     
 
+def prepareReadList(readlist_name, org):
+    readSourceName = 'organism'
+    readlistPrefix = 'true_'
+
+    readlist = pd.read_table(readlist_name,delim_whitespace=True)
+    readlist.rename(columns={readlist.columns[0]:'readname'},inplace=True)
+    
+    try:
+        iConflictingCol = readlist.columns.get_loc(readSourceName)
+        c = readlist.columns.tolist()
+        c[iConflictingCol] = uniquefy(readSourceName,readlist.columns)
+        readlist.columns = c
+    except KeyError:
+        pass
+
+    readlist[readSourceName] = org
+
+    c = readlist.columns.tolist()
+    c[1:] = readlistPrefix + readlist.columns[1:]
+    readlist.columns = c
+
+    return readlist
 
 
 # Thanks to Paul McGuire@stackoverflow
@@ -177,9 +193,19 @@ def parseArguments(argv):
             help="Run self-tests")
     return p.parse_args(argv)
 
+def uniquefy(name, existingNames):
+    if name not in existingNames: return name
+    i = 2
+    while name+str(i) in existingNames:
+        i += 1
+    return name+str(i)
 
 if __name__ == "__main__": 
-    main(sys.argv[1:])
+    try:
+        main(sys.argv[1:])
+    except Exception as e:
+        print('ERROR: {}'.format(e),file=sys.stderr)
+        sys.exit(1)
 
 
 # vim:tw=70
