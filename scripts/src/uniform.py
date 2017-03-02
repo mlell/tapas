@@ -170,7 +170,7 @@ def main(argv):
 def name_generator(prefix):
     i = 1
     while True:
-        yield prefix+"_"+str(i)
+        yield prefix+str(i)
         i += 1
 
 def name_adder(table, prefix):
