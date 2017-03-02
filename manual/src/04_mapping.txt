@@ -21,18 +21,18 @@ General procedure
 
 Here are the main steps which will be taken in subsequent subsections: 
 
-To generate the calls to the mapper using different combinations of 
-parameters, several files holding the values of the different parameters
-are first combined to a table holding all possible combinations of them.
+ 1. To generate the calls to the mapper using different combinations of 
+    parameters, several files holding the values of the different parameters
+    are first combined to a table holding all possible combinations of them.
 
-Subsequently, in this tutorial every line is given a unique index.
-Though this is not nessecary, it facilitates tasks like the naming of
-output files.  
+ 2. Subsequently, in this tutorial every line is given a unique index.
+    Though this is not nessecary, it facilitates tasks like the naming of
+    output files.  
 
-Because every mapper is different in how it expects the parameter
-values, you will be expected to write a small script which feeds 
-the parameter values into the mapping program. This will be explained 
-further below.
+ 3. Because every mapper is different in how it expects the parameter
+    values, you will be expected to write a small script which feeds 
+    the parameter values into the mapping program. This will be explained 
+    further below.
 
 How the parameter values are stored
 -----------------------------------
@@ -76,7 +76,7 @@ Mark the parameter combinations with a unique index
 ----------------------------------------------------
 
 As stated above, this is not nessecary, but facilitates the 
-naming of the output teext files.
+naming of the output text files.
 
 Again, `scripts/index_column` can be used for this purpose. 
 This script prepends a counting number to each input line. It can be used to 

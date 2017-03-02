@@ -22,6 +22,7 @@ added before, the origin of all values is still clear.
 ```{.sh}
 # Add the run number to each .performance file
 for f in data/5/*.performance; do
+    echo $f
     i=$(basename ${f%.performance})
 
     scripts/add_const_column "$f" runidx "$i" \

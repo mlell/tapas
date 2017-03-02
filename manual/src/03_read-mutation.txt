@@ -6,6 +6,65 @@ title:
 Mutation of reads
 =================
 
+Specifying the parameters
+-------------------------
+
+The mutation probabilities are saved as a text table. It looks like
+this:
+
+```{.sh}
+cat data/mut-tables/mut.tab
+```
+Two types of per-base mutation probabilities are distinguished:
+
+ * The  **position-independent** mutation probability is the same for
+   all bases of the read. This can be used to model read derivation by
+   evolution.
+ * The **position-dependent** mutation probability is dependent of the
+   proximity of a base to the end of the read. The nearer a base is to
+   the read end, the higher is the mutation probability of the base.
+   This can be used to model chemical damage to ancient DNA.
+
+Probability values  are specified which range from 0 (never mutate
+that base) to 1 (always mutate that base). Probabilities of multiple
+lines which are applicable to the same base add up. The columns have the 
+following meaning:
+ 
+  * strand:  [3 or 5] Which side (3' or 5' end) of the read shall be
+    considered the read end when the base-dependent mutation
+    probability is calculated. If both sides of the read shall see
+    heightened mutation probabilities, include two lines, one with a
+    value `3` and one with a value `5`.
+  * from: [Letter or `*`] Which bases should mutate according to this
+    lines' parameters. The character `*` means this line applies to every base.
+  * to:   [Letter or `*`] Which base should a mutation event yield. 
+          `*` means a base (A,T,C,G) different from the original base is
+            chosen at random.
+  * factor: Maximum position-dependent mutation probability at the
+    read end (specified by `strand`)
+  * geom_prob: How fast the position-dependent mutation probability
+    declines for bases further away from the read end. 0 means no
+    decline, higher values lead to faster decline. 
+  * intercept: The position-independent mutation probability.
+
+In the example above, a base is $x$ bp away from the 5' end of
+a read of length l. That means, it is $(l-x)$ bp away from the 3' end
+of the read. The exchange probability depends on the type of the
+nucleotide and on $x$:
+
+Base at position $x$ is not Cytosine:
+
+$$P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
+P_{\ast\rightarrow\ast}$$
+
+Base at position $x$ is Cytosine (C): 
+
+$$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
+          (0.3\times dgeom(x;0.4) + 0.1) + 
+          (0.1\times dgeom((l-x);0.2) + 0.0) $$
+
+
+
 Mutation probabilities
 ----------------------
 
@@ -43,65 +102,13 @@ The following sketch graphs illustrate the three parameters:
 
 <img src="fig/mut.svg" width="800" />
 
-Specifying the parameters
--------------------------
 
-The mutation probabilities are saved as a text table. It looks like
-this:
-
-```{.sh}
-cat data/mut-tables/mut.tab
-```
-
-The columns have the following meaning:
- 
-  * strand:  [3 or 5] On which end of the read should base 1 be
-    located, the base with the highest mutation probability
-  * from: [Letter or *] Which bases should mutate according to this
-    lines' parameters. * means this rule applies to every base.
-  * to:   [Letter or *] Which base should a mutation event yield. 
-          * means a base (A,T,C,G) different from the original base
-          is chosen at random.
-  * factor: $f$ from the previous section
-  * geom_prob: $p$ from the previous section
-  * intercept: $t$ from the previous section
-
-In the example above, a base is $x$ bp away from the 5' end of
-a read of length l. That means, it is $(l-x)$ bp away from the 3' end
-of the read. The exchange probability depends on the type of the
-nucleotide and on $x$:
-
-Base at position $x$ is not Cytosine:
-
-$$P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
-P_{\ast\rightarrow\ast}$$
-
-Base at position $x$ is Cytosine (C): 
-
-$$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
-          (0.3\times dgeom(x;0.4) + 0.1) + 
-          (0.1\times dgeom((l-x);0.2) + 0.0) $$
-
-Mutate a sequence
------------------
+Subject a FASTQ file to artificial mutations
+---------------------------------------------
 
 The `multiple-mutate.py` tool takes a table of the previous section as
 input and mutates strings provided to it on standard input
 accordingly. 
-
-Mutations can be inserted either before a FASTQ file is assembled
-(`synth_fastq.py`, see previous section), or afterwards. This example
-uses raw nucleotide strings generate during the creation of our
-*volpertinger* samples. This serves well as an example how nucleotide
-strings are processed line by line and mutated. You can see the
-mutations in this example showing up as lower-case letters. 
-
-```{.sh}
-scripts/multiple_mutate\
-    data/mut-tables/mut.tab \
-    < data/2/volpertinger.nucl \
-    | head
-```
 
 An already existent FASTQ file can be mutated using the `filter_fastq`
 tool in cooperation with `multiple-mutate`. The tool `filter_fastq`
@@ -145,7 +152,7 @@ the beginning and the end.
 Combining endogenous and non-endogenous reads
 ---------------------------------------------
 
-In this example, the endogenous reads from *volptertinger* undergo 
+In this example, the endogenous reads from *volpertinger* undergo 
 simulated mutation and damage prior to mapping, while the contaminant
 reads from *R. etli* do not.
 
