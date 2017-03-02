@@ -30,36 +30,42 @@ import gzip
 
 def main(argv):
     args = parseArgs(argv[1:])
-    printSAMTable(args.SAMFILE, sys.stdout, isGzipped=args.gz)
+    closeStream = True;
+    if args.gz:
+        samfd = gzip.open(filename, 'rt')
+    elif args.SAMFILE == '-':
+        samfd = sys.stdin;
+        closeStream = False;
+    else: 
+        samfd = open(args.SAMFILE, 'r')
+    try:
+        printSAMTable(samfd, sys.stdout)
+
+    finally:
+        if closeStream: samfd.close()
+        
 
 def parseArgs(argv):
     p = argparse.ArgumentParser( description = __doc__ 
                                , formatter_class = argparse.RawTextHelpFormatter);
-    p.add_argument('SAMFILE', help='Input SAM file')
+    p.add_argument('SAMFILE', default='-', nargs='?', help='Input SAM file')
     p.add_argument("--gz", action='store_true', help="The input is gzip'ed")
     return p.parse_args(args = argv)
 
-def printSAMTable(filename, stream, isGzipped):
+
+def printSAMTable(instream, outstream):
     samfields = [ 'qname','flag','rname'
                 , 'pos','mapq','cigar' 
                 ,'rnext','pnext','tlen'
                 ]
     nSamfields = len(samfields)
     print("\t".join(samfields))
-    if isGzipped:
-        samfd = gzip.open(filename, 'rt')
-    else:
-        samfd = open(filename, 'r')
-    try:
 
-        for line in samfd:
-            if line[0] == '@': 
-                continue
-            print("\t".join(line.split()[1:nSamfields]));
+    for line in instream:
+        if line[0] == '@': 
+            continue
+        print("\t".join(line.split()[0:nSamfields]), file=outstream);
 
-    finally:
-        samfd.close()
-        
 
 
 
