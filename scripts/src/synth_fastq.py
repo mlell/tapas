@@ -75,7 +75,7 @@ def print_fastq_lines(nclfd, quafd, idxgen, ostream=sys.stdout):
     if bool(nline) != bool(qline):
         raise Exception('Different number of nucleotide and quality lines, '+
                  'result is truncated')
-    if not nidx:
+    if not nidx and any([nline,qline]):
         raise Exception('Too little lines of read indices, result is truncated')
 
 def generate_id_line(id):
