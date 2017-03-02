@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
  
+"""
+
+From tabular information about mapped reads, infer the organisms the
+reads should be mapped to, and are actually mapped, from the FASTA
+record the reads were mapped to. 
+"""
+
 import sys
 import argparse
 import fasta_substring as fasub
 import itertools
 import pandas as pd
 
-"""
-From tabular information about mapped reads, infer the organisms the
-reads should be mapped to, and are actually mapped, from the FASTA
-record the reads were mapped to. 
-"""
 
 help_params = {
 'readtab':
@@ -29,7 +31,9 @@ this command:
     ─────────────────────
 """,
 "--endogenous":
-"""A set of endogenous reads. ORG is a string holding the
+"""A set of endogenous reads. 
+
+ORG is a string holding the
 organism"s name, FAI is a .fai file (see samtools) of the
 reference genome and RNAME is a file containing a 
 newline-separated list of read names which belong to
@@ -55,20 +59,23 @@ def main(argv):
         doctest.testmod(verbose=True)
         sys.exit(0)
 
+    # User-chosen names for read sources
     endoOrgNames = [a[0] for a in args.endogenous]
-    endoFAINames = [a[1] for a in args.endogenous]
-    endoReadListNames = [a[2] for a in args.endogenous]
-    
     exoOrgNames = [a[0] for a in args.exogenous] \
             if args.exogenous else []
+    # File names of FAI files of read source genomes
+    endoFAINames = [a[1] for a in args.endogenous]
     exoFAINames = [a[1] for a in args.exogenous] \
             if args.exogenous else []
+    # File names of text tables with true read position information
+    endoReadListNames = [a[2] for a in args.endogenous]
     exoReadListNames = [a[2] for a in args.exogenous] \
             if args.exogenous else []
+    
 
-
+    # Lookup table: For every FASTA record name, list the organism
+    # name it belongs to (endogenous organisms only)
     endoRecordToOrganismTab = pd.DataFrame()
-
     for org,FAIName in zip(endoOrgNames, endoFAINames):
         with open(FAIName,'rt') as f:
             FAI = fasub.FastaIndex(f)
