@@ -10,7 +10,7 @@ $endfor$
 $if(date-meta)$
   <meta name="date" content="$date-meta$" />
 $endif$
-  <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
+  <title>$if(title-prefix)$$title-prefix$ - $endif$$title$</title>
   <style type="text/css">code{white-space: pre;}</style>
 $if(quotes)$
   <style type="text/css">q { quotes: "“" "”" "‘" "’"; }</style>
@@ -34,7 +34,7 @@ $endfor$
 $for(include-before)$
 $include-before$
 $endfor$
-$if(title)$
+<!--$if(title)$
 <div id="$idprefix$header">
 <h1 class="title">$title$</h1>
 $if(subtitle)$
@@ -48,6 +48,7 @@ $if(date)$
 $endif$
 </div>
 $endif$
+-->
 $if(toc)$
 <div id="$idprefix$TOC">
 $if(toctitle)$
@@ -60,5 +61,6 @@ $body$
 $for(include-after)$
 $include-after$
 $endfor$
+</div>
 </body>
 </html>
