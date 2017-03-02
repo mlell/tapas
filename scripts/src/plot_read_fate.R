@@ -39,12 +39,17 @@ PLOT_FILE         The filename of the plot to be generated.
                   FALSE (reads which map with low quality).
 
 --format F        Image format of the plot. Allowed: pdf or png. [Default: pdf]
+
+--exogenous ORG (short form: --exo ORG) 
+                  Consider it a correct match if this organisms reads do not map.
+                  Can be specified multiple times.
 "
 
 options(stringsAsFactors=FALSE)
 
 COL_OKMATCH = "#d4fa2c"
 COL_MISMATCH = "#ff592d"
+CHAR_NOTMAPPED = "*"
 
 main = function(argv){
     args = parse.args(argv)
@@ -55,6 +60,7 @@ main = function(argv){
     countcol  = args$COUNT
     qcol      = args$HQ_COL
     plotfile  = args$PLOT_FILE
+    exoSpecies = args$EXOGENOUS
     format    = tolower(args$FORMAT)
 
     tab = read.table(file=ifelse(inputfile=="-",stdin(),inputfile),
@@ -91,6 +97,15 @@ main = function(argv){
 
     tab = tab[,cols]
     colnames(tab) = names
+
+    # Set correct mapping of exogenous species to TRUE if they were not mapped.
+    for(e in exoSpecies){
+        iMatch = tab[,"trname"] == e & tab[,"rname"] == CHAR_NOTMAPPED
+        tab[iMatch, "correct.match"] = TRUE
+        if("high.quality" %in% colnames(tab)){
+            tab[iMatch, "high.quality"] = TRUE
+        }
+    }
 
     open.graphics.device(plotfile, format)
     # locally-defined plot function
@@ -169,7 +184,7 @@ createPlot = function(stat, relative=TRUE){
                 plot.new() 
                 # Print true organism names
                 par(usr=c(0,1,0,1))
-                if(c.rname == "*"){
+                if(c.rname == CHAR_NOTMAPPED){
                     text( 0.5,0.2, labels="(not mapped)")
                 }else{
                     text( 0.5,0.2, labels=c.rname)
@@ -322,6 +337,7 @@ parse.args = function(argv){
     a$MAPPED_TO = NA
     a$HQ_COL = NA
     a$FORMAT = "pdf"
+    a$EXOGENOUS = c()
     while(length(argv) > 0 && substr(argv[1],1,2) == "--" ){
         x = argv[1]
         argv = argv[-1]
@@ -333,6 +349,9 @@ parse.args = function(argv){
             argv = argv[-1]
         }else if( x == "--format" ){
             a$FORMAT = argv[1]
+            argv = argv[-1]
+        }else if (x == "--exogenous" || x == "--exo"){
+            a$EXOGENOUS = c(a$EXOGENOUS, argv[1])
             argv = argv[-1]
         }else{
             stop("Unknown option ",x,", use --help for info")
