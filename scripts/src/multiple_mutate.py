@@ -122,7 +122,13 @@ def main():
     aparser.add_argument("param_file", help="A whitespace-separated table \
             containing the columns strand, from, to, factor, geom_prob and \
             intercept")
+    aparser.add_argument("--seed",default=None, type=int, help=\
+            "Random number generator seed. Same value and same input leads \
+            to same output.")
     args=aparser.parse_args()
+
+    if args.seed is not None:
+        random.seed(args.seed)
         
     m = createMutationChain(args.param_file)
     while True:
@@ -139,6 +145,7 @@ def createMutationChain(filename):
     containing one Mutator object for each data line is created and 
     returned. There must be the column names present which are specified
     in the main help text of this script."""
+
     # Read in input table, ignoring lines starting with # and empty lines
     with open(filename,"rt") as fd:
         fields=[ l.split() 
