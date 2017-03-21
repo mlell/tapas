@@ -33,7 +33,7 @@ for f in tmp/*.txt; do
 
     echo Pandoc...
 
-    pandoc --mathml -s \
+    pandoc --mathjax -s \
            --template="pandoc.html.template" \
            --highlight-style=pygments \
            -f markdown+simple_tables \
