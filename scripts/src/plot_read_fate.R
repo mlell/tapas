@@ -319,11 +319,11 @@ draw.mapping = function(d){
 open.graphics.device = function(file, format){
     w = 4
     h = 3
-    dpi=75
+    dpi=300
     if(tolower(format) == "pdf"){
         pdf(file,width=w,height=h)
     }else if(tolower(format) == "png"){
-        png(file, width=w*dpi, height=h*dpi)
+        png(file, res=dpi, units="in", width=w, height=h)
     }else{
         stop("Unsupported plot format:", format)
     }
