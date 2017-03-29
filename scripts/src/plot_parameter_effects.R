@@ -54,11 +54,12 @@ main = function(argv){
 
     # In cols, the column names are saved as R symbols, in args they are saved
     # as strings
-    cols <- new.env(parent=emptyenv())
-    for( n in c("--color","X","Y")){
-        cols[[n]] <- if(is.null(args[[n]])) NULL
-                     else as.name(args[[n]])
-    }
+    #cols <- new.env(parent=emptyenv())
+    #for( n in c("--color","X","Y")){
+    #    cols[[n]] <- if(is.null(args[[n]])) NULL
+    #                 else as.name(args[[n]])
+    #}
+
 
     t <- read.table(file=args$TABLE, row.names=NULL, header=TRUE)
 
@@ -75,12 +76,24 @@ main = function(argv){
 
     # This column name is needed to provide an input for the length
     # function in the subsequent aggregate function
-    firstcol <- as.name(colnames(t)[1])
+    #firstcol <- as.name(colnames(t)[1])
+    firstcol <- colnames(t)[1]
     # Generate formula for aggregate, substituting user-specified 
     # column names
-    f <- as.formula(interp( 
-            "cbind(.amount=FSTCOL ) ~ Y + COLOR + X",
-            X=cols$X, Y=cols$Y, FSTCOL=firstcol, COLOR=cols$`--color`))
+
+    if(is.null(args$`--color`)){
+        color <- "0"
+    }else{
+        color <- args$`--color`
+    }
+
+    f <- sprintf("cbind(.amount=%s) ~ %s + %s + %s",
+                    firstcol, args$X, args$Y, color)
+    f <- as.formula(f)
+
+    #f <- as.formula(interp( 
+    #        "cbind(.amount=FSTCOL ) ~ Y + COLOR + X",
+    #        X=cols$X, Y=cols$Y, FSTCOL=firstcol, COLOR=cols$`--color`))
 
     a <- aggregate( f, FUN=length, data=t )
 
@@ -92,7 +105,6 @@ main = function(argv){
         if(mode(data) == "numeric") return(scale_y_continuous(...))
         else return( scale_y_discrete(...))
     }
-    
     p <- ggplot(a) + 
         aes_string(x=args$X, y=args$Y, size=".amount", color=args$`--color`) +
         (
