@@ -12,7 +12,7 @@ alteration of ancient DNA samples.
 Installation
 ============
 
-See the section <a href=00b_shell-prerequisites.txt>Dependencies of the scripts</a>
+See the section <a href=00b_shell-prerequisites.html>Dependencies of the scripts</a>
 to learn about the installation process of TAPAS
 
 Workflow
@@ -50,7 +50,7 @@ chapters which give more detail on each step.
    measures of mapping accuracy like **sensitivity and specificity**.
  * Finally, the obtained accuracy values can be analysed to determine the
    **importance of a certain mapping parameter choice** for the mapping success.
-   The section [Parameter influence](06_parameter-influence.html) provides
+   The section [Parameter influence](06_parameter_influence.html) provides
    details.
 
 Apart from that, the **Appendix** lists additional information:

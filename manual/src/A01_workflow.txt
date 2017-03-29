@@ -57,7 +57,9 @@ for sam in data/4/*.sam; do
     # Convert SAM to table
     scripts/sam2table data/4/${p}.sam > data/5/${p}.tab
 
-    # Mark correctly/incorrectly mapped reads
+    # Using the FASTA record names from the SAM file, obtain the organism 
+    # names where they stem from. This enables calculating statistics for
+    # endogenous and exogenous reads, separately.
     scripts/add_mapped_organisms \
         --endogenous volpertinger \
                      data/genome/volpertinger.fasta.fai \
@@ -69,7 +71,7 @@ for sam in data/4/*.sam; do
         | scripts/write_later data/5/${p}.tab
 
 
-    # Determine whether each read was correctly mapped
+    # Determine whether each read was correctly mapped. Adds column "correct"
     scripts/pocketR '
         within(input, { 
             correct =    

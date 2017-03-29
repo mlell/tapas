@@ -38,7 +38,7 @@ geometric distribution. The mutation probability at the read ends is
 the highest. By this, the chemical damage near read ends can be
 modelled. For this, three parameters are important:
 
-  * The base-independent mutation probability $t$ ($0<t<1$). This is
+  * The position-independent mutation probability $t$ ($0<t<1$). This is
     the probability of any base to mutate, regardless of its proximity
     to the end of the read. This can be used to model evolutionary
     distance.
@@ -51,16 +51,17 @@ modelled. For this, three parameters are important:
   * The multiplying factor $f$. At the read end, $f+t$ is the
     probability of the first base of the read to be mutated.
 
+
 With this model, its possible to archive mutation probabilities
 greater than one. This makes of course no sense and the mutation
 probability is cut back to one in such cases.
 
-In mathematical notation, the mutation probability $P_{mut}$ of a base
+In mathematical notation, the mutation probability $P_{\text{mut}}$ of a base
 number $x$, starting to count at the reads' end, is:
 
-$$P_{mut}(x) = f \cdot dgeom(x;p) + t$$
+$$P_{\text{mut}}(x) = f \cdot \text{dgeom}(x;p) + t$$
 
-with $dgeom(X;P)$ being the density function of the geometric
+with $\text{dgeom}(X;P)$ being the density function of the geometric
 distribution, with parameters X = number of tries; P = success probability.
 
 The following sketch graphs illustrate the three parameters:
@@ -79,18 +80,7 @@ cat data/mut-tables/mut.tab
 ```
 Two types of per-base mutation probabilities are distinguished:
 
- * The  **position-independent** mutation probability is the same for
-   all bases of the read. This can be used to model read derivation by
-   evolution.
- * The **position-dependent** mutation probability is dependent of the
-   proximity of a base to the end of the read. The nearer a base is to
-   the read end, the higher is the mutation probability of the base.
-   This can be used to model chemical damage to ancient DNA.
-
-Probability values  are specified which range from 0 (never mutate
-that base) to 1 (always mutate that base). Probabilities of multiple
-lines which are applicable to the same base add up. The columns have the 
-following meaning:
+The columns have the following meaning:
  
   * strand:  [3 or 5] Which side (3' or 5' end) of the read shall be
     considered the read end when the base-dependent mutation
@@ -109,28 +99,16 @@ following meaning:
     decline, higher values lead to faster decline. 
   * intercept: The position-independent mutation probability.
 
-In the example above, a base is $x$ bp away from the 5' end of
-a read of length l. That means, it is $(l-x)$ bp away from the 3' end
-of the read. The exchange probability depends on the type of the
-nucleotide and on $x$:
-
-Base at position $x$ is not Cytosine:
-
-$$P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
-P_{\ast\rightarrow\ast}$$
-
-Base at position $x$ is Cytosine (C): 
-
-$$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
-          (0.3\times dgeom(x;0.4) + 0.1) + 
-          (0.1\times dgeom((l-x);0.2) + 0.0) $$
+For each row of the table, the read is subjected to one round of
+mutation introduction where the mutation probability per base is
+determined by the parameters found in that row.
 
 
 Subject a FASTQ file to artificial mutations
 ---------------------------------------------
 
 The `multiple-mutate.py` tool takes a table of the previous section as
-input and mutates strings provided to it on standard input
+input and mutates raw nucleotide strings provided to it on standard input
 accordingly. 
 
 An already existent FASTQ file can be mutated using the `filter_fastq`
