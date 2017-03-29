@@ -209,8 +209,8 @@ scripts/mapdamage2geomparam \
 ```
 
 The generated plots can be viewed 
-<a href="data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
-<a href="data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
+<a href="../../data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
+<a href="../../data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
 fit_000_GS136_3pGtoA_freq.txt.pdf
 
 Generating multiple damage patterns using a parameter table
