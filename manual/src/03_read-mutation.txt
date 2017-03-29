@@ -3,6 +3,70 @@ title:
   - Mutation of reads
 ---
 
+Mutations must be introduced into the artificial reads in order to
+simulate chemical damage and evolutionary distance of *ancient DNA*
+with respect to the recent reference which they shall be mapped to. 
+
+As chemical damage is more prevalent near the end of *ancient DNA*,
+TAPAS can introduce more mutations into the artificial reads, near
+their ends. To this effect parameters must be determined, which
+affect the probability of each base exchange for each position in the
+read. 
+
+The mutation probability parameters are detailed in the [next
+section](#mutation-probabilities). Following that, the section
+[Specifying the parameters](#specifying-the-parameters) shows how
+values for the mutation probability parameters can be set by the user.
+Afterwards, in [Subject-a-FASTQ-file-to-artificial-mutations](#subject-a-fastq-file-to-artificial-mutations), the FASTQ file
+containing artificial endogenous reads, which was generated in the
+[previous topic](02_read-generation.html), is subjected to mutations
+with the specified base exchange probabilities.
+
+This chapter closes with two [advanced
+topics](#advanced-read-mutation): 
+Obtaining mutation probability parameters from a mapDamage output and
+how to define multiple sets of mutation probability parameters to
+create multiple FASTQ files containing reads of different mutation
+strengths.
+
+
+Mutation probabilities
+----------------------
+
+The reads are mutated using per base probabilities derived from the
+geometric distribution. The mutation probability at the read ends is
+the highest. By this, the chemical damage near read ends can be
+modelled. For this, three parameters are important:
+
+  * The base-independent mutation probability $t$ ($0<t<1$). This is
+    the probability of any base to mutate, regardless of its proximity
+    to the end of the read. This can be used to model evolutionary
+    distance.
+
+  * The steepness $p$ ($0<p<1$) of the mutation probability decline
+    when moving away from the read end. The higher this parameter the
+    steeper is the decline of mutation probability when moving away
+    from the read end.
+
+  * The multiplying factor $f$. At the read end, $f+t$ is the
+    probability of the first base of the read to be mutated.
+
+With this model, its possible to archive mutation probabilities
+greater than one. This makes of course no sense and the mutation
+probability is cut back to one in such cases.
+
+In mathematical notation, the mutation probability $P_{mut}$ of a base
+number $x$, starting to count at the reads' end, is:
+
+$$P_{mut}(x) = f \cdot dgeom(x;p) + t$$
+
+with $dgeom(X;P)$ being the density function of the geometric
+distribution, with parameters X = number of tries; P = success probability.
+
+The following sketch graphs illustrate the three parameters:
+
+<img src="../../fig/mut.svg" width="800" />
+
 
 Specifying the parameters
 -------------------------
@@ -60,45 +124,6 @@ Base at position $x$ is Cytosine (C):
 $$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
           (0.3\times dgeom(x;0.4) + 0.1) + 
           (0.1\times dgeom((l-x);0.2) + 0.0) $$
-
-
-
-Mutation probabilities
-----------------------
-
-The reads are mutated using per base probabilities derived from the
-geometric distribution. The mutation probability at the read ends is
-the highest. By this, the chemical damage near read ends can be
-modelled. For this, three parameters are important:
-
-  * The base-independent mutation probability $t$ ($0<t<1$). This is
-    the probability of any base to mutate, regardless of its proximity
-    to the end of the read. This can be used to model evolutionary
-    distance.
-
-  * The steepness $p$ ($0<p<1$) of the mutation probability decline
-    when moving away from the read end. The higher this parameter the
-    steeper is the decline of mutation probability when moving away
-    from the read end.
-
-  * The multiplying factor $f$. At the read end, $f+t$ is the
-    probability of the first base of the read to be mutated.
-
-With this model, its possible to archive mutation probabilities
-greater than one. This makes of course no sense and the mutation
-probability is cut back to one in such cases.
-
-In mathematical notation, the mutation probability $P_{mut}$ of a base
-number $x$, starting to count at the reads' end, is:
-
-$$P_{mut}(x) = f \cdot dgeom(x;p) + t$$
-
-with $dgeom(X;P)$ being the density function of the geometric
-distribution, with parameters X = number of tries; P = success probability.
-
-The following sketch graphs illustrate the three parameters:
-
-<img src="fig/mut.svg" width="800" />
 
 
 Subject a FASTQ file to artificial mutations
