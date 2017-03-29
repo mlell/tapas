@@ -258,14 +258,17 @@ cp data/mut-tmpl/mut-tmpl data/3
 column -t data/3/mut-tmpl
 ```
 
-And a table is created which looks like this:
+... and another table is written which lists several values for the
+expressions in braces `{...}` from the previous file:
 
 ```{.sh}
 cp data/mut-tmpl/tab data/3/mut-tab
 column -t data/3/mut-tab
 ```
 
-several files can be generated with 
+... several files can be generated, where the brace-expressions are
+replaced by the values of the second table, using the `fill_template`
+script:
 
 ```{.sh}
 scripts/fill_template \
@@ -273,10 +276,12 @@ scripts/fill_template \
     < data/3/mut-tab
 ```
 
-Use the `--output` switch of this script to write each file in a
-separate file. The argument of `--output` can (and should!) contain
-column names of the table, enclosed in braces {...}. This creates a
-separate filename per input row. 
+To write each table into its own file, the `--output` switch of the
+`fill_template` script can be used. The argument of `--output` can
+(and should!) contain column names of the table, again enclosed in braces
+`{...}`. This creates multiple files, where the braced expressions in
+the file names are replaced in the same way as they are in the table
+contents.
 
 We will now write each of the tables shown above to its own file. We
 want to name the files using a counting number, but our input table
@@ -310,9 +315,9 @@ done
 ```
 
 If several combinations of mutation parameters shall be tested,
-`cross_tab.py` can be used to generate the table from predefined
-parameter values, like described with mapper parameters in the next
-section.
+`cross_tab.py` can be used to generate a table like `data/3/mut-tab`
+from predefined parameter values, like described with mapper
+parameters in the next chapter.
 
 
 
