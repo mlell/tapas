@@ -36,7 +36,7 @@ $endfor$
 $for(include-before)$
 $include-before$
 $endfor$
-<!--$if(title)$
+$if(title)$
 <div id="$idprefix$header">
 <h1 class="title">$title$</h1>
 $if(subtitle)$
@@ -50,8 +50,7 @@ $if(date)$
 $endif$
 </div>
 $endif$
--->
-<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<div class="tocbar"><a href="00b_Overview.html"><span>Table of contents</span></a></div>
 <!-- Local Table of contents -->
 $if(toc)$
 <div id="$idprefix$TOC">

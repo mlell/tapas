@@ -1,6 +1,6 @@
 ---
 title:
-- Input files
+  - Input files
 ---
 
 In this tutorial different parameters for the short read mapper BWA will be 

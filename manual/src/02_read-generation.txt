@@ -1,6 +1,6 @@
 ---
 title: 
-- Generation of simulated read sets
+  - Generation of simulated read sets
 ---
 
 Generate endogenous reads from our sample genome `volpertinger.fasta`. Store the

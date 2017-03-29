@@ -1,10 +1,7 @@
 ---
 title: 
-- Generate mapper calls
+  - Generate mapper calls
 ---
-
-Generate mapper calls
-=====================
 
 A call is an order to the computer to execute a program. It is a
 string which contains the program name and can include variables which

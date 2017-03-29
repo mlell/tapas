@@ -1,10 +1,7 @@
 ---
 title: 
-- Comparing multiple mapper runs
+  - Comparing multiple mapper runs
 ---
-
-Comparing multiple mapper runs
-==============================
 
 The file `data/4/partab` holds the information which parameters were
 used for which mapping run. By relating the output measures like
