@@ -190,6 +190,23 @@ cat data/3/volpertinger_mut.fastq data/2/retli.fastq \
     > data/3/all.fastq
 ```
 
+Advanced read mutation
+======================
+
+The following two sections deal with advanced means of determining
+read mutation probabilities. They are not used in this tutorial, but
+may be used in custom workflows. 
+
+The subsequent section deals with how
+to read out mapDamage output to determine the read mutation
+probability parameters. 
+
+The section following that deals with how to create multiple distinct
+sets of read mutation probabilty parameters. By that means, different
+read sets can be created which were subjected to varying degrees of
+mutations. Therefore, mapper performance can be evaluated for
+different severities of read mutations.
+
 Obtaining mutation rates from mapDamage
 ---------------------------------------
 
