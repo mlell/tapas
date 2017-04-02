@@ -83,7 +83,6 @@ def main(argv):
     endoRecordToOrganismTab = endoRecordToOrganismTab.append(
         {'record':NO_ORGANISM,'mapped_organism':NO_ORGANISM},
         ignore_index = True)
-    print(endoRecordToOrganismTab)
 
 
     # Make sure the record names of the endogenous organisms are
