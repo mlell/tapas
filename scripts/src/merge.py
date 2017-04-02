@@ -30,7 +30,9 @@ TAB_A and TAB_B are merged using the first column specified after the
 file name as a key. See examples below.
 
 By default, a natural join is performed, that is: only rows corresponding
-to values in TAB_A and TAB_B are inserted in the output. 
+to values in TAB_A and TAB_B are inserted in the output. If you want to make 
+sure that all rows of TAB_A and/or TAB_B are included in the output,
+use the --all, --all-a or --all-b switch.
 
 Options:
     
@@ -47,6 +49,9 @@ Options:
                        join. Default: NA
     --a-sorted         Table A is sorted already; do not sort again
     --b-sorted         Table B is sorted already; do not sort again  
+
+    --all-a-cols       Output all columns of table A
+    --all-b-cols       Output all columns of table B
 
 
 """
