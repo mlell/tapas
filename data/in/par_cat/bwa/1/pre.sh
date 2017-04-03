@@ -1,4 +1,0 @@
-
-mkdir run
-mkdir log
-
