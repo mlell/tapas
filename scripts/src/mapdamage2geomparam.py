@@ -8,6 +8,7 @@ import sys
 import re
 from collections import namedtuple
 from textwrap import dedent
+from numbers import Number
 
 import numpy as np
 from numpy import array 
@@ -74,7 +75,8 @@ def main():
             filename         = f,
             readMetadataFrom = args.metadata,
             plotFilename     = plot_filename)
-        outputList = [str(p) for p in outputParams] 
+        outputList = [str(np.round(p,8)) if isinstance(p,Number) else str(p) 
+                      for p in outputParams ]
         print("\t".join(outputList))
 
 
