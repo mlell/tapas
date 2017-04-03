@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Parse textual information about expected variables.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for parseExpectedArgs {argparse}"><tr><td>parseExpectedArgs {argparse}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Parse textual information about expected variables.
+</h2>
+
+<h3>Description</h3>
+
+<p>Reads in a string forming a table. Returns a nested list of class &quot;expectedArguments&quot;. 
+Contains one item per argument, each item containing
+4 sub-items named name, type, val, help.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+parseExpectedArgs(s, sep = "|", expectedMark = "&lt;&gt;", helpText = "")
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>s</code></td>
+<td>
+
+<p>String forming a table: Example:
+<code>
+a | numeric   | &lt;&gt;    | Help text for a
+b | character | abc   | Help text for b
+c | logical   | FALSE | Help text for c
+d | numeric   | 1     | Help text for d</code>
+</p>
+</td></tr>
+<tr valign="top"><td><code>sep</code></td>
+<td>
+
+<p>Table column separator character
+</p>
+</td></tr>
+<tr valign="top"><td><code>expectedMark</code></td>
+<td>
+
+<p>Text in value column if the argument is mandatory. Default: &lt;&gt;.
+</p>
+</td></tr>
+<tr valign="top"><td><code>helpText</code></td>
+<td>
+
+<p>A text describing the program. This is shown in addition to the 
+argument specific help texts when the script is invoked with the &ndash;help or
+-h option.
+</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>see Description.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Moritz Lell
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+expectedArgs="
+nreads        | numeric | &lt;&gt; | Number of reads to create
+readlength    | numeric | &lt;&gt; | Average length of an individual read
+readlength.sd | numeric | &lt;&gt; | Standard deviation of read lengths
+start         | numeric | &lt;&gt; | start index
+end           | numeric | &lt;&gt; | end index
+seed          | numeric | NA | random number generator seed
+"
+
+eargs= parseExpectedArgs(expectedArgs)
+
+</pre>
+
+<hr><div align="center">[Package <em>argparse</em> version 1.0 <a href="00Index.html">Index</a>]</div>
+</body></html>
