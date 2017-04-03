@@ -3,11 +3,16 @@ import argparse
 import random 
 import sys
 from textwrap import dedent
+import pandas as pd
+import numpy as np
 
 # Don't throw an error if output is piped into a program that doesn't
 # read all of its input, like `head`.
 from signal import signal, SIGPIPE, SIG_DFL
 signal(SIGPIPE, SIG_DFL) 
+
+# Used to make sure each deprecation warning is only shown once
+__warn_shown = []
 
 helpText=dedent("""
     Change one base into another with a probability geometrically dependent 
@@ -36,8 +41,8 @@ helpText=dedent("""
 
         # Lines starting with a hash are ignored as comments
         strand  from    to      factor          geom_prob       intercept
-        3       G       A       0.79513996      0.26918746      0.039386893
-        5       C       T       0.43360246      0.35249167      0.027965522
+        3p      G       A       0.79513996      0.26918746      0.039386893
+        5p      C       T       0.43360246      0.35249167      0.027965522
 
     The from and to columns can alternatively contain an asterisk (*). In the
     from column it means every character found in the string is replaced with
@@ -153,43 +158,51 @@ def createMutationChain(filename):
                  if not (
                      l.lstrip().startswith("#")
                      or l.strip() == "" ) ]
-    # Process header line
-    try:
-        h=fields[0]
-        # Determine the column number of each of the columns named
-        # strand, from, to, factor, geom_prob, intercept
-        # i will be a dictionary: column name -> column number
-        i={c: h.index(c) for c in \
-                "strand from to factor geom_prob intercept".split()}
-    except ValueError as e:
-        raise ValueError("Error: specified table doesn't contain \
-                all the required fields! Consult the help with -h.\n\n")
-    
+
+    reqd_headers = "strand from to factor geom_prob intercept".split()
+    if not sorted(fields[0]) == sorted(reqd_headers):
+        raise ValueError("Error: specified table misses columns or contains "+
+                "additional columns! Consult the help with -h.\n\n")
+
+    dat = pd.DataFrame(fields[1:], columns = fields[0])
+    dat[['factor','geom_prob','intercept']] = \
+        dat[['factor','geom_prob','intercept']].apply(pd.to_numeric,
+                errors="coerce")
+
+    dat.loc[np.isnan(dat['intercept']),'intercept'] = 0
+
     # Initalize object to be returned
     m = MutationChain()
     
     # For every row of input table
-    for a in fields[1:] :
+    for a in dat.to_dict('records') :
         # Convenience function f: Access elements by column name
-        f=lambda s: a[i[s]]
+        if a["strand"] in ["3","5"]:
+            showWarning("DEPRECATED: Old format for column 'strand' "+
+                        "provided (3|5). Use (3p|5p) instead.")
+            a["strand"] = a["strand"]+"p"
+
         # Whether to mutate from 3' end or 5' end
-        if f("strand") == "3":
+        if a["strand"] == "3p":
             inverse = True
-        elif f("strand") == "5":
+        elif a["strand"] == "5p":
             inverse = False
         else:
             raise ValueError(("Illegal entry {} in strand column!"+ 
-                              "Expected: 3 or 5").format(a[i_strand]))
+                              "Expected: 3p or 5p").format(a["strand"]))
         # Add a mutator with read parameters to the chain
-        m.append(GeomMutator( fromBase=f("from")       , toBase=f("to")  
-                            , factor=f("factor")       , geom_prob=f("geom_prob") 
-                            , constant=f("intercept")  , inverse=inverse))
+        m.append(GeomMutator( fromBase=a["from"]       , toBase=a["to"]  
+                            , factor=a["factor"]       , geom_prob=a["geom_prob"] 
+                            , constant=a["intercept"]  , inverse=inverse))
     
     return m
 
 
-
-
+def showWarning(msg):
+    global __warn_shown
+    if msg not in __warn_shown:
+        print(msg,file=sys.stderr)
+        __warn_shown.append(msg)
 
 if (__name__== "__main__"): main() 
 
