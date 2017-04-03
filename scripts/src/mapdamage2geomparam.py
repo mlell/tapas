@@ -57,8 +57,7 @@ def main():
     # List of files to process
     mdfiles=args.mdfiles
 
-    print("strand\tfrom\tto\tfactor\tgeom_prob\tintercept\t" + 
-            "filename")
+    print("strand\tfrom\tto\tfactor\tgeom_prob\tintercept")
     
     for i,f in enumerate(mdfiles):
         if plot_prefix != None:
@@ -72,7 +71,7 @@ def main():
             filename         = f,
             readMetadataFrom = args.metadata,
             plotFilename     = plot_filename)
-        outputList = [p for p in outputParams] + [f]
+        outputList = [p.rstrip('\n') for p in outputParams]
         print("\t".join(outputList))
 
 
