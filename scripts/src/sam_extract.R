@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(methods) # docopt
+#library(methods) # docopt
 #library(docopt) # Buggy: splits "..." enclosed arguments
 library(magrittr) # %>% and %<>% pipe operators
 library(stringr)

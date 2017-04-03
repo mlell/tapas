@@ -1,5 +1,5 @@
 #!/bin/sh
-## Launch the script src/preview.R.
+## Launch the script src/plot_mutation_probabilities.R.
 ## Set appropriate environment variables in advance.
 ## See the help of the launched scripts by invoking
 ## this script with the --help option.
@@ -28,4 +28,4 @@ function r_launch(){
 # Directory this script lives in
 thisdir="$(dirname "$(readlink -f "$0")")"
 # Launch the script and forward all command line arguments
-r_launch src/preview.R "${thisdir}" "$@"
+r_launch src/plot_mutation_probabilities.R "${thisdir}" "$@"

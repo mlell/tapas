@@ -1,5 +1,5 @@
 #!/bin/sh
-## Launch the script src/index-column.py.
+## Launch the script src/index_column.py.
 ## Set appropriate environment variables in advance.
 ## See the help of the launched scripts by invoking
 ## this script with the --help option.
@@ -32,4 +32,4 @@ function python_launch(){
 # Directory this script lives in
 thisdir="$(dirname "$(readlink -f "$0")")"
 # Launch the script and forward all command line arguments
-python_launch src/index-column.py "${thisdir}" "$@"
+python_launch src/index_column.py "${thisdir}" "$@"

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Intersperse a file with nucleotide sequences and a file with
 # Quality scores to form a FASTQ-File
 # Input files must have raw format: Just lines of Text are 
