@@ -148,21 +148,30 @@ def plotFitResult(filename, probabilities, fit_parameters,
     fig, (ax1, ax2) = plt.subplots(2,1,sharex=True, sharey=False)
     ax2.set_yscale('log',basey=10)
 
-    ax1.plot(x, probabilities, 'ok')
-    ax1.plot(x, y_fun, "b-")
+    # Commas behind hDat, etc. are needed because pyplot.plot always
+    # returns tuples of artists, even if only one artist is returned.
+    # Therefore, add the comma to unpack the tuple.
+    hDat, = ax1.plot(x, probabilities, 'ok')
+    hFit, = ax1.plot(x, y_fun, "b-")
+    ax1.set_ylabel("mutation probability")
+
+    ax2.plot(x, y_fun, "b-")
+
+    hErr, = ax2.plot(x, err, color="red")
+
+    ax1.legend( [hDat,hFit,hErr],["Data","Fit","Error"]
+              , bbox_to_anchor=(0.5,1), loc = "lower left"
+              , frameon = False, ncol = 3)
     
-    ax2.plot(x, y_fun)
-    ax2.plot(x, err, color="red")
     # Write parameters in plot
-    plt.figtext(0.9,0.9,verticalalignment='top',
+    plt.figtext(0.1,0.9,verticalalignment='bottom',
                 multialignment='left',s=dedent(r"""
-            $y=a\times\operatorname{{geom}}(x,p)+t$
-            a = {:0.3g}
-            p = {:0.3g}
-            t = {:0.3g}""".format( fit_parameters[0],
+            $y=a\times\operatorname{{geom}}(x,p)+t$  
+            a = {:0.3g}; p = {:0.3g};  t = {:0.3g}""".format( fit_parameters[0],
                fit_parameters[1], fit_parameters[2])))
 
-    
+    ax2.set_xlabel("bp from read end")
+    ax2.set_ylabel("mutation probability (log)")
 
     if imgFormat == 'show':
         plt.show()
