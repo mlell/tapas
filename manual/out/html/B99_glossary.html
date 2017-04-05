@@ -10,16 +10,31 @@
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
-    <div class="content">
-<!--<div id="header">
+<div class="toc contentbox">
+    <span class="tocheader">Table of contents</span>
+<ul>
+<li><a href="00b_Overview.html">Package overview</a>
+<li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
+<li><a href="00c_input-files.html">Input files</a>
+<li><a href="01_genome-preparation.html">Genome Preparation</a>
+<li><a href="02_read-generation.html">Generation of simulated read sets</a>
+<li><a href="03_read-mutation.html">Mutation of reads</a>
+<li><a href="04_mapping.html">Generate mapper calls</a>
+<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
+<li class="tocthis"><a href="B99_glossary.html">Glossary</a>
+</ul>
+</div>
+<div class="content contentbox">
+<div id="header">
 <h1 class="title">Glossary</h1>
 </div>
--->
-<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
 <!-- Local Table of contents -->
 <!--Back to table of contents -->
 <!-- CONTENT -------------------------------------->
-<h1 id="glossary">Glossary</h1>
 <p>Some terms are explained here, which are used in the rest of the manual and may have a special meaning:</p>
 <p>~table: A text table is the most widely used data format in this project. It is a simple text file, where the columns are separated by a special character. Usually this is a tabulator (tab) character, but sometimes space-separated tables are also used.</p>
 <p>~FASTA record: A FASTA record is a block in a fasta file which is delimited by two &gt; signs. It consists of the following parts:</p>
@@ -50,5 +65,6 @@
 <p>~command line argument: a value which is written on the command line behind the name of the program which shall be invoked. They are forwarded to the program and influence it. The valid parameters of a program are described in the program's manual. (often accessible via the <code>--help</code> command line argument.</p>
 <p>~command line switch: -&gt; command line argument</p>
 </div>
+<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
 </body>
 </html>

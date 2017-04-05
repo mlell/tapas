@@ -16,6 +16,7 @@ import pandas as pd
 
 
 help_params = {
+
 'readtab':
 """A text table containing at least the following columns. 
 Column names can be changed by additional parameters to 
@@ -30,6 +31,7 @@ this command:
     ...         ...
     ─────────────────────
 """,
+
 "--endogenous":
 """A set of endogenous reads. 
 
@@ -38,13 +40,17 @@ organism"s name, FAI is a .fai file (see samtools) of the
 reference genome and RNAME is a file containing a 
 newline-separated list of read names which belong to
 this organism.""",
+
 "--exogenous":
 """A set of exogenous reads. These reads will carry "*" as 
 true organism name. RLIST is a file containing a 
 newline-separated list of read names which are considered 
 exogenous reads.""",
-"--read-col"   : "The name of the read name column of READTAB",
-"--record-col" : "The name of the record name column of READTAB"
+
+"--read-col"   : "The name of the read name column of READTAB (default: qname)",
+
+"--record-col" : "The name of the record name column of READTAB (default: rname)"
+
 }
 
 # Character representing a non-mapped read <=> "no organism"

@@ -32,11 +32,15 @@ $endfor$
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
-    <div class="content">
+<div class="toc contentbox">
+    <span class="tocheader">Table of contents</span>
+<!-- ## TOC HERE ## -->
+</div>
+<div class="content contentbox">
 $for(include-before)$
 $include-before$
 $endfor$
-<!--$if(title)$
+$if(title)$
 <div id="$idprefix$header">
 <h1 class="title">$title$</h1>
 $if(subtitle)$
@@ -50,8 +54,6 @@ $if(date)$
 $endif$
 </div>
 $endif$
--->
-<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
 <!-- Local Table of contents -->
 $if(toc)$
 <div id="$idprefix$TOC">
@@ -73,5 +75,6 @@ $for(include-after)$
 $include-after$
 $endfor$
 </div>
+<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
 </body>
 </html>

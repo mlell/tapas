@@ -23,46 +23,71 @@ done
 
 for f in tmp/*.txt; do
     echo "--- Chapter $f ---"
-    md="${f%.txt}.md"
-    html="${f%.txt}.html"
+    bn="$(basename "$f")"
+    md="out/md/${bn%.txt}.md"
+
     gen-tools/pipeweave.py "bash --norc" <"$f" >"$md"
 
-    # This enables bash syntax highlighting by pandoc
+    # This enables bash syntax highlighting by pandoc of {.sh} sections
+    # only {.bash} is syntax highlighted, but {.sh} is executed and weaved
+    # by pipeweave
     sed 's/^```{.sh}/```{.bash}/' "$md" > "${md}.tmp" && 
     mv "${md}.tmp" "$md"
+done
 
-    echo Pandoc...
 
-    pandoc --mathml -s \
+for md in out/md/*.md; do
+    fn="$(basename "$md")"
+    html="out/html/${fn%.md}.html"
+    echo "Pandoc $md -> $html ..."
+    pandoc -s \
            --template="pandoc.html.template" \
+           --mathjax \
            --highlight-style=pygments \
            -f markdown+simple_tables \
            --css ../../manual.css -i "$md" -o "$html"
            #-V toctitle:"Table of contents" \
 done
 
-mv tmp/*.html out/html
-mv tmp/*.md   out/md
-
 cat >toc.html <<EOF
-<html>
-<head> <title> Table of contents </title> 
-<link rel="stylesheet" href="manual.css" type="text/css" />
-<body>
-<div class="title"> The TAPAS Manual</div>
-<div class="content">
 <ul>
 EOF
-grep --color=none -r '<title>' out/html |sort |\
-    sed -E 's|^(.*):.*<title>(.*)</title>|<li><a href="\1">\2</a>|' \
+grep -I -r '<title>' out/html |sort |\
+    sed -E 's|^out/html/(.*):.*<title>(.*)</title>|<li><a href="\1">\2</a>|' \
     >> toc.html
    
 cat >>toc.html <<EOF
 </ul>
-</div>
-</body>
-</html>
 EOF
+
+function printTOC(){
+    # fn: if this string is found in a TOC line, the respective <a> element
+    #     is assigned the "tochere" CSS class
+    fn="${1?}"
+    while IFS= read -r line; do
+        if grep -I -F -q "$fn" <<< "$line"; then
+            sed 's/<li>/<li class="tocthis">/' <<< "$line"
+        else
+            printf "%s\n" "$line"
+        fi
+    done < toc.html
+}
+
+
+# Insert the TOC into every file
+for f in out/html/*.html; do
+    echo "Add TOC: $f"
+    # read removes all characters in $IFS by default
+    while IFS= read -r line; do
+        if [ "$line" = '<!-- ## TOC HERE ## -->' ]; then
+            printTOC "$(basename "$f")"
+        else
+            printf "%s\n" "$line"
+        fi
+    done <"$f" >"$f.tmp" &&
+    mv "$f.tmp" "$f"
+
+done
 
 
         

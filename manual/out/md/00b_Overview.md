@@ -1,12 +1,7 @@
 ---
 title:
-- Package overview
+  - Package overview
 ---
-
-<span class="title">The TAPAS manual</span>
-
-Package overview
-================
 
 **TAPAS (Testing Aligner Performance for Ancient Samples)** is a software
 package written in Python and R which enables you to test how well parameters of
@@ -14,23 +9,60 @@ NGS short read mappers perform when mapping reads to a reference. The reads can
 be subjected to artificial damage to simulate evolutionary distance and chemical
 alteration of ancient DNA samples. 
 
+Installation
+============
+
+See the section <a href=00b_shell-prerequisites.html>Dependencies of the scripts</a>
+to learn about the installation process of TAPAS
 
 Workflow
 ========
 
-Click on the items to jump to the respective parts of the manual.
+TAPAS can be used to generate artificial NGS reads from a given reference
+genome, introduce mutations into them which follow a user-defined pattern and
+evaluate the mapping success of the reads with a user-supplied short read
+mapper.
 
-Generate reads from a sample genome
------------------------------------
+See the section about [Input files](00c_input-files.html) to see
+which files must be supplied prior to the analysis.
 
-Refer to the section [Generating sample reads](#generating-sample-reads).
+In the following, the workflow is outlined, where links are provided to manual
+chapters which give more detail on each step. 
 
-Mutate the sample reads
------------------------
+ * **Prepare the reference genome.** See section
+   [Genome Preparation](01_genome-preparation.html)
+ * **Generate artificial reads from a sample genome.** See 
+   [Read generation](02_read-generation.html)
+ * **Mutations** must be introduced into the reads to mimic chemical damage of
+   *ancient DNA* and evolutionary distance of the reads to the reference. Read
+   the section about [Read mutation](03_read-mutation.html) for more
+   information
+ * The mutated artificial reads are **mapped** back to the reference from which
+   they originated. This simulates the process of mapping *ancient DNA* reads to
+   a recent reference genome. TAPAS allows for comparison of different mapping
+   parameters in terms of mapping success. Section 
+   [Mapping](04_mapping.html) provides details on how the mapping
+   commands and parameters are provided to TAPAS.
+ * The read mapping yields one SAM file for every mapping parameter set tested.
+   The section [SAM parsing](05_sam-parsing.html) provides
+   information on how the mapping positions of the artificial reads can be
+   compared to their known, true, positions in the reference to determine
+   measures of mapping accuracy like **sensitivity and specificity**.
+ * Finally, the obtained accuracy values can be analysed to determine the
+   **importance of a certain mapping parameter choice** for the mapping success.
+   The section [Parameter influence](06_parameter_influence.html) provides
+   details.
 
-Simulate chemical damage and evolutionary distance. Read the section
-[Mutation of reads](#mutation-of-reads)
+Apart from that, the **Appendix** lists additional information:
 
+ * All commands from the tutorial, collated into one script for overview:
+   [Appendix A1](A01_workflow.html)
+ * An overview of all scripts provided by TAPAS: [Appendix A2](A02_scripts.html)
+ * How to put together artificial FASTQ files from their parts (1) nucleotide
+   strings, (2) quality strings and (3) read names to allow for more
+   fine-grained read generation and incorporation of external tools: [Appendix
+   A3: Advanced Read generation](A03_advanced_read-generation.html)
+ * [Appendix B: Glossary](B99_glossary.html)
 
 
 

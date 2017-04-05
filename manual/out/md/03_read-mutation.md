@@ -1,10 +1,73 @@
 ---
 title: 
-- Mutation of reads
+  - Mutation of reads
 ---
 
-Mutation of reads
-=================
+Mutations must be introduced into the artificial reads in order to
+simulate chemical damage and evolutionary distance of *ancient DNA*
+with respect to the recent reference which they shall be mapped to. 
+
+As chemical damage is more prevalent near the end of *ancient DNA*,
+TAPAS can introduce more mutations into the artificial reads, near
+their ends. To this effect parameters must be determined, which
+affect the probability of each base exchange for each position in the
+read. 
+
+The mutation probability parameters are detailed in the [next
+section](#mutation-probabilities). Following that, the section
+[Specifying the parameters](#specifying-the-parameters) shows how
+values for the mutation probability parameters can be set by the user.
+Afterwards, in [Subject-a-FASTQ-file-to-artificial-mutations](#subject-a-fastq-file-to-artificial-mutations), the FASTQ file
+containing artificial endogenous reads, which was generated in the
+[previous topic](02_read-generation.html), is subjected to mutations
+with the specified base exchange probabilities.
+
+This chapter closes with two [advanced
+topics](#advanced-read-mutation): 
+Obtaining mutation probability parameters from a mapDamage output and
+how to define multiple sets of mutation probability parameters to
+create multiple FASTQ files containing reads of different mutation
+strengths.
+
+
+Mutation probabilities
+----------------------
+
+The reads are mutated using per base probabilities derived from the
+geometric distribution. The mutation probability at the read ends is
+the highest. By this, the chemical damage near read ends can be
+modelled. For this, three parameters are important:
+
+  * The position-independent mutation probability $t$ ($0<t<1$). This is
+    the probability of any base to mutate, regardless of its proximity
+    to the end of the read. This can be used to model evolutionary
+    distance.
+
+  * The steepness $p$ ($0<p<1$) of the mutation probability decline
+    when moving away from the read end. The higher this parameter the
+    steeper is the decline of mutation probability when moving away
+    from the read end.
+
+  * The multiplying factor $f$. At the read end, $f+t$ is the
+    probability of the first base of the read to be mutated.
+
+
+With this model, its possible to archive mutation probabilities
+greater than one. This makes of course no sense and the mutation
+probability is cut back to one in such cases.
+
+In mathematical notation, the mutation probability $P_{\text{mut}}$ of a base
+number $x$, starting to count at the reads' end, is:
+
+$$P_{\text{mut}}(x) = f \cdot \text{dgeom}(x;p) + t$$
+
+with $\text{dgeom}(X;P)$ being the density function of the geometric
+distribution, with parameters X = number of tries; P = success probability.
+
+The following sketch graphs illustrate the three parameters:
+
+<img src="../../fig/mut.svg" width="800" />
+
 
 Specifying the parameters
 -------------------------
@@ -23,18 +86,7 @@ strand   from   to   factor  geom_prob  intercept
 ```
 Two types of per-base mutation probabilities are distinguished:
 
- * The  **position-independent** mutation probability is the same for
-   all bases of the read. This can be used to model read derivation by
-   evolution.
- * The **position-dependent** mutation probability is dependent of the
-   proximity of a base to the end of the read. The nearer a base is to
-   the read end, the higher is the mutation probability of the base.
-   This can be used to model chemical damage to ancient DNA.
-
-Probability values  are specified which range from 0 (never mutate
-that base) to 1 (always mutate that base). Probabilities of multiple
-lines which are applicable to the same base add up. The columns have the 
-following meaning:
+The columns have the following meaning:
  
   * strand:  [3 or 5] Which side (3' or 5' end) of the read shall be
     considered the read end when the base-dependent mutation
@@ -53,67 +105,16 @@ following meaning:
     decline, higher values lead to faster decline. 
   * intercept: The position-independent mutation probability.
 
-In the example above, a base is $x$ bp away from the 5' end of
-a read of length l. That means, it is $(l-x)$ bp away from the 3' end
-of the read. The exchange probability depends on the type of the
-nucleotide and on $x$:
-
-Base at position $x$ is not Cytosine:
-
-$$P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
-P_{\ast\rightarrow\ast}$$
-
-Base at position $x$ is Cytosine (C): 
-
-$$P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
-          (0.3\times dgeom(x;0.4) + 0.1) + 
-          (0.1\times dgeom((l-x);0.2) + 0.0) $$
-
-
-
-Mutation probabilities
-----------------------
-
-The reads are mutated using per base probabilities derived from the
-geometric distribution. The mutation probability at the read ends is
-the highest. By this, the chemical damage near read ends can be
-modelled. For this, three parameters are important:
-
-  * The base-independent mutation probability $t$ ($0<t<1$). This is
-    the probability of any base to mutate, regardless of its proximity
-    to the end of the read. This can be used to model evolutionary
-    distance.
-
-  * The steepness $p$ ($0<p<1$) of the mutation probability decline
-    when moving away from the read end. The higher this parameter the
-    steeper is the decline of mutation probability when moving away
-    from the read end.
-
-  * The multiplying factor $f$. At the read end, $f+t$ is the
-    probability of the first base of the read to be mutated.
-
-With this model, its possible to archive mutation probabilities
-greater than one. This makes of course no sense and the mutation
-probability is cut back to one in such cases.
-
-In mathematical notation, the mutation probability $P_{mut}$ of a base
-number $x$, starting to count at the reads' end, is:
-
-$$P_{mut}(x) = f \cdot dgeom(x;p) + t$$
-
-with $dgeom(X;P)$ being the density function of the geometric
-distribution, with parameters X = number of tries; P = success probability.
-
-The following sketch graphs illustrate the three parameters:
-
-<img src="fig/mut.svg" width="800" />
+For each row of the table, the read is subjected to one round of
+mutation introduction where the mutation probability per base is
+determined by the parameters found in that row.
 
 
 Subject a FASTQ file to artificial mutations
 ---------------------------------------------
 
 The `multiple-mutate.py` tool takes a table of the previous section as
-input and mutates strings provided to it on standard input
+input and mutates raw nucleotide strings provided to it on standard input
 accordingly. 
 
 An already existent FASTQ file can be mutated using the `filter_fastq`
@@ -189,6 +190,23 @@ cat data/3/volpertinger_mut.fastq data/2/retli.fastq \
 ```{.output}
 ```
 
+Advanced read mutation
+======================
+
+The following two sections deal with advanced means of determining
+read mutation probabilities. They are not used in this tutorial, but
+may be used in custom workflows. 
+
+The subsequent section deals with how
+to read out mapDamage output to determine the read mutation
+probability parameters. 
+
+The section following that deals with how to create multiple distinct
+sets of read mutation probabilty parameters. By that means, different
+read sets can be created which were subjected to varying degrees of
+mutations. Therefore, mapper performance can be evaluated for
+different severities of read mutations.
+
 Obtaining mutation rates from mapDamage
 ---------------------------------------
 
@@ -218,8 +236,8 @@ strand  from  to  factor      geom_prob   intercept
 ```
 
 The generated plots can be viewed 
-<a href="data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
-<a href="data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
+<a href="../../data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
+<a href="../../data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
 fit_000_GS136_3pGtoA_freq.txt.pdf
 
 Generating multiple damage patterns using a parameter table
@@ -251,7 +269,8 @@ strand  from  to  factor  geom_prob  intercept
 3       *     *   0       0          {all_intercept}
 ```
 
-And a table is created which looks like this:
+... and another table is written which lists several values for the
+expressions in braces `{...}` from the previous file:
 
 ```{.bash}
 cp data/mut-tmpl/tab data/3/mut-tab
@@ -265,7 +284,9 @@ fac  geom  all_intercept
 0.5  0.1   0.3
 ```
 
-several files can be generated with 
+... several files can be generated, where the brace-expressions are
+replaced by the values of the second table, using the `fill_template`
+script:
 
 ```{.bash}
 scripts/fill_template \
@@ -295,10 +316,12 @@ strand	from	to	factor	geom_prob	intercept
 
 ```
 
-Use the `--output` switch of this script to write each file in a
-separate file. The argument of `--output` can (and should!) contain
-column names of the table, enclosed in braces {...}. This creates a
-separate filename per input row. 
+To write each table into its own file, the `--output` switch of the
+`fill_template` script can be used. The argument of `--output` can
+(and should!) contain column names of the table, again enclosed in braces
+`{...}`. This creates multiple files, where the braced expressions in
+the file names are replaced in the same way as they are in the table
+contents.
 
 We will now write each of the tables shown above to its own file. We
 want to name the files using a counting number, but our input table
@@ -361,9 +384,9 @@ strand  from  to  factor  geom_prob  intercept
 ```
 
 If several combinations of mutation parameters shall be tested,
-`cross_tab.py` can be used to generate the table from predefined
-parameter values, like described with mapper parameters in the next
-section.
+`cross_tab.py` can be used to generate a table like `data/3/mut-tab`
+from predefined parameter values, like described with mapper
+parameters in the next chapter.
 
 
 

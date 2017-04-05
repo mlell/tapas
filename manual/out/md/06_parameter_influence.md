@@ -1,10 +1,7 @@
 ---
 title: 
-- Comparing multiple mapper runs
+  - Comparing multiple mapper runs
 ---
-
-Comparing multiple mapper runs
-==============================
 
 The file `data/4/partab` holds the information which parameters were
 used for which mapping run. By relating the output measures like
@@ -22,7 +19,6 @@ added before, the origin of all values is still clear.
 ```{.bash}
 # Add the run number to each .performance file
 for f in data/5/*.performance; do
-    echo $f
     i=$(basename ${f%.performance})
 
     scripts/add_const_column "$f" runidx "$i" \
@@ -36,12 +32,6 @@ scripts/cat_tables data/6/*.performance \
 cat data/6/performance | column -t
 ```
 ```{.output}
-data/5/0.performance
-data/5/1.performance
-data/5/2.performance
-data/5/3.performance
-data/5/4.performance
-data/5/5.performance
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
 25        0         0            50          50          1            0.5   0
 25        17        0.68         50          49          0.98         0.83  1
@@ -104,4 +94,8 @@ View the plots:
  does not. The BCR rises and falls again because the gain in
  sensitivity is offset by the loss in specificity if n rises too high.
 
+However, for the sake of simplicity, in this tutorial the number of
+reads to map is very small. To draw serious conclusions about the influence of
+mapper parameters, large numbers of reads must be mapped and
+statistical inference methods must be employed.
 

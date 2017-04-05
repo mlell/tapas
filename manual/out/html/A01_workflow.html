@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Appendix A1 -- Tutorial script</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+<div class="toc contentbox">
+    <span class="tocheader">Table of contents</span>
+<ul>
+<li><a href="00b_Overview.html">Package overview</a>
+<li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
+<li><a href="00c_input-files.html">Input files</a>
+<li><a href="01_genome-preparation.html">Genome Preparation</a>
+<li><a href="02_read-generation.html">Generation of simulated read sets</a>
+<li><a href="03_read-mutation.html">Mutation of reads</a>
+<li><a href="04_mapping.html">Generate mapper calls</a>
+<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li class="tocthis"><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
+<li><a href="B99_glossary.html">Glossary</a>
+</ul>
+</div>
+<div class="content contentbox">
+<div id="header">
+<h1 class="title">Appendix A1 -- Tutorial script</h1>
+</div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<p>This page lists all the commands which were used to perform the tasks in the tutorial. Commands like <code>column -t</code> which serve only formatting issues are omitted.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Prepare reference genome</span>
+<span class="ex">samtools</span> faidx data/genome/volpertinger.fasta
+
+<span class="co"># Generate endogenous reads</span>
+<span class="ex">scripts/uniform</span> data/genome/volpertinger.fasta \
+    --seed 1234 \
+    --name volpertinger_ \
+    --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
+    25 20 5
+
+<span class="co"># Generate exogenous reads</span>
+<span class="ex">scripts/uniform</span> data/retli/retli_tr.fasta \
+    --seed 1235 \
+    --name retli_ \
+    --output-fastq data/2/retli.coord data/2/retli.fastq \
+    50 20 5
+
+<span class="co"># Introduce mutations into endogenous reads</span>
+<span class="ex">scripts/filter_fastq</span> --nucleotide \
+  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
+  <span class="op">&lt;</span> data/2/volpertinger.fastq \
+  <span class="op">&gt;</span> data/3/volpertinger_mut.fastq
+
+<span class="co"># Combine endogenous and exogenous reads</span>
+<span class="fu">cat</span> data/3/volpertinger_mut.fastq data/2/retli.fastq \
+    <span class="op">&gt;</span> data/3/all.fastq
+
+<span class="co"># Generate the table of mapping parameters per run</span>
+<span class="ex">scripts/cross_tab</span> --head 1 data/mapping/*.par <span class="kw">|</span> <span class="kw">\</span>
+<span class="ex">scripts/index_column</span> --colname runidx <span class="op">&gt;</span> data/4/partab
+
+<span class="co"># Convert the mapping run parameter table into executable calls</span>
+<span class="ex">scripts/table2calls</span> data/4/partab \
+                    data/mapping/map-bwa.sh \
+                  <span class="op">&gt;</span> data/4/calls
+
+<span class="co"># Start parallel mapping runs</span>
+<span class="ex">scripts/mcall</span> -c data/4/calls -t 2 \
+              --status
+
+<span class="co"># Determine sensitivity and specificity for all generated SAM files</span>
+<span class="kw">for</span> <span class="ex">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span>
+    <span class="co"># Generate output prefix p from input name: `4.sam` -&gt; `4`</span>
+    <span class="va">bn=$(</span><span class="fu">basename</span> <span class="va">$sam)</span>
+    <span class="va">p=${bn%</span>.sam<span class="va">}</span>
+
+    <span class="co"># Convert SAM to table</span>
+    <span class="ex">scripts/sam2table</span> data/4/<span class="va">${p}</span>.sam <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.tab
+
+    <span class="co"># Using the FASTA record names from the SAM file, obtain the organism </span>
+    <span class="co"># names where they stem from. This enables calculating statistics for</span>
+    <span class="co"># endogenous and exogenous reads, separately.</span>
+    <span class="ex">scripts/add_mapped_organisms</span> \
+        --endogenous volpertinger \
+                     data/genome/volpertinger.fasta.fai \
+                     data/2/volpertinger.coord \
+        --exogenous  retli \
+                     data/retli/retli.fasta.fai \
+                     data/2/retli.coord \
+        data/5/<span class="va">${p}</span>.tab \
+        <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab
+
+
+    <span class="co"># Determine whether each read was correctly mapped. Adds column &quot;correct&quot;</span>
+    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">        within(input, { </span>
+<span class="st">            correct =    </span>
+<span class="st">                mapped_pos == true_start  &amp;</span>
+<span class="st">                mapped_rname == true_record &amp;</span>
+<span class="st">                mapped_organism == true_organism })</span>
+<span class="st">    &#39;</span>  data/5/<span class="va">${p}</span>.tab \
+    <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab
+
+    <span class="co"># Count reads per origin/target organism and mapping status</span>
+    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span>
+<span class="st">            FUN=length, data=input) &#39;</span> \
+    data/5/<span class="va">${p}</span>.tab \
+    <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.agg
+
+    <span class="co"># Plot mapping targets per origin organism </span>
+    <span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
+                              true_organism    mapped_organism \
+                              correct          count \
+                              data/5/<span class="va">${p}</span>.pdf  data/5/<span class="va">${p}</span>.agg
+
+    <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span>
+    <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \
+                     --c-torg true_organism \
+                     data/5/<span class="va">${p}</span>.agg volpertinger \
+        <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.performance
+
+    <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$sam</span><span class="st"> done. -&gt; Generated data/5/</span><span class="va">${p}</span><span class="st">.{tab,agg,pdf,performance}&quot;</span>
+
+<span class="kw">done</span>
+
+<span class="co"># Add the run number to each .performance file</span>
+<span class="kw">for</span> <span class="ex">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span>
+    <span class="bu">echo</span> <span class="va">$f</span>
+    <span class="va">i=$(</span><span class="fu">basename</span> <span class="va">${f%</span>.performance<span class="va">})</span>
+
+    <span class="ex">scripts/add_const_column</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> runidx <span class="st">&quot;</span><span class="va">$i</span><span class="st">&quot;</span> \
+        <span class="op">&gt;</span> <span class="st">&quot;data/6/</span><span class="va">${i}</span><span class="st">.performance&quot;</span>
+<span class="kw">done</span>
+
+<span class="co"># Concatenate all tables, but print the header line only once.</span>
+<span class="ex">scripts/cat_tables</span> data/6/*.performance \
+                 <span class="op">&gt;</span> data/6/performance
+
+<span class="co"># Lookup the mapping run parameters for each run and merge them with the</span>
+<span class="co"># outcomes documented in data/6/performance</span>
+<span class="ex">scripts/merge</span> -a data/6/performance runidx \
+              -b data/4/partab      runidx \
+              --all-a-cols --all-b-cols --all-a \
+           <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/6/performance
+
+
+<span class="co"># Plot BWA parameter -n versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
+    data/6/n.pdf
+
+<span class="co"># Plot BWA parameter -k versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \
+    data/6/k.pdf</code></pre></div>
+</div>
+<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
+</body>
+</html>

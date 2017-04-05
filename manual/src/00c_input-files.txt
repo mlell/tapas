@@ -1,6 +1,6 @@
 ---
 title:
-- Input files
+  - Input files
 ---
 
 In this tutorial different parameters for the short read mapper BWA will be 
@@ -42,7 +42,8 @@ sets of mutations are to be compared, multiple files of this format can be
 created using the script `fill_template`.
 
 Alternatively, a file like shown above can be created by deriving the mutation
-parameters from mapDamage output. This is shown in **Section X**.
+parameters from mapDamage output. Both possibilities are detailed in the section
+about introducing read mutations.
 
 Mapping script
 --------------

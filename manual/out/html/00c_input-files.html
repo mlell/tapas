@@ -47,12 +47,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
-    <div class="content">
-<!--<div id="header">
+<div class="toc contentbox">
+    <span class="tocheader">Table of contents</span>
+<ul>
+<li><a href="00b_Overview.html">Package overview</a>
+<li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
+<li class="tocthis"><a href="00c_input-files.html">Input files</a>
+<li><a href="01_genome-preparation.html">Genome Preparation</a>
+<li><a href="02_read-generation.html">Generation of simulated read sets</a>
+<li><a href="03_read-mutation.html">Mutation of reads</a>
+<li><a href="04_mapping.html">Generate mapper calls</a>
+<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
+<li><a href="B99_glossary.html">Glossary</a>
+</ul>
+</div>
+<div class="content contentbox">
+<div id="header">
 <h1 class="title">Input files</h1>
 </div>
--->
-<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
 <!-- Local Table of contents -->
 <!--Back to table of contents -->
 <!-- CONTENT -------------------------------------->
@@ -70,7 +86,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 5        C      T    0.1     0.2        0.0
 3        *      *    0.0     0.1        0.12</code></pre>
 <p>These mutation parameters can be set to user-defined values. If different sets of mutations are to be compared, multiple files of this format can be created using the script <code>fill_template</code>.</p>
-<p>Alternatively, a file like shown above can be created by deriving the mutation parameters from mapDamage output. This is shown in <strong>Section X</strong>.</p>
+<p>Alternatively, a file like shown above can be created by deriving the mutation parameters from mapDamage output. Both possibilities are detailed in the section about introducing read mutations.</p>
 <h2 id="mapping-script">Mapping script</h2>
 <p>As mappers are different in the way they are called, a shell script must be created which forwards the values of the parameters to the mapper. The script will be called for each combination of mapping parameters to be tested. The script must use variables for each parameter which varies in the comparison.</p>
 <p>An example for the short read mapper is given below.</p>
@@ -115,5 +131,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 8</code></pre>
 <p>It can be seen that the first line of each file contains a name for the parameter (in this case, the letters k and n, respectively). This name will be used later on in the mapping script each time when the parameter value must be inserted.</p>
 </div>
+<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
 </body>
 </html>
