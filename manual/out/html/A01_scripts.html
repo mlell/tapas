@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>true</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">true</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="overview-of-the-scripts-by-category">Overview of the scripts by category</h1>
+<p>Below you find a list of the scripts in this package, grouped by rough application situations.</p>
+<p>More specific help for each command can be obtained by invoking the respective command with the <code>--help</code> or <code>-h</code> command line argument.</p>
+<h2 id="general-file-and-table-manipulation">General file and table manipulation</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>add_const_column</td>
+<td>Add a column with a column name and fixed value.</td>
+</tr>
+<tr class="even">
+<td>cat_tables</td>
+<td>Concatenate tables with the same headers.</td>
+</tr>
+<tr class="odd">
+<td>cross_tab</td>
+<td>Print all combinations of input table rows.</td>
+</tr>
+<tr class="even">
+<td>fill_template</td>
+<td>Output copies of a file, where placeholders are replaced by values read from a table.</td>
+</tr>
+<tr class="odd">
+<td>index_column</td>
+<td>Add a column with a name and a counting number to the table.</td>
+</tr>
+<tr class="even">
+<td>merge</td>
+<td>Based on values of table 1, look up corresponding rows of table 2 (table join).</td>
+</tr>
+<tr class="odd">
+<td>pocketR</td>
+<td>Change text tables by R commands.</td>
+</tr>
+<tr class="even">
+<td>write_later</td>
+<td>Cache the input and write it only after input completion, to enable file modification without (explicit) temporary files.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="read-sampling-and-fitering">Read sampling and fitering</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>filter_fastq</td>
+<td>Apply a program to ID, nucleotide or quality string of each read.</td>
+</tr>
+<tr class="even">
+<td>uniform</td>
+<td>Sample reads from a reference genome.</td>
+</tr>
+<tr class="odd">
+<td>synth_fastq</td>
+<td>Create a FASTQ file from input IDs, nucleotide strings and quality strings.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="introducing-mutations-into-reads">Introducing mutations into reads</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>geom_induce</td>
+<td>Change bases of input nucleotide strings with a probability dependent of proximity to the string beginning or end.</td>
+</tr>
+<tr class="even">
+<td>mapdamage2geomparam</td>
+<td>Parse output of mapDamage an output a table of base mutation probabilities.</td>
+</tr>
+<tr class="odd">
+<td>multiple_mutate</td>
+<td>Based on a table of base mutation probabilities, apply multiple mutation rounds to nucleotide strings.</td>
+</tr>
+<tr class="even">
+<td>plot_mutation_probabi</td>
+<td>lities Plot mutation probability versus base position.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parallel-program-calls-e.g.-mappers">Parallel program calls (e.g. mappers)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mcall</td>
+<td>Read a list of program calls and invoke several of them in parallel.</td>
+</tr>
+<tr class="even">
+<td>table2calls</td>
+<td>Based on a table of parameters, generate calls to a script with changing parameters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sam-parsing-and-result-data-handling">SAM parsing and result data handling</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>add_mapped_organisms</td>
+<td>Add organisms relating to FASTA record names in the input tables to the output.</td>
+</tr>
+<tr class="even">
+<td>plot_read_fate</td>
+<td>Plot how many reads from which origin were mapped to which target organism correctly or incorrectly.</td>
+</tr>
+<tr class="odd">
+<td>plot_parameter_effects</td>
+<td>Plot how much mapping parameters influence sensitivity or specificity</td>
+</tr>
+<tr class="even">
+<td>sam_extract</td>
+<td>Extract information from a SAM file into a text table.</td>
+</tr>
+<tr class="odd">
+<td>sensspec</td>
+<td>Calculate sensitivity and specificity of a mapping run.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

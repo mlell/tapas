@@ -1,2 +1,2 @@
 map.true	map.actl	sensitivity	nomap.true	nomap.actl	specificity	bcr
-25	21	0.84	25	24	0.96	0.9
+25	13	0.52	50	49	0.98	0.75

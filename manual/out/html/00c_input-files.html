@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Input files</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">Input files</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<p>In this tutorial different parameters for the short read mapper BWA will be compared for their recall and accuracy in mapping damaged reads to a refence genome.</p>
+<p>This chapter explains the input files needed for this tutorial.</p>
+<h2 id="reference-genomes">Reference genomes</h2>
+<p>A genome must be provided from which sample reads can be generated. Two types of genomes are needed: The genome to which reads shall be mapped is called genome of an <em>endogenous</em> species. The genome (or genomes) from which contaminant reads stem (e.g. soil bacteria or humans) is called genome(s) of <em>exogenous</em> species.</p>
+<p>In this tutorial, mutated reads of the genome <code>data/genome/volpertinger.fasta</code> shall be generated and mapped back to that genome. Therefore, <code>volpertinger</code> is the endogenous species.</p>
+<p>The file <code>data/retli/retli_tr.fasta</code> contains an excerpt (if this were not a demonstration, the whole genome would be used, of course) genome of the soil bacterium <em>R. etli</em>. Reads from this genome will be generated as exogenous, contaminant reads.</p>
+<h2 id="read-mutation-probabilities">Read Mutation probabilities</h2>
+<p>In order to simulate mutation of the synthetic reads, probabilities that a mutation happens must be set. An example of this can be found in the file <code>data/mut-tables/mut.tab</code>, which is shown below</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mut-tables/mut.tab</code></pre></div>
+<pre class="output"><code>strand   from   to   factor  geom_prob  intercept
+3        C      T    0.3     0.4        0.1
+5        C      T    0.1     0.2        0.0
+3        *      *    0.0     0.1        0.12</code></pre>
+<p>These mutation parameters can be set to user-defined values. If different sets of mutations are to be compared, multiple files of this format can be created using the script <code>fill_template</code>.</p>
+<p>Alternatively, a file like shown above can be created by deriving the mutation parameters from mapDamage output. This is shown in <strong>Section X</strong>.</p>
+<h2 id="mapping-script">Mapping script</h2>
+<p>As mappers are different in the way they are called, a shell script must be created which forwards the values of the parameters to the mapper. The script will be called for each combination of mapping parameters to be tested. The script must use variables for each parameter which varies in the comparison.</p>
+<p>An example for the short read mapper is given below.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="co">## This script performs a mapping using BWA.</span>
+<span class="co">## It requires the variables k, n and runidx be set </span>
+<span class="co">## prior to its execution.</span>
+
+<span class="co"># Fail if any needed variable is not set</span>
+<span class="kw">set</span> <span class="ex">-ue</span>
+
+<span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \
+    <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span>
+
+<span class="ex">bwa</span> samse                      \
+      data/genome/volpertinger \
+      data/4/<span class="va">${runidx}</span>.sai     \
+      data/3/all.fastq         \
+      <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \
+      <span class="op">2&gt;&gt;</span> data/4/<span class="va">${runidx}</span>.log</code></pre></div>
+<p>The script reflects the common procedure of short read mapping using BWA: First, <code>bwa aln</code> is called to map a set of reads (<code>all.fastq</code>) to a reference genome (<code>volpertinger</code>). Afterwards, the command <code>bwa samse</code> is used to convert the output of the mapper to the SAM format.</p>
+<p>Note that the script contains the variables <code>${n}</code>, <code>${k}</code> and <code>${runidx}</code>, which are not set to any values inside the script. For each of the variables, different values will be provided for each time a mapping is performed with a different set of mapping parameters.</p>
+<p>As will be detailed later, <code>${runidx}</code> serves as a run index, taking counting values, the values for the variables <code>${n}</code> and <code>${k}</code> will be provided starting from a set of parameter files which will be shown in the following.</p>
+<h2 id="parameter-files">Parameter files</h2>
+<p>The parameter values which are to be compared must be written into dedicated files. For each parameter which is to be tested in differing combinations with other parameters, one file must be created. Parameters which always vary together must be written into the same file.</p>
+<p>To compare different combinations of parameter values, the lines of these files will be merged in different combinations and the mapping script mentioned above will be run for each combination.</p>
+<p>Example files, which are used in this tutorial, can be seen in he folder <code>data/mapping</code> and are printed below. The file names are arbitrary, however, the column names (first line of each file) determines the name of the variable in the mapping script (previous section) which will take the values of that column.</p>
+<p>In the following, the file contents are printed:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mapping/k.par</code></pre></div>
+<pre class="output"><code>k
+2
+10
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mapping/n.par</code></pre></div>
+<pre class="output"><code>n
+0
+4
+8</code></pre>
+<p>It can be seen that the first line of each file contains a name for the parameter (in this case, the letters k and n, respectively). This name will be used later on in the mapping script each time when the parameter value must be inserted.</p>
+</div>
+</body>
+</html>

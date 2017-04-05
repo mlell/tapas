@@ -1,3 +1,8 @@
+---
+title:
+- Glossary
+---
+
 Glossary
 ========
 
@@ -75,4 +80,3 @@ the `--help` command line argument.
 
 
 
-vim:tw=70

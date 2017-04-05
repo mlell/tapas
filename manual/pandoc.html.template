@@ -10,7 +10,7 @@ $endfor$
 $if(date-meta)$
   <meta name="date" content="$date-meta$" />
 $endif$
-  <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
+  <title>$if(title-prefix)$$title-prefix$ - $endif$$title$</title>
   <style type="text/css">code{white-space: pre;}</style>
 $if(quotes)$
   <style type="text/css">q { quotes: "“" "”" "‘" "’"; }</style>
@@ -30,11 +30,13 @@ $for(header-includes)$
   $header-includes$
 $endfor$
 </head>
+<!-- BODY BEGIN ------------------------------>
 <body>
+    <div class="content">
 $for(include-before)$
 $include-before$
 $endfor$
-$if(title)$
+<!--$if(title)$
 <div id="$idprefix$header">
 <h1 class="title">$title$</h1>
 $if(subtitle)$
@@ -48,6 +50,9 @@ $if(date)$
 $endif$
 </div>
 $endif$
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
 $if(toc)$
 <div id="$idprefix$TOC">
 $if(toctitle)$
@@ -56,9 +61,17 @@ $endif$
 $toc$
 </div>
 $endif$
+<!--Back to table of contents -->
+$if(mainfile)$
+<div id="$idprefix$mainlink">
+    <a href="$mainfile$">Back to Table of contents</a>
+</div>
+$endif$
+<!-- CONTENT -------------------------------------->
 $body$
 $for(include-after)$
 $include-after$
 $endfor$
+</div>
 </body>
 </html>

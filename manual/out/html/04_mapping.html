@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Generate mapper calls</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">Generate mapper calls</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="generate-mapper-calls">Generate mapper calls</h1>
+<p>A call is an order to the computer to execute a program. It is a string which contains the program name and can include variables which will be set in advance to executing the program and which influence the program.</p>
+<p>We will in the following generate calls to start our favourite mapper (BWA in this tutorial) with different combinations of parameter values. The results will be analysed in coming sections to determine the effects of the parameter values on the mapping result.</p>
+<h2 id="general-procedure">General procedure</h2>
+<p>Here are the main steps which will be taken in subsequent subsections:</p>
+<ol class="incremental" style="list-style-type: decimal">
+<li><p>To generate the calls to the mapper using different combinations of parameters, several files holding the values of the different parameters are first combined to a table holding all possible combinations of them.</p></li>
+<li><p>Subsequently, in this tutorial every line is given a unique index. Though this is not nessecary, it facilitates tasks like the naming of output files.</p></li>
+<li><p>Because every mapper is different in how it expects the parameter values, you will be expected to write a small script which feeds the parameter values into the mapping program. This will be explained further below.</p></li>
+</ol>
+<h2 id="how-the-parameter-values-are-stored">How the parameter values are stored</h2>
+<p>The parameter values are saved in several files, one per parameter. In this example, the BWA parameters n and k are varied which results in two files:</p>
+<p>For your project, you will of course create your own files which hold the parameter values you want to compare</p>
+<p>Here is a list of the parameter files used in this tutorial:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> data/mapping/*.par</code></pre></div>
+<pre class="output"><code>data/mapping/k.par
+data/mapping/n.par</code></pre>
+<p>The files can have arbitrary filenames. They are in a tabular format where the column names determine the variable names which will be used in the mapping script which is created later on.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">column</span> -t data/mapping/n.par</code></pre></div>
+<pre class="output"><code>n
+0
+4
+8</code></pre>
+<h2 id="generate-combinations-of-parameter-values">Generate combinations of parameter values</h2>
+<p>To generate all combinations of parameters, <code>scripts/cross_tab</code> will be used. It expects multiple files and outputs all possible combinations of their lines.</p>
+<p>Generate all possible combinations of parameters, retaining 1 header line:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/cross_tab</span> --head 1 data/mapping/*.par <span class="op">&gt;</span> data/4/partab
+<span class="fu">head</span> data/4/partab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>k   n
+2   0
+2   4
+2   8
+10  0
+10  4
+10  8</code></pre>
+<h2 id="mark-the-parameter-combinations-with-a-unique-index">Mark the parameter combinations with a unique index</h2>
+<p>As stated above, this is not nessecary, but facilitates the naming of the output text files.</p>
+<p>Again, <code>scripts/index_column</code> can be used for this purpose. This script prepends a counting number to each input line. It can be used to generate index columns for text tables.</p>
+<p>Add an index column called runidx:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span> --colname runidx --inplace data/4/partab
+<span class="fu">head</span> data/4/partab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>runidx  k   n
+0       2   0
+1       2   4
+2       2   8
+3       10  0
+4       10  4
+5       10  8</code></pre>
+<h2 id="the-mapping-script">The mapping script</h2>
+<p>Read now the script <code>data/mapping/map-bwa.sh</code>.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="co">## This script performs a mapping using BWA.</span>
+<span class="co">## It requires the variables k, n, runidx and fastq be set </span>
+<span class="co">## prior to its execution.</span>
+
+<span class="co"># Fail if any needed variable is not set</span>
+<span class="kw">set</span> <span class="ex">-ue</span>
+
+<span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \
+    data/genome/volpertinger \
+    data/3/all.fastq         \
+    <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \
+    <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span>
+
+<span class="ex">bwa</span> samse                      \
+      data/genome/volpertinger \
+      data/4/<span class="va">${runidx}</span>.sai     \
+      data/3/all.fastq         \
+      <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \
+      <span class="op">2&gt;&gt;</span> data/4/<span class="va">${runidx}</span>.log</code></pre></div>
+<p>As you can see, the script uses several variables, denoted like this: <code>${variable}</code>. These are not defined inside the script, but will be set from outside at the time this script will be run.</p>
+<p>The variable names are exactly equal to the column names of the file <code>data/4/partab</code> and therefore to the column names of all the files which lie in <code>data/mapping/*.par</code>. They are the means how the different parameter values will be fed to the mapper.</p>
+<p>You will be required to write a script like this for your mapper. All it must do is to call the mapper, to specify the output file names and to forward the parameters values on to the mapper using the <code>${variable}</code> syntax.</p>
+<h2 id="generate-mapper-calls-1">Generate mapper calls</h2>
+<p>The script <code>table2calls</code> converts the table with the parameter value combinations and the filename of the mapping script to calls which can be executed on the shell.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Convert the table into calls that can be executed in the next section</span>
+<span class="ex">scripts/table2calls</span>  data/4/partab \
+                    data/mapping/map-bwa.sh \
+                  <span class="op">&gt;</span> data/4/calls
+<span class="fu">cat</span> data/4/calls</code></pre></div>
+<pre class="output"><code>runidx=0 k=2 n=0 data/mapping/map-bwa.sh
+runidx=1 k=2 n=4 data/mapping/map-bwa.sh
+runidx=2 k=2 n=8 data/mapping/map-bwa.sh
+runidx=3 k=10 n=0 data/mapping/map-bwa.sh
+runidx=4 k=10 n=4 data/mapping/map-bwa.sh
+runidx=5 k=10 n=8 data/mapping/map-bwa.sh</code></pre>
+<h1 id="executing-multiple-mapping-runs-in-parallel">Executing multiple mapping runs in parallel</h1>
+<p>For this task, many programs can be used, from simple shell background spawning using &amp; (in bash) to job managers orchestrating a big network of worker machines. In this package, a simple program is implemented which executes a user-definable number of jobs in parallel and waits with spawning new ones until another of its already started jobs finishes.</p>
+<p>Note that some mappers can use more than one processor core themselves. Therefore if you spawn multiple mapper processes where each mapper process utilizes multiple cores, the total number of utilized cores is the number of cores used per mapper multiplied with the number of mapper processes launched in parallel.</p>
+<p>Invoke <code>scripts/mcall --help</code> to get more information about this tool.</p>
+<p>Example: Run the previously generated mapper calls.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">    <span class="co"># Execute calls, at 2 cores</span>
+    <span class="ex">scripts/mcall</span> -c data/4/calls -t 2 \
+                  --status
+    <span class="co"># Standard error was piped to log files,</span>
+    <span class="co"># Standard output was piped to sam files, as specified in the</span>
+    <span class="co"># `tmpl` file.</span>
+    <span class="fu">head</span> data/4/0.log
+    <span class="fu">head</span> -n15 data/4/0.sam</code></pre></div>
+<pre class="output"><code>[bwa_aln_core] calculate SA coordinate... 0.00 sec
+[bwa_aln_core] write to the disk... 0.00 sec
+[bwa_aln_core] 75 sequences have been processed.
+[main] Version: 0.7.15-r1140
+[main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
+[main] Real time: 0.064 sec; CPU: 0.000 sec
+[bwa_aln_core] convert to sequence coordinate... 0.00 sec
+[bwa_aln_core] refine gapped alignments... 0.00 sec
+[bwa_aln_core] print alignments... 0.00 sec
+[bwa_aln_core] 75 sequences have been processed.
+@SQ SN:A1   LN:6000
+@SQ SN:A2   LN:6000
+@SQ SN:A3   LN:6000
+@SQ SN:B1   LN:6000
+@SQ SN:B2   LN:6000
+@SQ SN:B3   LN:6000
+@SQ SN:B4   LN:6000
+@SQ SN:MT   LN:6000
+@SQ SN:X    LN:6000
+@PG ID:bwa  PN:bwa  VN:0.7.15-r1140 CL:bwa samse data/genome/volpertinger data/4/0.sai data/3/all.fastq
+volpertinger_1  4   *   0   0   *   *   0   0   CTCAATAAGGTTTTAGCCCACCAGAT  FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_2  4   *   0   0   *   *   0   0   GCTATTTAAGTACCTCTGCC    FFFFFFFFFFFFFFFFFFFF
+volpertinger_3  4   *   0   0   *   *   0   0   TTGAACTGTATCTACCGGGTATCA    FFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_4  4   *   0   0   *   *   0   0   TCCTGAGGGTTTCTCTTTAGA   FFFFFFFFFFFFFFFFFFFFF
+volpertinger_5  4   *   0   0   *   *   0   0   TATAACCTCAAAGTTGGATCAGC FFFFFFFFFFFFFFFFFFFFFFF</code></pre>
+</div>
+</body>
+</html>

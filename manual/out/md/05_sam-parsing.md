@@ -1,0 +1,342 @@
+---
+title: 
+- Parsing of SAM files
+---
+
+Parsing of SAM files
+====================
+
+With the following tools, SAM files can be parsed to gain information of read
+names, where they were mapped, which quality score the mapping was assigned
+and so on. 
+
+The procedures in this chapter may vary more than the previous ones, 
+depending on the research question.
+
+In the setting this package was originally designed for, the names of the
+reads carry the information where the reads actually belong to. This
+information can subsequently be compared to the actual mapping information
+obtained from the SAM file.
+
+Extraction of information
+-------------------------
+
+To use the information of the SAM file, convert it to a tabular form
+using the tool `sam2table`. This generates a table with column names
+adhering to the names defined in the SAM Specification, which are,
+amongst others:
+
+* qname: Read name
+* rname: FASTA record name of genome this read was mapped to. `*` if 
+         not mapped.
+* pos:   Base index of mapping position (1-based index!)
+* mapq:  Quality score assigned by the mapper
+* cigar: CIGAR String: Information about gaps and mismatches in
+         the alignment read -- reference
+
+
+```{.bash}
+scripts/sam2table data/4/1.sam > data/5/1.tab
+```
+```{.output}
+```
+
+Show beginning and end of the generated file:
+```{.bash}
+head data/5/1.tab | column -t
+```
+```{.output}
+qname           flag  rname  pos   mapq  cigar    rnext  pnext  tlen
+volpertinger_1  4     *      0     0     *        *      0      0
+volpertinger_2  16    X      4264  37    4M1I15M  *      0      0
+volpertinger_3  0     A3     1413  25    24M      *      0      0
+volpertinger_4  0     A3     5689  37    21M      *      0      0
+volpertinger_5  4     *      0     0     *        *      0      0
+volpertinger_6  4     *      0     0     *        *      0      0
+volpertinger_7  4     *      0     0     *        *      0      0
+volpertinger_8  4     *      0     0     *        *      0      0
+volpertinger_9  0     X      2381  37    20M      *      0      0
+```
+
+```{.bash}
+tail data/5/1.tab | column -t
+```
+```{.output}
+retli_41  0  A1  961  25  20M  *  0  0
+retli_42  4  *   0    0   *    *  0  0
+retli_43  4  *   0    0   *    *  0  0
+retli_44  4  *   0    0   *    *  0  0
+retli_45  4  *   0    0   *    *  0  0
+retli_46  4  *   0    0   *    *  0  0
+retli_47  4  *   0    0   *    *  0  0
+retli_48  4  *   0    0   *    *  0  0
+retli_49  4  *   0    0   *    *  0  0
+retli_50  4  *   0    0   *    *  0  0
+```
+
+Gather all information needed to determine correct mapping
+----------------------------------------------------------
+
+To determine whether a read was mapped correctly, the mapping
+information like mapped position of the read in the target reference
+as well as the true read position must be known. The true read
+information was generated along with the read FASTQ files and was
+stored in `.coord` files. 
+
+The script `add_mapped_organisms` reads the mapping information stored
+in the SAM file (converted to a table) and the true read information
+and merges the information into one table.
+
+Thereby, all information about one read is stored in the same line. 
+
+In this example, the organism `volpertinger` provides the endogenous
+reads as all reads were mapped only to the `volpertinger` genome. The
+`retli` reads are therefore exogenous reads, as these are not supposed
+to map to that reference genome.
+
+To assign the correct organism names to the reads, the script must be provided
+with
+
+The call is shown below. The script `write_later` at the end of the
+pipe is to prevent `merge` from overwriting its own input file too
+soon, as the output is meant to replace the input file.
+
+```{.bash}
+scripts/add_mapped_organisms \
+    --endogenous volpertinger \
+                 data/genome/volpertinger.fasta.fai \
+                 data/2/volpertinger.coord \
+    --exogenous  retli \
+                 data/retli/retli.fasta.fai \
+                 data/2/retli.coord \
+    data/5/1.tab \
+    | scripts/write_later data/5/1.tab
+
+head data/5/1.tab | column -t
+```
+```{.output}
+qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism
+volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger
+volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger
+volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger
+volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger
+volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger
+volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger
+```
+
+
+Now all the information is present to determine whether a read has
+been mapped correctly. The last step is writing in a new column
+whether a read was mapped correctly. This can be archieved using any
+means you can imagine, for this example we will use R. The `pocketR`
+tool is a thin wrapper which handles reading and writing of data for
+us. The input data will be available as a `data.frame` called
+`input`, everything written insides the parentheses of the `return(.)`
+statement will be printed. 
+
+The following command adds a new column to the input data which
+indicates whether a read was mapped correctly:
+
+```{.bash}
+scripts/pocketR '
+    within(input, {
+        correct =
+            mapped_pos == true_start  &
+            mapped_rname == true_record &
+            mapped_organism == true_organism })
+'  data/5/1.tab \
+| scripts/write_later data/5/1.tab
+
+ head data/5/1.tab | column -t
+```
+```{.output}
+qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism  correct
+volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger   FALSE
+volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger   FALSE
+volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger   TRUE
+volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger   TRUE
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger   FALSE
+volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger   FALSE
+volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger   FALSE
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger   FALSE
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE
+```
+ 
+
+
+Grouping of reads
+-----------------
+
+As next step, the number of reads are counted which belong to 
+certain categories. Here, the categories are:
+
+  * Correctly mapped or not
+  * Origin organism
+  * Organism a read was mapped to
+
+Again, the R language can be used to express our wishes concisely:
+Group the reads by all combinations of:
+
+ * `true_organism`
+ * `mapped_organism`
+ * correctly mapped
+
+... and count the reads belonging to each category:
+
+the `cbind` function is needed in order to rename the column containing 
+the read count. `qname` can be substituted here by any valid input
+column name, as its only used for counting (each column is equal in
+length). 
+
+```{.bash}
+scripts/pocketR '
+    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
+        FUN=length, data=input)
+' data/5/1.tab \
+> data/5/1.agg
+
+cat data/5/1.agg | column -t
+```
+```{.output}
+true_organism  mapped_organism  correct  count
+retli          *                FALSE    49
+volpertinger   *                FALSE    11
+retli          volpertinger     FALSE    1
+volpertinger   volpertinger     FALSE    1
+volpertinger   volpertinger     TRUE     13
+```
+
+This format may be used to plot the read fate of a single mapper run
+and to derive the measures sensitivity and specificity:
+
+```{.bash}
+scripts/plot_read_fate    --exogenous retli \
+                          true_organism mapped_organism \
+                          correct       count \
+                          data/5/1.pdf  data/5/1.agg
+```
+```{.output}
+```
+
+<a href="data/5/1.pdf">Click here</a> to see the plot.
+
+Sensitivity and specificity
+---------------------------
+
+  * **Sensitivity** (recall) shows how many reads have been mapped
+    correctly by the mapper which are supposed to map.
+  * **Specificity** (precision) shows how many reads have been
+    correctly identified as non-endogenous and were therefore not
+    mapped.
+  * **Balanced control rate*** (BCR) is the mean of sensitivity and
+    specificity
+
+If non-endogenous reads were included in the reads, like we did by
+including the *R. etli* reads, both measures can be calculated.
+
+The following script needs the same kind of input as the
+`plot-read-fate` script. Additionally, a list of organisms must be
+specified, whose genomes the mapper used as a reference. 
+
+If you specify multiple organisms, separate them by commas and don't
+include any spaces.
+
+```{.bash}
+scripts/sensspec --c-morg mapped_organism \
+                 --c-torg true_organism \
+                 data/5/1.agg volpertinger \
+    > data/5/1.performance
+
+column -t data/5/1.performance
+```
+```{.output}
+map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
+25        13        0.52         50          49          0.98         0.75
+```
+
+
+
+Repeat all steps for every SAM file
+-----------------------------------
+
+The code needed to evaluate the data generated by the mapper might as
+well be included in the mapping template script introduced in the last
+section. If this is done, the data evaluation can be as well
+parallelized as the mapping process.
+
+All scripts used here were already introduced in this section.
+
+The files `data/5/all.tab` and `data/5/all.recids` must be calculated
+prior to execution of this script. This has been done in this section 
+as well.
+
+Browse the <a href="data/5">directory `data/5`</a> to see the results.
+
+```{.bash}
+for sam in data/4/*.sam; do
+    # Generate output prefix p from input name: `4.sam` -> `4`
+    bn=$(basename $sam)
+    p=${bn%.sam}
+
+    # Convert SAM to table
+    scripts/sam2table data/4/${p}.sam > data/5/${p}.tab
+
+    # Mark correctly/incorrectly mapped reads
+    scripts/add_mapped_organisms \
+        --endogenous volpertinger \
+                     data/genome/volpertinger.fasta.fai \
+                     data/2/volpertinger.coord \
+        --exogenous  retli \
+                     data/retli/retli.fasta.fai \
+                     data/2/retli.coord \
+        data/5/${p}.tab \
+        | scripts/write_later data/5/${p}.tab
+
+
+    # Determine whether each read was correctly mapped
+    scripts/pocketR '
+        within(input, {
+            correct =
+                mapped_pos == true_start  &
+                mapped_rname == true_record &
+                mapped_organism == true_organism })
+    '  data/5/${p}.tab \
+    | scripts/write_later data/5/${p}.tab
+
+    # Count reads per origin/target organism and mapping status
+    scripts/pocketR '
+        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,
+            FUN=length, data=input) ' \
+    data/5/${p}.tab \
+    > data/5/${p}.agg
+
+    # Plot mapping targets per origin organism
+    scripts/plot_read_fate    --exogenous retli \
+                              true_organism    mapped_organism \
+                              correct          count \
+                              data/5/${p}.pdf  data/5/${p}.agg
+
+    # Calculate sensitivity, specificity and balanced accuracy
+    scripts/sensspec --c-morg mapped_organism \
+                     --c-torg true_organism \
+                     data/5/${p}.agg volpertinger \
+        > data/5/${p}.performance
+
+    echo "$sam done. -> Generated data/5/${p}.{tab,agg,pdf,performance}"
+
+done
+```
+```{.output}
+data/4/0.sam done. -> Generated data/5/0.{tab,agg,pdf,performance}
+data/4/1.sam done. -> Generated data/5/1.{tab,agg,pdf,performance}
+data/4/2.sam done. -> Generated data/5/2.{tab,agg,pdf,performance}
+data/4/3.sam done. -> Generated data/5/3.{tab,agg,pdf,performance}
+data/4/4.sam done. -> Generated data/5/4.{tab,agg,pdf,performance}
+data/4/5.sam done. -> Generated data/5/5.{tab,agg,pdf,performance}
+```
+
+    
+
