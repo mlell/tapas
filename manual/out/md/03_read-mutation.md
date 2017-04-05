@@ -126,11 +126,12 @@ take lines of text as input and return the same number of lines on
 standard output. The output of the sub-program is then placed into the output
 fastq file. By combining `filter_fastq` and `multiple_mutate`, the tool
 which applies mutations to strings of nucleotides, a FASTQ file can be
-mutated:
+mutated. The `--seed` can be set to an arbitrary value to generate a
+reproducable result.
 
 ```{.bash}
 scripts/filter_fastq --nucleotide \
-  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
   < data/2/volpertinger.fastq \
   > data/3/volpertinger_mut.fastq
 ```
@@ -144,15 +145,15 @@ head data/3/volpertinger_mut.fastq
 ```
 ```{.output}
 @volpertinger_1
-cTCaATAAGgTtTTAGCCcACCAGAT
+TTgTACcAGtTATTAGtCAATCAGAT
 +
 FFFFFFFFFFFFFFFFFFFFFFFFFF
 @volpertinger_2
-gCTATTTAAgtACcTCTgCC
+TCTAgTTccTAACTTtTCCC
 +
 FFFFFFFFFFFFFFFFFFFF
 @volpertinger_3
-TTGAACTgTATCTaCCGGGtaTCA
+gTaAACTtTATCTTCTGGGGCcgA
 ```
 
 The `filter_fastq.py` script enables you to apply an arbitrary script

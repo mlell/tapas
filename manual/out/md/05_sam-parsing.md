@@ -46,16 +46,16 @@ Show beginning and end of the generated file:
 head data/5/1.tab | column -t
 ```
 ```{.output}
-qname           flag  rname  pos   mapq  cigar    rnext  pnext  tlen
-volpertinger_1  4     *      0     0     *        *      0      0
-volpertinger_2  16    X      4264  37    4M1I15M  *      0      0
-volpertinger_3  0     A3     1413  25    24M      *      0      0
-volpertinger_4  0     A3     5689  37    21M      *      0      0
-volpertinger_5  4     *      0     0     *        *      0      0
-volpertinger_6  4     *      0     0     *        *      0      0
-volpertinger_7  4     *      0     0     *        *      0      0
-volpertinger_8  4     *      0     0     *        *      0      0
-volpertinger_9  0     X      2381  37    20M      *      0      0
+qname           flag  rname  pos   mapq  cigar  rnext  pnext  tlen
+volpertinger_1  4     *      0     0     *      *      0      0
+volpertinger_2  0     MT     3402  25    20M    *      0      0
+volpertinger_3  4     *      0     0     *      *      0      0
+volpertinger_4  4     *      0     0     *      *      0      0
+volpertinger_5  0     MT     3280  37    23M    *      0      0
+volpertinger_6  0     A3     4936  37    25M    *      0      0
+volpertinger_7  0     A1     1320  23    21M    *      0      0
+volpertinger_8  0     A3     4480  37    25M    *      0      0
+volpertinger_9  4     *      0     0     *      *      0      0
 ```
 
 ```{.bash}
@@ -117,14 +117,14 @@ head data/5/1.tab | column -t
 ```{.output}
 qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger
-volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger
-volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger
-volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger
-volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger
-volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger
-volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger
-volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger
-volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger
+volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger
+volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger
+volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger
+volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger
+volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger
+volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger
+volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger
+volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger
 ```
 
 
@@ -155,14 +155,14 @@ scripts/pocketR '
 ```{.output}
 qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism  correct
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger   FALSE
-volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger   FALSE
-volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger   TRUE
-volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger   TRUE
-volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger   FALSE
-volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger   FALSE
-volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger   FALSE
-volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger   FALSE
-volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE
+volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger   TRUE
+volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger   FALSE
+volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger   FALSE
+volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger   TRUE
+volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger   TRUE
+volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger   TRUE
+volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger   TRUE
+volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger   FALSE
 ```
  
 
@@ -203,10 +203,9 @@ cat data/5/1.agg | column -t
 ```{.output}
 true_organism  mapped_organism  correct  count
 retli          *                FALSE    49
-volpertinger   *                FALSE    11
+volpertinger   *                FALSE    8
 retli          volpertinger     FALSE    1
-volpertinger   volpertinger     FALSE    1
-volpertinger   volpertinger     TRUE     13
+volpertinger   volpertinger     TRUE     17
 ```
 
 This format may be used to plot the read fate of a single mapper run
@@ -214,14 +213,23 @@ and to derive the measures sensitivity and specificity:
 
 ```{.bash}
 scripts/plot_read_fate    --exogenous retli \
+                          --format png \
                           true_organism mapped_organism \
                           correct       count \
-                          data/5/1.pdf  data/5/1.agg
+                          data/5/1.png  data/5/1.agg
 ```
 ```{.output}
 ```
 
-<a href="data/5/1.pdf">Click here</a> to see the plot.
+The script produces the following plot:
+
+<img class="plot" src="../../data/5/1.png" width=500 />
+
+The plot shows, which fractions of the input species (endogenous:
+*volpertinger*, contaminant: *R. etli*) are mapped and whether the
+mapping was correct. It can be seen that in this case, almost no
+contaminant reads were mapped, indicating high mapper specificity.
+However, only 75% of the endogenous reads were mapped.
 
 Sensitivity and specificity
 ---------------------------
@@ -254,7 +262,7 @@ column -t data/5/1.performance
 ```
 ```{.output}
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        13        0.52         50          49          0.98         0.75
+25        17        0.68         50          49          0.98         0.83
 ```
 
 
@@ -315,9 +323,10 @@ for sam in data/4/*.sam; do
 
     # Plot mapping targets per origin organism
     scripts/plot_read_fate    --exogenous retli \
+                              --format png \
                               true_organism    mapped_organism \
                               correct          count \
-                              data/5/${p}.pdf  data/5/${p}.agg
+                              data/5/${p}.png  data/5/${p}.agg
 
     # Calculate sensitivity, specificity and balanced accuracy
     scripts/sensspec --c-morg mapped_organism \
@@ -337,6 +346,28 @@ data/4/3.sam done. -> Generated data/5/3.{tab,agg,pdf,performance}
 data/4/4.sam done. -> Generated data/5/4.{tab,agg,pdf,performance}
 data/4/5.sam done. -> Generated data/5/5.{tab,agg,pdf,performance}
 ```
+
+All generated images:
+
+**1.png**:
+
+<img class="plot" src="../../data/5/1.png" width=500 />
+
+**2.png**:
+
+<img class="plot" src="../../data/5/2.png" width=500 />
+
+**3.png**:
+
+<img class="plot" src="../../data/5/3.png" width=500 />
+
+**4.png**:
+
+<img class="plot" src="../../data/5/4.png" width=500 />
+
+**5.png**:
+
+<img class="plot" src="../../data/5/5.png" width=500 />
 
     
 

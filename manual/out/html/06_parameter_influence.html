@@ -81,12 +81,12 @@ data/5/3.performance
 data/5/4.performance
 data/5/5.performance
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        1         0.04         50          50          1            0.52  0
-25        13        0.52         50          49          0.98         0.75  1
-25        21        0.84         50          10          0.2          0.52  2
-25        1         0.04         50          50          1            0.52  3
-25        13        0.52         50          49          0.98         0.75  4
-25        22        0.88         50          10          0.2          0.54  5</code></pre>
+25        0         0            50          50          1            0.5   0
+25        17        0.68         50          49          0.98         0.83  1
+25        23        0.92         50          10          0.2          0.56  2
+25        0         0            50          50          1            0.5   3
+25        17        0.68         50          49          0.98         0.83  4
+25        24        0.96         50          10          0.2          0.58  5</code></pre>
 <p>Next, the parameter values belonging to the run indices are joined in, appending the parameter columns to <code>data/6/parameters</code> itself.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/merge</span> -a data/6/performance runidx \
               -b data/4/partab      runidx \
@@ -95,22 +95,26 @@ map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runi
 
 <span class="fu">head</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        1         0.04         50          50          1            0.52  2   0
-1       25        13        0.52         50          49          0.98         0.75  2   4
-2       25        21        0.84         50          10          0.2          0.52  2   8
-3       25        1         0.04         50          50          1            0.52  10  0
-4       25        13        0.52         50          49          0.98         0.75  10  4
-5       25        22        0.88         50          10          0.2          0.54  10  8</code></pre>
+0       25        0         0            50          50          1            0.5   2   0
+1       25        17        0.68         50          49          0.98         0.83  2   4
+2       25        23        0.92         50          10          0.2          0.56  2   8
+3       25        0         0            50          50          1            0.5   10  0
+4       25        17        0.68         50          49          0.98         0.83  10  4
+5       25        24        0.96         50          10          0.2          0.58  10  8</code></pre>
 <p>The value of one parameter can be plotted against some measure. The following command shows plots where the X and Y axis are free to choose. If multiple runs yield a similar score on the Y axis, their data points are merged to form one bigger dot on the plot. Here all numbers are rounded to one significant digit, because only 8 mapping runs are compared in this example. Therefore results must be aggregated coarsely to demonstrate the results.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
 <span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
-    data/6/n.pdf
+                               --plot-format png \
+                               data/6/n.png
 
 <span class="co"># Plot k versus BCR</span>
 <span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \
-    data/6/k.pdf</code></pre></div>
+                               --plot-format png \
+                               data/6/k.png</code></pre></div>
 <pre class="output"><code></code></pre>
-<p>View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and <a href="data/6/k.pdf">k vs. BCR</a>.</p>
+<p>View the plots:</p>
+<p><img class="plot" src="../../data/6/n.png" width=500 /></p>
+<p><img class="plot" src="../../data/6/k.png" width=500 /></p>
 <p>It can be seen that n seems to have an impact on the BCR whereas k does not. The BCR rises and falls again because the gain in sensitivity is offset by the loss in specificity if n rises too high.</p>
 </div>
 </body>

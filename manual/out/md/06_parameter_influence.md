@@ -43,12 +43,12 @@ data/5/3.performance
 data/5/4.performance
 data/5/5.performance
 map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        1         0.04         50          50          1            0.52  0
-25        13        0.52         50          49          0.98         0.75  1
-25        21        0.84         50          10          0.2          0.52  2
-25        1         0.04         50          50          1            0.52  3
-25        13        0.52         50          49          0.98         0.75  4
-25        22        0.88         50          10          0.2          0.54  5
+25        0         0            50          50          1            0.5   0
+25        17        0.68         50          49          0.98         0.83  1
+25        23        0.92         50          10          0.2          0.56  2
+25        0         0            50          50          1            0.5   3
+25        17        0.68         50          49          0.98         0.83  4
+25        24        0.96         50          10          0.2          0.58  5
 ```
 
 Next, the parameter values belonging to the run indices are joined in, 
@@ -64,12 +64,12 @@ head data/6/performance | column -t
 ```
 ```{.output}
 runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        1         0.04         50          50          1            0.52  2   0
-1       25        13        0.52         50          49          0.98         0.75  2   4
-2       25        21        0.84         50          10          0.2          0.52  2   8
-3       25        1         0.04         50          50          1            0.52  10  0
-4       25        13        0.52         50          49          0.98         0.75  10  4
-5       25        22        0.88         50          10          0.2          0.54  10  8
+0       25        0         0            50          50          1            0.5   2   0
+1       25        17        0.68         50          49          0.98         0.83  2   4
+2       25        23        0.92         50          10          0.2          0.56  2   8
+3       25        0         0            50          50          1            0.5   10  0
+4       25        17        0.68         50          49          0.98         0.83  10  4
+5       25        24        0.96         50          10          0.2          0.58  10  8
 ```
 
 The value of one parameter can be plotted against some measure. The
@@ -83,17 +83,22 @@ aggregated coarsely to demonstrate the results.
 ```{.bash}
 # Plot n versus BCR
 scripts/plot_parameter_effects --signif 1 data/6/performance n bcr \
-    data/6/n.pdf
+                               --plot-format png \
+                               data/6/n.png
 
 # Plot k versus BCR
 scripts/plot_parameter_effects --signif 1 data/6/performance k bcr \
-    data/6/k.pdf
+                               --plot-format png \
+                               data/6/k.png
 ```
 ```{.output}
 ```
 
-View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and
- <a href="data/6/k.pdf">k vs. BCR</a>.
+View the plots: 
+
+<img class="plot" src="../../data/6/n.png" width=500 /> 
+
+<img class="plot" src="../../data/6/k.png" width=500 />
 
  It can be seen that n seems to have an impact on the BCR whereas k
  does not. The BCR rises and falls again because the gain in
