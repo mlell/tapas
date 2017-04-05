@@ -1,51 +1,76 @@
-qname	rname	pos	mapq	true_organism	mapped_organism	true_record	true_pos	correct
-retli_0	*	0	0	retli	*	retli_tr	121502	FALSE
-retli_1	*	0	0	retli	*	retli_tr	133167	FALSE
-retli_10	*	0	0	retli	*	retli_tr	110631	FALSE
-retli_11	*	0	0	retli	*	retli_tr	82809	FALSE
-retli_12	*	0	0	retli	*	retli_tr	66530	FALSE
-retli_13	*	0	0	retli	*	retli_tr	108831	FALSE
-retli_14	*	0	0	retli	*	retli_tr	109927	FALSE
-retli_15	*	0	0	retli	*	retli_tr	82777	FALSE
-retli_16	MT	2791	25	retli	volpertinger	retli_tr	66982	FALSE
-retli_17	*	0	0	retli	*	retli_tr	63230	FALSE
-retli_18	*	0	0	retli	*	retli_tr	90233	FALSE
-retli_19	*	0	0	retli	*	retli_tr	134302	FALSE
-retli_2	*	0	0	retli	*	retli_tr	90433	FALSE
-retli_20	*	0	0	retli	*	retli_tr	141445	FALSE
-retli_21	*	0	0	retli	*	retli_tr	38554	FALSE
-retli_22	*	0	0	retli	*	retli_tr	36370	FALSE
-retli_23	*	0	0	retli	*	retli_tr	41673	FALSE
-retli_24	*	0	0	retli	*	retli_tr	99707	FALSE
-retli_3	*	0	0	retli	*	retli_tr	130196	FALSE
-retli_4	*	0	0	retli	*	retli_tr	128990	FALSE
-retli_5	*	0	0	retli	*	retli_tr	31115	FALSE
-retli_6	*	0	0	retli	*	retli_tr	110146	FALSE
-retli_7	*	0	0	retli	*	retli_tr	17981	FALSE
-retli_8	*	0	0	retli	*	retli_tr	127497	FALSE
-retli_9	*	0	0	retli	*	retli_tr	128046	FALSE
-volpertinger_0	B1	2143	37	volpertinger	volpertinger	B1	2143	TRUE
-volpertinger_1	MT	3402	37	volpertinger	volpertinger	MT	3402	TRUE
-volpertinger_10	A2	4254	37	volpertinger	volpertinger	A2	4254	TRUE
-volpertinger_11	A1	3811	37	volpertinger	volpertinger	A1	3811	TRUE
-volpertinger_12	X	1474	37	volpertinger	volpertinger	X	1474	TRUE
-volpertinger_13	B3	5855	37	volpertinger	volpertinger	B3	5855	TRUE
-volpertinger_14	A1	2351	25	volpertinger	volpertinger	A1	2351	TRUE
-volpertinger_15	B3	1378	37	volpertinger	volpertinger	B3	1378	TRUE
-volpertinger_16	MT	3153	25	volpertinger	volpertinger	MT	3153	TRUE
-volpertinger_17	B2	3167	25	volpertinger	volpertinger	B2	3167	TRUE
-volpertinger_18	A2	5852	37	volpertinger	volpertinger	A2	5852	TRUE
-volpertinger_19	A3	4211	37	volpertinger	volpertinger	A3	4211	TRUE
-volpertinger_2	A3	1413	37	volpertinger	volpertinger	A3	1413	TRUE
-volpertinger_20	MT	3627	25	volpertinger	volpertinger	MT	3627	TRUE
-volpertinger_21	*	0	0	volpertinger	*	B3	5269	FALSE
-volpertinger_22	MT	615	25	volpertinger	volpertinger	MT	615	TRUE
-volpertinger_23	B3	608	37	volpertinger	volpertinger	B3	608	TRUE
-volpertinger_24	B2	4581	37	volpertinger	volpertinger	B2	4581	TRUE
-volpertinger_3	A3	5689	37	volpertinger	volpertinger	A3	5689	TRUE
-volpertinger_4	*	0	0	volpertinger	*	MT	3280	FALSE
-volpertinger_5	A3	4936	37	volpertinger	volpertinger	A3	4936	TRUE
-volpertinger_6	A1	1320	37	volpertinger	volpertinger	A1	1320	TRUE
-volpertinger_7	A3	4480	37	volpertinger	volpertinger	A3	4480	TRUE
-volpertinger_8	X	2381	37	volpertinger	volpertinger	X	2381	TRUE
-volpertinger_9	*	0	0	volpertinger	*	A1	2751	FALSE
+qname	mapped_flag	mapped_rname	mapped_pos	mapped_mapq	mapped_cigar	mapped_rnext	mapped_pnext	mapped_tlen	mapped_organism	true_record	true_start	true_end	true_organism	correct
+volpertinger_1	4	*	0	0	*	*	0	0	*	B1	2143	2168	volpertinger	FALSE
+volpertinger_2	16	X	4264	37	4M1I15M	*	0	0	volpertinger	MT	3402	3421	volpertinger	FALSE
+volpertinger_3	0	A3	1413	25	24M	*	0	0	volpertinger	A3	1413	1436	volpertinger	TRUE
+volpertinger_4	0	A3	5689	37	21M	*	0	0	volpertinger	A3	5689	5709	volpertinger	TRUE
+volpertinger_5	4	*	0	0	*	*	0	0	*	MT	3280	3302	volpertinger	FALSE
+volpertinger_6	4	*	0	0	*	*	0	0	*	A3	4936	4960	volpertinger	FALSE
+volpertinger_7	4	*	0	0	*	*	0	0	*	A1	1320	1340	volpertinger	FALSE
+volpertinger_8	4	*	0	0	*	*	0	0	*	A3	4480	4504	volpertinger	FALSE
+volpertinger_9	0	X	2381	37	20M	*	0	0	volpertinger	X	2381	2400	volpertinger	TRUE
+volpertinger_10	0	A1	2751	37	31M	*	0	0	volpertinger	A1	2751	2781	volpertinger	TRUE
+volpertinger_11	4	*	0	0	*	*	0	0	*	A2	4254	4281	volpertinger	FALSE
+volpertinger_12	4	*	0	0	*	*	0	0	*	A1	3811	3830	volpertinger	FALSE
+volpertinger_13	0	X	1474	37	24M	*	0	0	volpertinger	X	1474	1497	volpertinger	TRUE
+volpertinger_14	4	*	0	0	*	*	0	0	*	B3	5855	5876	volpertinger	FALSE
+volpertinger_15	4	*	0	0	*	*	0	0	*	A1	2351	2382	volpertinger	FALSE
+volpertinger_16	4	*	0	0	*	*	0	0	*	B3	1378	1399	volpertinger	FALSE
+volpertinger_17	0	MT	3153	25	21M	*	0	0	volpertinger	MT	3153	3173	volpertinger	TRUE
+volpertinger_18	0	B2	3167	37	20M	*	0	0	volpertinger	B2	3167	3186	volpertinger	TRUE
+volpertinger_19	4	*	0	0	*	*	0	0	*	A2	5852	5884	volpertinger	FALSE
+volpertinger_20	0	A3	4211	37	20M	*	0	0	volpertinger	A3	4211	4230	volpertinger	TRUE
+volpertinger_21	0	MT	3627	25	25M	*	0	0	volpertinger	MT	3627	3651	volpertinger	TRUE
+volpertinger_22	0	B3	5269	37	21M	*	0	0	volpertinger	B3	5269	5289	volpertinger	TRUE
+volpertinger_23	0	MT	615	37	20M	*	0	0	volpertinger	MT	615	634	volpertinger	TRUE
+volpertinger_24	0	B3	608	37	24M	*	0	0	volpertinger	B3	608	631	volpertinger	TRUE
+volpertinger_25	0	B2	4581	25	32M	*	0	0	volpertinger	B2	4581	4612	volpertinger	TRUE
+retli_1	4	*	0	0	*	*	0	0	*	retli_tr	36600	36622	retli	FALSE
+retli_2	4	*	0	0	*	*	0	0	*	retli_tr	117130	117149	retli	FALSE
+retli_3	4	*	0	0	*	*	0	0	*	retli_tr	117305	117329	retli	FALSE
+retli_4	4	*	0	0	*	*	0	0	*	retli_tr	30807	30828	retli	FALSE
+retli_5	4	*	0	0	*	*	0	0	*	retli_tr	93409	93435	retli	FALSE
+retli_6	4	*	0	0	*	*	0	0	*	retli_tr	85874	85912	retli	FALSE
+retli_7	4	*	0	0	*	*	0	0	*	retli_tr	28236	28257	retli	FALSE
+retli_8	4	*	0	0	*	*	0	0	*	retli_tr	114005	114026	retli	FALSE
+retli_9	4	*	0	0	*	*	0	0	*	retli_tr	9768	9805	retli	FALSE
+retli_10	4	*	0	0	*	*	0	0	*	retli_tr	41861	41894	retli	FALSE
+retli_11	4	*	0	0	*	*	0	0	*	retli_tr	123185	123207	retli	FALSE
+retli_12	4	*	0	0	*	*	0	0	*	retli_tr	113898	113918	retli	FALSE
+retli_13	4	*	0	0	*	*	0	0	*	retli_tr	2951	2971	retli	FALSE
+retli_14	4	*	0	0	*	*	0	0	*	retli_tr	26597	26627	retli	FALSE
+retli_15	4	*	0	0	*	*	0	0	*	retli_tr	64746	64765	retli	FALSE
+retli_16	4	*	0	0	*	*	0	0	*	retli_tr	10638	10657	retli	FALSE
+retli_17	4	*	0	0	*	*	0	0	*	retli_tr	90041	90060	retli	FALSE
+retli_18	4	*	0	0	*	*	0	0	*	retli_tr	7463	7483	retli	FALSE
+retli_19	4	*	0	0	*	*	0	0	*	retli_tr	93752	93771	retli	FALSE
+retli_20	4	*	0	0	*	*	0	0	*	retli_tr	15481	15528	retli	FALSE
+retli_21	4	*	0	0	*	*	0	0	*	retli_tr	120748	120769	retli	FALSE
+retli_22	4	*	0	0	*	*	0	0	*	retli_tr	136738	136759	retli	FALSE
+retli_23	4	*	0	0	*	*	0	0	*	retli_tr	83641	83684	retli	FALSE
+retli_24	4	*	0	0	*	*	0	0	*	retli_tr	142184	142209	retli	FALSE
+retli_25	4	*	0	0	*	*	0	0	*	retli_tr	142293	142312	retli	FALSE
+retli_26	4	*	0	0	*	*	0	0	*	retli_tr	52922	52957	retli	FALSE
+retli_27	4	*	0	0	*	*	0	0	*	retli_tr	75861	75886	retli	FALSE
+retli_28	4	*	0	0	*	*	0	0	*	retli_tr	143539	143558	retli	FALSE
+retli_29	4	*	0	0	*	*	0	0	*	retli_tr	91663	91687	retli	FALSE
+retli_30	4	*	0	0	*	*	0	0	*	retli_tr	36765	36784	retli	FALSE
+retli_31	4	*	0	0	*	*	0	0	*	retli_tr	78720	78740	retli	FALSE
+retli_32	4	*	0	0	*	*	0	0	*	retli_tr	116027	116050	retli	FALSE
+retli_33	4	*	0	0	*	*	0	0	*	retli_tr	27502	27521	retli	FALSE
+retli_34	4	*	0	0	*	*	0	0	*	retli_tr	98977	98997	retli	FALSE
+retli_35	4	*	0	0	*	*	0	0	*	retli_tr	90311	90331	retli	FALSE
+retli_36	4	*	0	0	*	*	0	0	*	retli_tr	36339	36362	retli	FALSE
+retli_37	4	*	0	0	*	*	0	0	*	retli_tr	132721	132740	retli	FALSE
+retli_38	4	*	0	0	*	*	0	0	*	retli_tr	3000	3026	retli	FALSE
+retli_39	4	*	0	0	*	*	0	0	*	retli_tr	144983	145005	retli	FALSE
+retli_40	4	*	0	0	*	*	0	0	*	retli_tr	28855	28875	retli	FALSE
+retli_41	0	A1	961	25	20M	*	0	0	volpertinger	retli_tr	128008	128027	retli	FALSE
+retli_42	4	*	0	0	*	*	0	0	*	retli_tr	42588	42608	retli	FALSE
+retli_43	4	*	0	0	*	*	0	0	*	retli_tr	94904	94923	retli	FALSE
+retli_44	4	*	0	0	*	*	0	0	*	retli_tr	128095	128122	retli	FALSE
+retli_45	4	*	0	0	*	*	0	0	*	retli_tr	59450	59469	retli	FALSE
+retli_46	4	*	0	0	*	*	0	0	*	retli_tr	90408	90427	retli	FALSE
+retli_47	4	*	0	0	*	*	0	0	*	retli_tr	20159	20180	retli	FALSE
+retli_48	4	*	0	0	*	*	0	0	*	retli_tr	7611	7631	retli	FALSE
+retli_49	4	*	0	0	*	*	0	0	*	retli_tr	31312	31334	retli	FALSE
+retli_50	4	*	0	0	*	*	0	0	*	retli_tr	88719	88746	retli	FALSE

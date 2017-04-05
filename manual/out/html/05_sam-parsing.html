@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Parsing of SAM files</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">Parsing of SAM files</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="parsing-of-sam-files">Parsing of SAM files</h1>
+<p>With the following tools, SAM files can be parsed to gain information of read names, where they were mapped, which quality score the mapping was assigned and so on.</p>
+<p>The procedures in this chapter may vary more than the previous ones, depending on the research question.</p>
+<p>In the setting this package was originally designed for, the names of the reads carry the information where the reads actually belong to. This information can subsequently be compared to the actual mapping information obtained from the SAM file.</p>
+<h2 id="extraction-of-information">Extraction of information</h2>
+<p>To use the information of the SAM file, convert it to a tabular form using the tool <code>sam2table</code>. This generates a table with column names adhering to the names defined in the SAM Specification, which are, amongst others:</p>
+<ul class="incremental">
+<li>qname: Read name</li>
+<li>rname: FASTA record name of genome this read was mapped to. <code>*</code> if not mapped.</li>
+<li>pos: Base index of mapping position (1-based index!)</li>
+<li>mapq: Quality score assigned by the mapper</li>
+<li>cigar: CIGAR String: Information about gaps and mismatches in the alignment read -- reference</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/sam2table</span> data/4/1.sam <span class="op">&gt;</span> data/5/1.tab</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Show beginning and end of the generated file:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>qname           flag  rname  pos   mapq  cigar    rnext  pnext  tlen
+volpertinger_1  4     *      0     0     *        *      0      0
+volpertinger_2  16    X      4264  37    4M1I15M  *      0      0
+volpertinger_3  0     A3     1413  25    24M      *      0      0
+volpertinger_4  0     A3     5689  37    21M      *      0      0
+volpertinger_5  4     *      0     0     *        *      0      0
+volpertinger_6  4     *      0     0     *        *      0      0
+volpertinger_7  4     *      0     0     *        *      0      0
+volpertinger_8  4     *      0     0     *        *      0      0
+volpertinger_9  0     X      2381  37    20M      *      0      0</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">tail</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>retli_41  0  A1  961  25  20M  *  0  0
+retli_42  4  *   0    0   *    *  0  0
+retli_43  4  *   0    0   *    *  0  0
+retli_44  4  *   0    0   *    *  0  0
+retli_45  4  *   0    0   *    *  0  0
+retli_46  4  *   0    0   *    *  0  0
+retli_47  4  *   0    0   *    *  0  0
+retli_48  4  *   0    0   *    *  0  0
+retli_49  4  *   0    0   *    *  0  0
+retli_50  4  *   0    0   *    *  0  0</code></pre>
+<h2 id="gather-all-information-needed-to-determine-correct-mapping">Gather all information needed to determine correct mapping</h2>
+<p>To determine whether a read was mapped correctly, the mapping information like mapped position of the read in the target reference as well as the true read position must be known. The true read information was generated along with the read FASTQ files and was stored in <code>.coord</code> files.</p>
+<p>The script <code>add_mapped_organisms</code> reads the mapping information stored in the SAM file (converted to a table) and the true read information and merges the information into one table.</p>
+<p>Thereby, all information about one read is stored in the same line.</p>
+<p>In this example, the organism <code>volpertinger</code> provides the endogenous reads as all reads were mapped only to the <code>volpertinger</code> genome. The <code>retli</code> reads are therefore exogenous reads, as these are not supposed to map to that reference genome.</p>
+<p>To assign the correct organism names to the reads, the script must be provided with</p>
+<p>The call is shown below. The script <code>write_later</code> at the end of the pipe is to prevent <code>merge</code> from overwriting its own input file too soon, as the output is meant to replace the input file.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/add_mapped_organisms</span> \
+    --endogenous volpertinger \
+                 data/genome/volpertinger.fasta.fai \
+                 data/2/volpertinger.coord \
+    --exogenous  retli \
+                 data/retli/retli.fasta.fai \
+                 data/2/retli.coord \
+    data/5/1.tab \
+    <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/1.tab
+
+<span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism
+volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger
+volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger
+volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger
+volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger
+volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger
+volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger</code></pre>
+<p>Now all the information is present to determine whether a read has been mapped correctly. The last step is writing in a new column whether a read was mapped correctly. This can be archieved using any means you can imagine, for this example we will use R. The <code>pocketR</code> tool is a thin wrapper which handles reading and writing of data for us. The input data will be available as a <code>data.frame</code> called <code>input</code>, everything written insides the parentheses of the <code>return(.)</code> statement will be printed.</p>
+<p>The following command adds a new column to the input data which indicates whether a read was mapped correctly:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">    within(input, {</span>
+<span class="st">        correct =</span>
+<span class="st">            mapped_pos == true_start  &amp;</span>
+<span class="st">            mapped_rname == true_record &amp;</span>
+<span class="st">            mapped_organism == true_organism })</span>
+<span class="st">&#39;</span>  data/5/1.tab \
+<span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/1.tab
+
+ <span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism  correct
+volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger   FALSE
+volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger   FALSE
+volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger   TRUE
+volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger   TRUE
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger   FALSE
+volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger   FALSE
+volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger   FALSE
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger   FALSE
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE</code></pre>
+<h2 id="grouping-of-reads">Grouping of reads</h2>
+<p>As next step, the number of reads are counted which belong to certain categories. Here, the categories are:</p>
+<ul class="incremental">
+<li>Correctly mapped or not</li>
+<li>Origin organism</li>
+<li>Organism a read was mapped to</li>
+</ul>
+<p>Again, the R language can be used to express our wishes concisely: Group the reads by all combinations of:</p>
+<ul class="incremental">
+<li><code>true_organism</code></li>
+<li><code>mapped_organism</code></li>
+<li>correctly mapped</li>
+</ul>
+<p>... and count the reads belonging to each category:</p>
+<p>the <code>cbind</code> function is needed in order to rename the column containing the read count. <code>qname</code> can be substituted here by any valid input column name, as its only used for counting (each column is equal in length).</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span>
+<span class="st">        FUN=length, data=input)</span>
+<span class="st">&#39;</span> data/5/1.tab \
+<span class="op">&gt;</span> data/5/1.agg
+
+<span class="fu">cat</span> data/5/1.agg <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>true_organism  mapped_organism  correct  count
+retli          *                FALSE    49
+volpertinger   *                FALSE    11
+retli          volpertinger     FALSE    1
+volpertinger   volpertinger     FALSE    1
+volpertinger   volpertinger     TRUE     13</code></pre>
+<p>This format may be used to plot the read fate of a single mapper run and to derive the measures sensitivity and specificity:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
+                          true_organism mapped_organism \
+                          correct       count \
+                          data/5/1.pdf  data/5/1.agg</code></pre></div>
+<pre class="output"><code></code></pre>
+<p><a href="data/5/1.pdf">Click here</a> to see the plot.</p>
+<h2 id="sensitivity-and-specificity">Sensitivity and specificity</h2>
+<ul class="incremental">
+<li><strong>Sensitivity</strong> (recall) shows how many reads have been mapped correctly by the mapper which are supposed to map.</li>
+<li><strong>Specificity</strong> (precision) shows how many reads have been correctly identified as non-endogenous and were therefore not mapped.</li>
+<li><strong>Balanced control rate</strong>* (BCR) is the mean of sensitivity and specificity</li>
+</ul>
+<p>If non-endogenous reads were included in the reads, like we did by including the <em>R. etli</em> reads, both measures can be calculated.</p>
+<p>The following script needs the same kind of input as the <code>plot-read-fate</code> script. Additionally, a list of organisms must be specified, whose genomes the mapper used as a reference.</p>
+<p>If you specify multiple organisms, separate them by commas and don't include any spaces.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/sensspec</span> --c-morg mapped_organism \
+                 --c-torg true_organism \
+                 data/5/1.agg volpertinger \
+    <span class="op">&gt;</span> data/5/1.performance
+
+<span class="ex">column</span> -t data/5/1.performance</code></pre></div>
+<pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
+25        13        0.52         50          49          0.98         0.75</code></pre>
+<h2 id="repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</h2>
+<p>The code needed to evaluate the data generated by the mapper might as well be included in the mapping template script introduced in the last section. If this is done, the data evaluation can be as well parallelized as the mapping process.</p>
+<p>All scripts used here were already introduced in this section.</p>
+<p>The files <code>data/5/all.tab</code> and <code>data/5/all.recids</code> must be calculated prior to execution of this script. This has been done in this section as well.</p>
+<p>Browse the <a href="data/5">directory <code>data/5</code></a> to see the results.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="ex">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span>
+    <span class="co"># Generate output prefix p from input name: `4.sam` -&gt; `4`</span>
+    <span class="va">bn=$(</span><span class="fu">basename</span> <span class="va">$sam)</span>
+    <span class="va">p=${bn%</span>.sam<span class="va">}</span>
+
+    <span class="co"># Convert SAM to table</span>
+    <span class="ex">scripts/sam2table</span> data/4/<span class="va">${p}</span>.sam <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.tab
+
+    <span class="co"># Mark correctly/incorrectly mapped reads</span>
+    <span class="ex">scripts/add_mapped_organisms</span> \
+        --endogenous volpertinger \
+                     data/genome/volpertinger.fasta.fai \
+                     data/2/volpertinger.coord \
+        --exogenous  retli \
+                     data/retli/retli.fasta.fai \
+                     data/2/retli.coord \
+        data/5/<span class="va">${p}</span>.tab \
+        <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab
+
+
+    <span class="co"># Determine whether each read was correctly mapped</span>
+    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">        within(input, {</span>
+<span class="st">            correct =</span>
+<span class="st">                mapped_pos == true_start  &amp;</span>
+<span class="st">                mapped_rname == true_record &amp;</span>
+<span class="st">                mapped_organism == true_organism })</span>
+<span class="st">    &#39;</span>  data/5/<span class="va">${p}</span>.tab \
+    <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab
+
+    <span class="co"># Count reads per origin/target organism and mapping status</span>
+    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
+<span class="st">        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span>
+<span class="st">            FUN=length, data=input) &#39;</span> \
+    data/5/<span class="va">${p}</span>.tab \
+    <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.agg
+
+    <span class="co"># Plot mapping targets per origin organism</span>
+    <span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
+                              true_organism    mapped_organism \
+                              correct          count \
+                              data/5/<span class="va">${p}</span>.pdf  data/5/<span class="va">${p}</span>.agg
+
+    <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span>
+    <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \
+                     --c-torg true_organism \
+                     data/5/<span class="va">${p}</span>.agg volpertinger \
+        <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.performance
+
+    <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$sam</span><span class="st"> done. -&gt; Generated data/5/</span><span class="va">${p}</span><span class="st">.{tab,agg,pdf,performance}&quot;</span>
+
+<span class="kw">done</span></code></pre></div>
+<pre class="output"><code>data/4/0.sam done. -&gt; Generated data/5/0.{tab,agg,pdf,performance}
+data/4/1.sam done. -&gt; Generated data/5/1.{tab,agg,pdf,performance}
+data/4/2.sam done. -&gt; Generated data/5/2.{tab,agg,pdf,performance}
+data/4/3.sam done. -&gt; Generated data/5/3.{tab,agg,pdf,performance}
+data/4/4.sam done. -&gt; Generated data/5/4.{tab,agg,pdf,performance}
+data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,pdf,performance}</code></pre>
+</div>
+</body>
+</html>

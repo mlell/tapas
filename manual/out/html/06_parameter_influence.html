@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Comparing multiple mapper runs</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">Comparing multiple mapper runs</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="comparing-multiple-mapper-runs">Comparing multiple mapper runs</h1>
+<p>The file <code>data/4/partab</code> holds the information which parameters were used for which mapping run. By relating the output measures like sensitivity, specificity or balanced accuracy to these parameters, the influence of individual parameters can be assessed.</p>
+<p>First step is to combine the output measures of all runs:</p>
+<p>To this effect, to each of the <code>.performance</code>-files (contain sensitivity, specificity, bcr) generated in the last section, the run number is added as a separate column, then the <code>.performance</code>-files of all runs are concatenated to one table. Because the run number was added before, the origin of all values is still clear.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Add the run number to each .performance file</span>
+<span class="kw">for</span> <span class="ex">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span>
+    <span class="bu">echo</span> <span class="va">$f</span>
+    <span class="va">i=$(</span><span class="fu">basename</span> <span class="va">${f%</span>.performance<span class="va">})</span>
+
+    <span class="ex">scripts/add_const_column</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> runidx <span class="st">&quot;</span><span class="va">$i</span><span class="st">&quot;</span> \
+        <span class="op">&gt;</span> <span class="st">&quot;data/6/</span><span class="va">${i}</span><span class="st">.performance&quot;</span>
+<span class="kw">done</span>
+
+<span class="co"># Concatenate all tables, but print the header line only once.</span>
+<span class="ex">scripts/cat_tables</span> data/6/*.performance \
+                 <span class="op">&gt;</span> data/6/performance
+
+<span class="fu">cat</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>data/5/0.performance
+data/5/1.performance
+data/5/2.performance
+data/5/3.performance
+data/5/4.performance
+data/5/5.performance
+map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
+25        1         0.04         50          50          1            0.52  0
+25        13        0.52         50          49          0.98         0.75  1
+25        21        0.84         50          10          0.2          0.52  2
+25        1         0.04         50          50          1            0.52  3
+25        13        0.52         50          49          0.98         0.75  4
+25        22        0.88         50          10          0.2          0.54  5</code></pre>
+<p>Next, the parameter values belonging to the run indices are joined in, appending the parameter columns to <code>data/6/parameters</code> itself.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/merge</span> -a data/6/performance runidx \
+              -b data/4/partab      runidx \
+              --all-a-cols --all-b-cols --all-a \
+           <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/6/performance
+
+<span class="fu">head</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
+0       25        1         0.04         50          50          1            0.52  2   0
+1       25        13        0.52         50          49          0.98         0.75  2   4
+2       25        21        0.84         50          10          0.2          0.52  2   8
+3       25        1         0.04         50          50          1            0.52  10  0
+4       25        13        0.52         50          49          0.98         0.75  10  4
+5       25        22        0.88         50          10          0.2          0.54  10  8</code></pre>
+<p>The value of one parameter can be plotted against some measure. The following command shows plots where the X and Y axis are free to choose. If multiple runs yield a similar score on the Y axis, their data points are merged to form one bigger dot on the plot. Here all numbers are rounded to one significant digit, because only 8 mapping runs are compared in this example. Therefore results must be aggregated coarsely to demonstrate the results.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
+    data/6/n.pdf
+
+<span class="co"># Plot k versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \
+    data/6/k.pdf</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>View the plots: <a href="data/6/n.pdf">n vs. BCR</a> and <a href="data/6/k.pdf">k vs. BCR</a>.</p>
+<p>It can be seen that n seems to have an impact on the BCR whereas k does not. The BCR rises and falls again because the gain in sensitivity is offset by the loss in specificity if n rises too high.</p>
+</div>
+</body>
+</html>

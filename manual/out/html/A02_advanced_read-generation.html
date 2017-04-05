@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>true</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">true</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="advanced-read-generation">Advanced read generation</h1>
+<p>The output FASTQ file will be constructed by interleaving the contents of three files, containing the read names, the nucleotide strings and the quality strings, respectively. These files will be generated in the following.</p>
+<p>Additionally, a table containing the read names with the true read positions will be created, to evaluate later on whether a read was mapped correctly.</p>
+<p>By adding additional custom steps between the steps shown here it is possible to match advanced requirements to the generated reads.</p>
+<p>Create the subfolder which holds the generated files:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> data/2e</code></pre></div>
+<pre class="output"><code></code></pre>
+<h2 id="generate-nucleotide-strings-and-read-names">Generate nucleotide strings and read names</h2>
+<p>The <code>uniform</code> script can be used to sample reads from a reference genome. The script needs a FASTA file as input, as well as the desired amount of reads to be generated, the minimum length and the decay length. The read lengths are exponentially distributed; the decay length parameter specifies the length by which half of the reads are longer than the minimum read length.</p>
+<p>For the FASTA file, an index file must exist which was generated in the previous section using samtools.</p>
+<p>Example: Extract 25 reads, with minimum length 20 basepairs, where half of the reads have a length longer than 25 bp. The value 123 is used to initialize the random number generator, i.e. can be used to obtain reproducible reads. This last parameter can be omitted.</p>
+<p>The resulting output will be a raw list of nucleotide sequences and a table containing three columns:</p>
+<ol class="incremental" style="list-style-type: decimal">
+<li>The FASTA record name (e.g. chromosome) where the read originated.</li>
+<li>1-based base number of the reads' first base.</li>
+<li>1-based base number of the reads' last base.</li>
+</ol>
+<p>The base indices are 1-based because base indices are 1-based in SAM-files as well. (whereas in BAM-files, they are 0-based, but we don't need to deal with BAM-files here.)</p>
+<p>We will generate sample reads from our sample genome of a volpertinger.</p>
+<p>Execute the following script to generate random nucleotide sequences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> data/genome/volpertinger.fasta \
+    --seed 1234 \
+    --output data/2e/volpertinger.coord data/2e/volpertinger.nucl \
+    25 20 5</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Two files are generated when the <code>--output</code> switch is used, as is the case above: One holds the read names and coordinates and the other one holds the raw nucleotide sequences. When omitting <code>--output</code>, all information is printed in tabular form on the standard output and not saved to distinct files.</p>
+<p>The resulting files look like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/2e/volpertinger.coord <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>record  start  end
+B1      2143   2168
+MT      3402   3421
+A3      1413   1436
+A3      5689   5709
+MT      3280   3302
+A3      4936   4960
+A1      1320   1340
+A3      4480   4504
+X       2381   2400</code></pre>
+<h2 id="putting-together-the-fastq-file">Putting together the FASTQ file</h2>
+<p>This task needs three input files:</p>
+<ol class="incremental" style="list-style-type: decimal">
+<li>The list of read names</li>
+<li>The list of nucleotide strings</li>
+<li>The list of quality strings</li>
+</ol>
+<p>The first list is extracted from the file <code>volpertinger.coord</code>, the second list exists already (<code>volpertinger.nucl</code>) and the third list is generated using standard UNIX tools from the nucleotide strings</p>
+<h2 id="read-names">Read names</h2>
+<p>In this tutorial we generate read names consisting of the organism name (<em>volpertinger</em>) followed by an underscore and a counting number.</p>
+<p>To have the origin information of the reads available along with their newly-generated reads, it is advisable to add the read names to the <code>volpertinger.coord</code> file generated above.</p>
+<p>There is a script included for adding this kind of column, which is shown in the next code example. You can as well use <code>awk</code> or whichever tool you like to accomplish this task if you need more sophisticated read names.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span>  --prefix volpertinger_ \
+                      --colname name  \
+                      --inplace data/2e/volpertinger.coord
+
+<span class="fu">head</span> data/2e/volpertinger.coord <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>name            record  start  end
+volpertinger_0  B1      2143   2168
+volpertinger_1  MT      3402   3421
+volpertinger_2  A3      1413   1436
+volpertinger_3  A3      5689   5709
+volpertinger_4  MT      3280   3302
+volpertinger_5  A3      4936   4960
+volpertinger_6  A1      1320   1340
+volpertinger_7  A3      4480   4504
+volpertinger_8  X       2381   2400</code></pre>
+<p>To use the read names to generate a FASTQ file, they must be available as a raw list without additional columns or a header. <code>awk</code> can be used to perform this task:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> \
+      data/2e/volpertinger.coord \
+    <span class="op">&gt;</span> data/2e/volpertinger.i
+
+<span class="fu">head</span> data/2e/volpertinger.i</code></pre></div>
+<pre class="output"><code>volpertinger_0
+volpertinger_1
+volpertinger_2
+volpertinger_3
+volpertinger_4
+volpertinger_5
+volpertinger_6
+volpertinger_7
+volpertinger_8
+volpertinger_9</code></pre>
+<h2 id="quality-strings">Quality strings</h2>
+<p>Currently, the effect of quality strings on the mapping result has not been investigated. Currently only strings of constant quality score are used. This can be done by the UNIX <code>sed</code> tool, which replaces every character by an F:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span> \
+      data/2e/volpertinger.nucl \
+    <span class="op">&gt;</span> data/2e/volpertinger.q
+
+<span class="fu">head</span> data/2e/volpertinger.q</code></pre></div>
+<pre class="output"><code>FFFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
+<p>If you want to generate more elaborate quality strings, you are free to do so using whichever tools you desire. Just generate a list with as many lines as there are nucleotide strings in <code>volpertinger.nucl</code> to input them into the pipeline.</p>
+<h2 id="putting-the-fastq-file-together">Putting the FASTQ file together</h2>
+<p>The <code>synth_fastq</code> tool creates a FASTQ file from its components, nucleotide string, quality string and read name (ID line). If the file containing the read lines is omitted, the reads are numbered sequentially.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/synth_fastq</span> data/2e/volpertinger.nucl \
+                    data/2e/volpertinger.q    \
+                    data/2e/volpertinger.i    \
+    <span class="op">&gt;</span> data/2e/volpertinger.fastq
+
+<span class="fu">head</span> data/2e/volpertinger.fastq</code></pre></div>
+<pre class="output"><code>@volpertinger_0
+TTCCACAAGATATTAGCCAACCAGAT
++
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_1
+TCTATTTAATAACTTCTCCC
++
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+TTGAACTCTATCTTCCGGGGCTCA</code></pre>
+<h2 id="repeat-the-above-steps-to-generate-contaminant-reads">Repeat the above steps to generate contaminant reads</h2>
+<p>This commands generate some reads from a truncated <em>Rhizobium etli</em> genome, to supply reads which are not supposed to map. This way, contamination with non-endogenous reads are simulated.</p>
+<p>The endogenous (<code>volpertinger.fastq</code>) and contaminant (<code>retli.fastq</code>) read will be merged into one fastq file (<code>all.fastq</code>) once the sample reads have undergone mutation simulation. This will be done in the next section.</p>
+<p>Note that two kinds of abbreviations are used here:</p>
+<ul class="incremental">
+<li>Terms like <code>const_{a,b,c}</code> are expanded by <code>bash</code> to <code>const_a const_b const_c</code> and can therefore be used to specify mulitple paths which share some parts.</li>
+<li>The temporary files (similar to <code>volpertinger.q</code> and <code>volpertinger.i</code> above) are omitted here by using <code>bash</code>'s <em>process substitution</em> (<code>&lt;(...)</code>) which uses the output of one argument instead of a file name which the other command expects.</li>
+</ul>
+<p>If you do not understand why these commands are equivalent to the commands listed above used to generate <code>reads.fastq</code>, you can use these as well without problems.</p>
+<p>Index genome and sample nucleotide seqences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">samtools</span> faidx data/retli/retli_tr.fasta
+
+<span class="ex">scripts/uniform</span> \
+    data/retli/retli_tr.fasta \
+    --seed 2345 \
+    --output data/2e/retli.<span class="dt">{coord,nucl}</span> \
+    25 20 5</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Read names:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span>  --prefix retli_ \
+                      --colname name  \
+                      --inplace data/2e/retli.coord</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Put the FASTQ together:</p>
+<ul class="incremental">
+<li>Quality strings are generated without an intermediate file using <code>sed</code></li>
+<li>Read names are extracted without an intermediate file using <code>awk</code></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/synth_fastq</span> \
+    data/2e/retli.nucl \
+    <span class="op">&lt;(</span><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span>           data/2e/retli.nucl<span class="op">)</span> \
+    <span class="op">&lt;(</span><span class="fu">awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> data/2e/retli.coord<span class="op">)</span> \
+    <span class="op">&gt;</span> data/2e/retli.fastq
+
+<span class="fu">head</span> data/2e/retli.fastq</code></pre></div>
+<pre class="output"><code>@retli_0
+TCGTTCTTGTAGCCTTCCGGGAA
++
+FFFFFFFFFFFFFFFFFFFFFFF
+@retli_1
+ACTGAAGCGCAAGCTCTGAA
++
+FFFFFFFFFFFFFFFFFFFF
+@retli_2
+TGGCCGAGGGACGCTTGCGTCG</code></pre>
+</div>
+</body>
+</html>

@@ -1,2 +1,2 @@
 map.true	map.actl	sensitivity	nomap.true	nomap.actl	specificity	bcr	runidx
-25	2	0.08	25	25	1	0.54	3
+25	1	0.04	50	50	1	0.52	3

@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Mutation of reads</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+</head>
+<!-- BODY BEGIN ------------------------------>
+<body>
+    <div class="content">
+<!--<div id="header">
+<h1 class="title">Mutation of reads</h1>
+</div>
+-->
+<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
+<!-- Local Table of contents -->
+<!--Back to table of contents -->
+<!-- CONTENT -------------------------------------->
+<h1 id="mutation-of-reads">Mutation of reads</h1>
+<h2 id="specifying-the-parameters">Specifying the parameters</h2>
+<p>The mutation probabilities are saved as a text table. It looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mut-tables/mut.tab</code></pre></div>
+<pre class="output"><code>strand   from   to   factor  geom_prob  intercept
+3        C      T    0.3     0.4        0.1
+5        C      T    0.1     0.2        0.0
+3        *      *    0.0     0.1        0.12</code></pre>
+<p>Two types of per-base mutation probabilities are distinguished:</p>
+<ul class="incremental">
+<li>The <strong>position-independent</strong> mutation probability is the same for all bases of the read. This can be used to model read derivation by evolution.</li>
+<li>The <strong>position-dependent</strong> mutation probability is dependent of the proximity of a base to the end of the read. The nearer a base is to the read end, the higher is the mutation probability of the base. This can be used to model chemical damage to ancient DNA.</li>
+</ul>
+<p>Probability values are specified which range from 0 (never mutate that base) to 1 (always mutate that base). Probabilities of multiple lines which are applicable to the same base add up. The columns have the following meaning:</p>
+<ul class="incremental">
+<li>strand: [3 or 5] Which side (3' or 5' end) of the read shall be considered the read end when the base-dependent mutation probability is calculated. If both sides of the read shall see heightened mutation probabilities, include two lines, one with a value <code>3</code> and one with a value <code>5</code>.</li>
+<li>from: [Letter or <code>*</code>] Which bases should mutate according to this lines' parameters. The character <code>*</code> means this line applies to every base.</li>
+<li>to: [Letter or <code>*</code>] Which base should a mutation event yield. <code>*</code> means a base (A,T,C,G) different from the original base is chosen at random.</li>
+<li>factor: Maximum position-dependent mutation probability at the read end (specified by <code>strand</code>)</li>
+<li>geom_prob: How fast the position-dependent mutation probability declines for bases further away from the read end. 0 means no decline, higher values lead to faster decline.</li>
+<li>intercept: The position-independent mutation probability.</li>
+</ul>
+<p>In the example above, a base is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> bp away from the 5' end of a read of length l. That means, it is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(l-x)</annotation></semantics></math> bp away from the 3' end of the read. The exchange probability depends on the type of the nucleotide and on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>:</p>
+<p>Base at position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> is not Cytosine:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0.1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.12</mn><mo>=</mo><mn>0.12</mn><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub></mrow><annotation encoding="application/x-tex">P_{\ast\rightarrow\ast}(x) = 0 \times dgeom(x;0.1) + 0.12 = 0.12 = 
+P_{\ast\rightarrow\ast}</annotation></semantics></math></p>
+<p>Base at position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> is Cytosine (C):</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mi>C</mi><mo accent="false">→</mo><mi>T</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>P</mi><mrow><mo>*</mo><mo accent="false">→</mo><mo>*</mo></mrow></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0.3</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mn>0.4</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0.1</mn><mo>×</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mo>−</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>;</mo><mn>0.2</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>0.0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P_{C\rightarrow T}(x) = P_{\ast\rightarrow\ast} + 
+          (0.3\times dgeom(x;0.4) + 0.1) + 
+          (0.1\times dgeom((l-x);0.2) + 0.0) </annotation></semantics></math></p>
+<h2 id="mutation-probabilities">Mutation probabilities</h2>
+<p>The reads are mutated using per base probabilities derived from the geometric distribution. The mutation probability at the read ends is the highest. By this, the chemical damage near read ends can be modelled. For this, three parameters are important:</p>
+<ul class="incremental">
+<li><p>The base-independent mutation probability <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>t</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0&lt;t&lt;1</annotation></semantics></math>). This is the probability of any base to mutate, regardless of its proximity to the end of the read. This can be used to model evolutionary distance.</p></li>
+<li><p>The steepness <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>p</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0&lt;p&lt;1</annotation></semantics></math>) of the mutation probability decline when moving away from the read end. The higher this parameter the steeper is the decline of mutation probability when moving away from the read end.</p></li>
+<li><p>The multiplying factor <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>. At the read end, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo>+</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">f+t</annotation></semantics></math> is the probability of the first base of the read to be mutated.</p></li>
+</ul>
+<p>With this model, its possible to archive mutation probabilities greater than one. This makes of course no sense and the mutation probability is cut back to one in such cases.</p>
+<p>In mathematical notation, the mutation probability <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mrow><mi>m</mi><mi>u</mi><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">P_{mut}</annotation></semantics></math> of a base number <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>, starting to count at the reads' end, is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mrow><mi>m</mi><mi>u</mi><mi>t</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>f</mi><mo>⋅</mo><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">P_{mut}(x) = f \cdot dgeom(x;p) + t</annotation></semantics></math></p>
+<p>with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>g</mi><mi>e</mi><mi>o</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>;</mo><mi>P</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">dgeom(X;P)</annotation></semantics></math> being the density function of the geometric distribution, with parameters X = number of tries; P = success probability.</p>
+<p>The following sketch graphs illustrate the three parameters:</p>
+<p><img src="fig/mut.svg" width="800" /></p>
+<h2 id="subject-a-fastq-file-to-artificial-mutations">Subject a FASTQ file to artificial mutations</h2>
+<p>The <code>multiple-mutate.py</code> tool takes a table of the previous section as input and mutates strings provided to it on standard input accordingly.</p>
+<p>An already existent FASTQ file can be mutated using the <code>filter_fastq</code> tool in cooperation with <code>multiple-mutate</code>. The tool <code>filter_fastq</code> enables you to apply transformations to existing fastq files. To this effect, <code>filter_fastq</code> extracts one part out of a FASTQ file (read name, nucleotide string or quality string) and feeds it into another sub-program specified between two <code>@</code>-signs. The sub-program is required to take lines of text as input and return the same number of lines on standard output. The output of the sub-program is then placed into the output fastq file. By combining <code>filter_fastq</code> and <code>multiple_mutate</code>, the tool which applies mutations to strings of nucleotides, a FASTQ file can be mutated:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/filter_fastq</span> --nucleotide \
+  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  <span class="op">&lt;</span> data/2/volpertinger.fastq \
+  <span class="op">&gt;</span> data/3/volpertinger_mut.fastq</code></pre></div>
+<pre class="output"><code></code></pre>
+<p>Note how the nucleotide strings of the output FASTQ file now carry mutations (lower-case letters):</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/3/volpertinger_mut.fastq</code></pre></div>
+<pre class="output"><code>@volpertinger_1
+cTCaATAAGgTtTTAGCCcACCAGAT
++
+FFFFFFFFFFFFFFFFFFFFFFFFFF
+@volpertinger_2
+gCTATTTAAgtACcTCTgCC
++
+FFFFFFFFFFFFFFFFFFFF
+@volpertinger_3
+TTGAACTgTATCTaCCGGGtaTCA</code></pre>
+<p>The <code>filter_fastq.py</code> script enables you to apply an arbitrary script or program on just one part of a FASTQ file (ID line, nucleotide line, quality line). The used script must accept the respective part on standard input and print the modified version on standard output. The modified FASTQ file is assembled by <code>filter_fastq.py</code> from the output of its children scripts and printed on standard output.</p>
+<p>On the <code>filter_fastq.py</code> call, the @ sign serves as a sentinel character, which determines start and end of the sub-program's command line. It can also be any arbitrary other character, as long as it doesn't occur inside the child script's command line but only at the beginning and the end.</p>
+<h2 id="combining-endogenous-and-non-endogenous-reads">Combining endogenous and non-endogenous reads</h2>
+<p>In this example, the endogenous reads from <em>volpertinger</em> undergo simulated mutation and damage prior to mapping, while the contaminant reads from <em>R. etli</em> do not.</p>
+<p>Therefore only now, after applying mutations to our <em>volpertinger</em> reads, is the time to combine the mutated sample reads and the contaminant reads generated in the last section to one file. For this purpose, the UNIX tool <code>cat</code> is used:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/3/volpertinger_mut.fastq data/2/retli.fastq \
+    <span class="op">&gt;</span> data/3/all.fastq</code></pre></div>
+<pre class="output"><code></code></pre>
+<h2 id="obtaining-mutation-rates-from-mapdamage">Obtaining mutation rates from mapDamage</h2>
+<p>Damage patterns from mapDamage can be converted into a table with mutation parameters by least-squares fitting. For this purpose, the mapDamage output files ending with <code>... _freq.txt</code> are needed.</p>
+<p>The following command fits a geometric distribution to mapDamage data, shows the derived parameters and plots the data with the fitted curve.</p>
+<p>The <code>cut</code> command is used only to limit the output to a width acceptable for this manual. Use the bash <code>&gt;</code> redirection operator to write this output into a file suitable for <code>multiple_mutate.py</code>.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/mapdamage2geomparam</span> \
+    --fit-plots data/3/fit_ \
+    data/mapdamage/*.txt <span class="kw">|</span> <span class="kw">\</span>
+    <span class="fu">cut</span> -f1-6 <span class="kw">|</span> <span class="kw">\</span>
+    <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>strand  from  to  factor      geom_prob   intercept
+3       G     A   0.79513996  0.26918746  0.039386893
+5       C     T   0.43360246  0.35249167  0.027965522</code></pre>
+<p>The generated plots can be viewed <a href="data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and <a href="data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>. fit_000_GS136_3pGtoA_freq.txt.pdf</p>
+<h2 id="generating-multiple-damage-patterns-using-a-parameter-table">Generating multiple damage patterns using a parameter table</h2>
+<p>Sometimes, multiple damage patterns need to be compared. There is a possibility to generate the <code>multiple_mutate</code> input files from one table which lists all different values of the different mutation parameters.</p>
+<p>This approach will be seen again later, where there is a possibility to generate many short read mapper calls from exactly the same kind of parameter table. You can therefore generate appropriate input files as well as appropriate short read mapper calls out of only one table which lists all the parameters.</p>
+<p>The <code>fill_template.py</code> script expects a table, where each row is used to fill a prespecified template with values.</p>
+<p>For example, if a template is written which looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cp</span> data/mut-tmpl/mut-tmpl data/3
+<span class="ex">column</span> -t data/3/mut-tmpl</code></pre></div>
+<pre class="output"><code>strand  from  to  factor  geom_prob  intercept
+5       C     T   {fac}   {geom}     0
+3       G     A   {fac}   {geom}     0
+3       *     *   0       0          {all_intercept}</code></pre>
+<p>And a table is created which looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cp</span> data/mut-tmpl/tab data/3/mut-tab
+<span class="ex">column</span> -t data/3/mut-tab</code></pre></div>
+<pre class="output"><code>fac  geom  all_intercept
+0    0.1   0
+0    0.1   0.3
+0.5  0.1   0
+0.5  0.1   0.3</code></pre>
+<p>several files can be generated with</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/fill_template</span> \
+    data/3/mut-tmpl \
+    <span class="op">&lt;</span> data/3/mut-tab</code></pre></div>
+<pre class="output"><code>strand  from    to  factor  geom_prob   intercept
+5   C   T   0   0.1 0
+3   G   A   0   0.1 0
+3   *   *   0   0   0
+
+strand  from    to  factor  geom_prob   intercept
+5   C   T   0   0.1 0
+3   G   A   0   0.1 0
+3   *   *   0   0   0.3
+
+strand  from    to  factor  geom_prob   intercept
+5   C   T   0.5 0.1 0
+3   G   A   0.5 0.1 0
+3   *   *   0   0   0
+
+strand  from    to  factor  geom_prob   intercept
+5   C   T   0.5 0.1 0
+3   G   A   0.5 0.1 0
+3   *   *   0   0   0.3
+</code></pre>
+<p>Use the <code>--output</code> switch of this script to write each file in a separate file. The argument of <code>--output</code> can (and should!) contain column names of the table, enclosed in braces {...}. This creates a separate filename per input row.</p>
+<p>We will now write each of the tables shown above to its own file. We want to name the files using a counting number, but our input table doesn't yet contain a column with that counter. Therefore we must first add one.</p>
+<p>The mentioned-above table can be prepended with an index column:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span> --inplace data/3/mut-tab
+
+<span class="fu">head</span> data/3/mut-tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code>index  fac  geom  all_intercept
+0      0    0.1   0
+1      0    0.1   0.3
+2      0.5  0.1   0
+3      0.5  0.1   0.3</code></pre>
+<p>Now, each output of <code>fill_template.py</code> can be written to its own output file, using the information from the newly-generated <code>index</code> column:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/fill_template</span> \
+    --output <span class="st">&quot;data/3/{index}_filled&quot;</span> \
+    data/3/mut-tmpl \
+    <span class="op">&lt;</span> data/3/mut-tab
+
+<span class="co"># Show all the generated files</span>
+<span class="kw">for</span> <span class="ex">f</span> in data/3/*_filled<span class="kw">;</span> <span class="kw">do</span>
+    <span class="bu">echo</span> <span class="st">&quot; === </span><span class="va">$f</span><span class="st"> === &quot;</span>
+    <span class="ex">column</span> -t <span class="va">$f</span>
+<span class="kw">done</span></code></pre></div>
+<pre class="output"><code> === data/3/0_filled ===
+strand  from  to  factor  geom_prob  intercept
+5       C     T   0       0.1        0
+3       G     A   0       0.1        0
+3       *     *   0       0          0
+ === data/3/1_filled ===
+strand  from  to  factor  geom_prob  intercept
+5       C     T   0       0.1        0
+3       G     A   0       0.1        0
+3       *     *   0       0          0.3
+ === data/3/2_filled ===
+strand  from  to  factor  geom_prob  intercept
+5       C     T   0.5     0.1        0
+3       G     A   0.5     0.1        0
+3       *     *   0       0          0
+ === data/3/3_filled ===
+strand  from  to  factor  geom_prob  intercept
+5       C     T   0.5     0.1        0
+3       G     A   0.5     0.1        0
+3       *     *   0       0          0.3</code></pre>
+<p>If several combinations of mutation parameters shall be tested, <code>cross_tab.py</code> can be used to generate the table from predefined parameter values, like described with mapper parameters in the next section.</p>
+</div>
+</body>
+</html>
