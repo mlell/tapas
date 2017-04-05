@@ -16,7 +16,7 @@ volpertinger_14	4	*	0	0	*	*	0	0	*	B3	5855	5876	volpertinger	FALSE
 volpertinger_15	4	*	0	0	*	*	0	0	*	A1	2351	2382	volpertinger	FALSE
 volpertinger_16	4	*	0	0	*	*	0	0	*	B3	1378	1399	volpertinger	FALSE
 volpertinger_17	4	*	0	0	*	*	0	0	*	MT	3153	3173	volpertinger	FALSE
-volpertinger_18	0	B2	3167	25	20M	*	0	0	volpertinger	B2	3167	3186	volpertinger	TRUE
+volpertinger_18	4	*	0	0	*	*	0	0	*	B2	3167	3186	volpertinger	FALSE
 volpertinger_19	4	*	0	0	*	*	0	0	*	A2	5852	5884	volpertinger	FALSE
 volpertinger_20	4	*	0	0	*	*	0	0	*	A3	4211	4230	volpertinger	FALSE
 volpertinger_21	4	*	0	0	*	*	0	0	*	MT	3627	3651	volpertinger	FALSE

@@ -1,4 +1,3 @@
 true_organism	mapped_organism	correct	count
 retli	*	FALSE	50
-volpertinger	*	FALSE	24
-volpertinger	volpertinger	TRUE	1
+volpertinger	*	FALSE	25

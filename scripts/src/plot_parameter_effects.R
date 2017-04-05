@@ -42,6 +42,10 @@ Options:
                  *significant* digits, e.g. rounding 14, 1.4, 0.14 to one
                  significant digit yields 10, 1 and 0.1. Purpose is the same
                  as for the round parameter.
+
+--plot-format FORMAT  [Default: png]
+                 Specify 'png' or 'pdf' to output in the respective image 
+                 format.
 "
 
 
@@ -112,7 +116,17 @@ main = function(argv){
         scale_size_continuous("amount")+
         geom_point()
 
-    ggsave(filename=args$PLOT_NAME, plot=p, device=pdf, width=5,height=2.5)
+    plot_format <- tolower(args$`--plot-format`)
+    plot_w  <- 5
+    plot_h  <- 2.5
+    if(plot_format == 'pdf'){
+        ggsave( filename=args$PLOT_NAME, plot=p
+              , device=pdf, width=plot_w, height=plot_h)
+    }else if(plot_format == 'png'){
+        dpi <- 150
+        ggsave( filename=args$PLOT_NAME, plot=p
+              , dpi = dpi, device='png', width=plot_w, height=plot_h)
+    }
 }
 
 checkArgumentSanity = function(args){

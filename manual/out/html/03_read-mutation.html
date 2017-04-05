@@ -101,24 +101,24 @@ P_{\ast\rightarrow\ast}</annotation></semantics></math></p>
 <p><img src="fig/mut.svg" width="800" /></p>
 <h2 id="subject-a-fastq-file-to-artificial-mutations">Subject a FASTQ file to artificial mutations</h2>
 <p>The <code>multiple-mutate.py</code> tool takes a table of the previous section as input and mutates strings provided to it on standard input accordingly.</p>
-<p>An already existent FASTQ file can be mutated using the <code>filter_fastq</code> tool in cooperation with <code>multiple-mutate</code>. The tool <code>filter_fastq</code> enables you to apply transformations to existing fastq files. To this effect, <code>filter_fastq</code> extracts one part out of a FASTQ file (read name, nucleotide string or quality string) and feeds it into another sub-program specified between two <code>@</code>-signs. The sub-program is required to take lines of text as input and return the same number of lines on standard output. The output of the sub-program is then placed into the output fastq file. By combining <code>filter_fastq</code> and <code>multiple_mutate</code>, the tool which applies mutations to strings of nucleotides, a FASTQ file can be mutated:</p>
+<p>An already existent FASTQ file can be mutated using the <code>filter_fastq</code> tool in cooperation with <code>multiple-mutate</code>. The tool <code>filter_fastq</code> enables you to apply transformations to existing fastq files. To this effect, <code>filter_fastq</code> extracts one part out of a FASTQ file (read name, nucleotide string or quality string) and feeds it into another sub-program specified between two <code>@</code>-signs. The sub-program is required to take lines of text as input and return the same number of lines on standard output. The output of the sub-program is then placed into the output fastq file. By combining <code>filter_fastq</code> and <code>multiple_mutate</code>, the tool which applies mutations to strings of nucleotides, a FASTQ file can be mutated. The <code>--seed</code> can be set to an arbitrary value to generate a reproducable result.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/filter_fastq</span> --nucleotide \
-  @ scripts/multiple_mutate data/mut-tables/mut.tab @ \
+  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
   <span class="op">&lt;</span> data/2/volpertinger.fastq \
   <span class="op">&gt;</span> data/3/volpertinger_mut.fastq</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>Note how the nucleotide strings of the output FASTQ file now carry mutations (lower-case letters):</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/3/volpertinger_mut.fastq</code></pre></div>
 <pre class="output"><code>@volpertinger_1
-cTCaATAAGgTtTTAGCCcACCAGAT
+TTgTACcAGtTATTAGtCAATCAGAT
 +
 FFFFFFFFFFFFFFFFFFFFFFFFFF
 @volpertinger_2
-gCTATTTAAgtACcTCTgCC
+TCTAgTTccTAACTTtTCCC
 +
 FFFFFFFFFFFFFFFFFFFF
 @volpertinger_3
-TTGAACTgTATCTaCCGGGtaTCA</code></pre>
+gTaAACTtTATCTTCTGGGGCcgA</code></pre>
 <p>The <code>filter_fastq.py</code> script enables you to apply an arbitrary script or program on just one part of a FASTQ file (ID line, nucleotide line, quality line). The used script must accept the respective part on standard input and print the modified version on standard output. The modified FASTQ file is assembled by <code>filter_fastq.py</code> from the output of its children scripts and printed on standard output.</p>
 <p>On the <code>filter_fastq.py</code> call, the @ sign serves as a sentinel character, which determines start and end of the sub-program's command line. It can also be any arbitrary other character, as long as it doesn't occur inside the child script's command line but only at the beginning and the end.</p>
 <h2 id="combining-endogenous-and-non-endogenous-reads">Combining endogenous and non-endogenous reads</h2>

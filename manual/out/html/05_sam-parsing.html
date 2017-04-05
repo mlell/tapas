@@ -73,16 +73,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <pre class="output"><code></code></pre>
 <p>Show beginning and end of the generated file:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
-<pre class="output"><code>qname           flag  rname  pos   mapq  cigar    rnext  pnext  tlen
-volpertinger_1  4     *      0     0     *        *      0      0
-volpertinger_2  16    X      4264  37    4M1I15M  *      0      0
-volpertinger_3  0     A3     1413  25    24M      *      0      0
-volpertinger_4  0     A3     5689  37    21M      *      0      0
-volpertinger_5  4     *      0     0     *        *      0      0
-volpertinger_6  4     *      0     0     *        *      0      0
-volpertinger_7  4     *      0     0     *        *      0      0
-volpertinger_8  4     *      0     0     *        *      0      0
-volpertinger_9  0     X      2381  37    20M      *      0      0</code></pre>
+<pre class="output"><code>qname           flag  rname  pos   mapq  cigar  rnext  pnext  tlen
+volpertinger_1  4     *      0     0     *      *      0      0
+volpertinger_2  0     MT     3402  25    20M    *      0      0
+volpertinger_3  4     *      0     0     *      *      0      0
+volpertinger_4  4     *      0     0     *      *      0      0
+volpertinger_5  0     MT     3280  37    23M    *      0      0
+volpertinger_6  0     A3     4936  37    25M    *      0      0
+volpertinger_7  0     A1     1320  23    21M    *      0      0
+volpertinger_8  0     A3     4480  37    25M    *      0      0
+volpertinger_9  4     *      0     0     *      *      0      0</code></pre>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">tail</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>retli_41  0  A1  961  25  20M  *  0  0
 retli_42  4  *   0    0   *    *  0  0
@@ -114,14 +114,14 @@ retli_50  4  *   0    0   *    *  0  0</code></pre>
 <span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger
-volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger
-volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger
-volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger
-volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger
-volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger
-volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger
-volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger
-volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger</code></pre>
+volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger
+volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger
+volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger
+volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger
+volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger
+volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger
+volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger
+volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger</code></pre>
 <p>Now all the information is present to determine whether a read has been mapped correctly. The last step is writing in a new column whether a read was mapped correctly. This can be archieved using any means you can imagine, for this example we will use R. The <code>pocketR</code> tool is a thin wrapper which handles reading and writing of data for us. The input data will be available as a <code>data.frame</code> called <code>input</code>, everything written insides the parentheses of the <code>return(.)</code> statement will be printed.</p>
 <p>The following command adds a new column to the input data which indicates whether a read was mapped correctly:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span>
@@ -136,14 +136,14 @@ volpertinger_9  0            X             2381        37           20M         
  <span class="fu">head</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>qname           mapped_flag  mapped_rname  mapped_pos  mapped_mapq  mapped_cigar  mapped_rnext  mapped_pnext  mapped_tlen  mapped_organism  true_record  true_start  true_end  true_organism  correct
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger   FALSE
-volpertinger_2  16           X             4264        37           4M1I15M       *             0             0            volpertinger     MT           3402        3421      volpertinger   FALSE
-volpertinger_3  0            A3            1413        25           24M           *             0             0            volpertinger     A3           1413        1436      volpertinger   TRUE
-volpertinger_4  0            A3            5689        37           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger   TRUE
-volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger   FALSE
-volpertinger_6  4            *             0           0            *             *             0             0            *                A3           4936        4960      volpertinger   FALSE
-volpertinger_7  4            *             0           0            *             *             0             0            *                A1           1320        1340      volpertinger   FALSE
-volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger   FALSE
-volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE</code></pre>
+volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger   TRUE
+volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger   FALSE
+volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger   FALSE
+volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger   TRUE
+volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger   TRUE
+volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger   TRUE
+volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger   TRUE
+volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger   FALSE</code></pre>
 <h2 id="grouping-of-reads">Grouping of reads</h2>
 <p>As next step, the number of reads are counted which belong to certain categories. Here, the categories are:</p>
 <ul class="incremental">
@@ -168,17 +168,19 @@ volpertinger_9  0            X             2381        37           20M         
 <span class="fu">cat</span> data/5/1.agg <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>true_organism  mapped_organism  correct  count
 retli          *                FALSE    49
-volpertinger   *                FALSE    11
+volpertinger   *                FALSE    8
 retli          volpertinger     FALSE    1
-volpertinger   volpertinger     FALSE    1
-volpertinger   volpertinger     TRUE     13</code></pre>
+volpertinger   volpertinger     TRUE     17</code></pre>
 <p>This format may be used to plot the read fate of a single mapper run and to derive the measures sensitivity and specificity:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
+                          --format png \
                           true_organism mapped_organism \
                           correct       count \
-                          data/5/1.pdf  data/5/1.agg</code></pre></div>
+                          data/5/1.png  data/5/1.agg</code></pre></div>
 <pre class="output"><code></code></pre>
-<p><a href="data/5/1.pdf">Click here</a> to see the plot.</p>
+<p>The script produces the following plot:</p>
+<p><img class="plot" src="../../data/5/1.png" width=500 /></p>
+<p>The plot shows, which fractions of the input species (endogenous: <em>volpertinger</em>, contaminant: <em>R. etli</em>) are mapped and whether the mapping was correct. It can be seen that in this case, almost no contaminant reads were mapped, indicating high mapper specificity. However, only 75% of the endogenous reads were mapped.</p>
 <h2 id="sensitivity-and-specificity">Sensitivity and specificity</h2>
 <ul class="incremental">
 <li><strong>Sensitivity</strong> (recall) shows how many reads have been mapped correctly by the mapper which are supposed to map.</li>
@@ -195,7 +197,7 @@ volpertinger   volpertinger     TRUE     13</code></pre>
 
 <span class="ex">column</span> -t data/5/1.performance</code></pre></div>
 <pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        13        0.52         50          49          0.98         0.75</code></pre>
+25        17        0.68         50          49          0.98         0.83</code></pre>
 <h2 id="repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</h2>
 <p>The code needed to evaluate the data generated by the mapper might as well be included in the mapping template script introduced in the last section. If this is done, the data evaluation can be as well parallelized as the mapping process.</p>
 <p>All scripts used here were already introduced in this section.</p>
@@ -240,9 +242,10 @@ volpertinger   volpertinger     TRUE     13</code></pre>
 
     <span class="co"># Plot mapping targets per origin organism</span>
     <span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
+                              --format png \
                               true_organism    mapped_organism \
                               correct          count \
-                              data/5/<span class="va">${p}</span>.pdf  data/5/<span class="va">${p}</span>.agg
+                              data/5/<span class="va">${p}</span>.png  data/5/<span class="va">${p}</span>.agg
 
     <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span>
     <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \
@@ -259,6 +262,17 @@ data/4/2.sam done. -&gt; Generated data/5/2.{tab,agg,pdf,performance}
 data/4/3.sam done. -&gt; Generated data/5/3.{tab,agg,pdf,performance}
 data/4/4.sam done. -&gt; Generated data/5/4.{tab,agg,pdf,performance}
 data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,pdf,performance}</code></pre>
+<p>All generated images:</p>
+<p><strong>1.png</strong>:</p>
+<p><img class="plot" src="../../data/5/1.png" width=500 /></p>
+<p><strong>2.png</strong>:</p>
+<p><img class="plot" src="../../data/5/2.png" width=500 /></p>
+<p><strong>3.png</strong>:</p>
+<p><img class="plot" src="../../data/5/3.png" width=500 /></p>
+<p><strong>4.png</strong>:</p>
+<p><img class="plot" src="../../data/5/4.png" width=500 /></p>
+<p><strong>5.png</strong>:</p>
+<p><img class="plot" src="../../data/5/5.png" width=500 /></p>
 </div>
 </body>
 </html>

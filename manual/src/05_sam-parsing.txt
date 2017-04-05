@@ -156,12 +156,21 @@ and to derive the measures sensitivity and specificity:
 
 ```{.sh}
 scripts/plot_read_fate    --exogenous retli \
+                          --format png \
                           true_organism mapped_organism \
                           correct       count \
-                          data/5/1.pdf  data/5/1.agg
+                          data/5/1.png  data/5/1.agg
 ```
 
-<a href="data/5/1.pdf">Click here</a> to see the plot.
+The script produces the following plot:
+
+<img class="plot" src="../../data/5/1.png" width=500 />
+
+The plot shows, which fractions of the input species (endogenous:
+*volpertinger*, contaminant: *R. etli*) are mapped and whether the
+mapping was correct. It can be seen that in this case, almost no
+contaminant reads were mapped, indicating high mapper specificity.
+However, only 75% of the endogenous reads were mapped.
 
 Sensitivity and specificity
 ---------------------------
@@ -251,9 +260,10 @@ for sam in data/4/*.sam; do
 
     # Plot mapping targets per origin organism 
     scripts/plot_read_fate    --exogenous retli \
+                              --format png \
                               true_organism    mapped_organism \
                               correct          count \
-                              data/5/${p}.pdf  data/5/${p}.agg
+                              data/5/${p}.png  data/5/${p}.agg
 
     # Calculate sensitivity, specificity and balanced accuracy
     scripts/sensspec --c-morg mapped_organism \
@@ -265,6 +275,28 @@ for sam in data/4/*.sam; do
 
 done
 ```
+
+All generated images:
+
+**1.png**:
+
+<img class="plot" src="../../data/5/1.png" width=500 />
+
+**2.png**:
+
+<img class="plot" src="../../data/5/2.png" width=500 />
+
+**3.png**:
+
+<img class="plot" src="../../data/5/3.png" width=500 />
+
+**4.png**:
+
+<img class="plot" src="../../data/5/4.png" width=500 />
+
+**5.png**:
+
+<img class="plot" src="../../data/5/5.png" width=500 />
 
     
 
