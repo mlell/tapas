@@ -1,10 +1,7 @@
 ---
 title:
-- Appendix A2: Advanced read generation
+  - Appendix A2 -- Advanced read generation
 ---
-
-Advanced read generation
-=======================
 
 The output FASTQ file will be constructed by interleaving the contents
 of three files, containing the read names, the nucleotide strings and

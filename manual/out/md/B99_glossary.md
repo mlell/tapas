@@ -1,10 +1,7 @@
 ---
 title:
-- Glossary
+  - Glossary
 ---
-
-Glossary
-========
 
 Some terms are explained here, which are used in the rest of the
 manual and may have a special meaning:

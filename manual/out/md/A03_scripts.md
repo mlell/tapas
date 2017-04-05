@@ -1,10 +1,7 @@
 ---
 title:
-- Appendix A: Overview of the scripts by category
+  - Appendix A3 -- Overview of the scripts by category
 ---
-
-Overview of the scripts by category
-===================================
 
 Below you find a list of the scripts in this package, grouped by rough
 application situations. 

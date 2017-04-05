@@ -10,24 +10,54 @@
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
-    <div class="content">
-<!--<div id="header">
+<div class="toc contentbox">
+    <span class="tocheader">Table of contents</span>
+<ul>
+<li class="tocthis"><a href="00b_Overview.html">Package overview</a>
+<li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
+<li><a href="00c_input-files.html">Input files</a>
+<li><a href="01_genome-preparation.html">Genome Preparation</a>
+<li><a href="02_read-generation.html">Generation of simulated read sets</a>
+<li><a href="03_read-mutation.html">Mutation of reads</a>
+<li><a href="04_mapping.html">Generate mapper calls</a>
+<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
+<li><a href="B99_glossary.html">Glossary</a>
+</ul>
+</div>
+<div class="content contentbox">
+<div id="header">
 <h1 class="title">Package overview</h1>
 </div>
--->
-<div class="tocbar"><a href="../../toc.html"><span>Table of contents</span></a></div>
 <!-- Local Table of contents -->
 <!--Back to table of contents -->
 <!-- CONTENT -------------------------------------->
-<p><span class="title">The TAPAS manual</span></p>
-<h1 id="package-overview">Package overview</h1>
 <p><strong>TAPAS (Testing Aligner Performance for Ancient Samples)</strong> is a software package written in Python and R which enables you to test how well parameters of NGS short read mappers perform when mapping reads to a reference. The reads can be subjected to artificial damage to simulate evolutionary distance and chemical alteration of ancient DNA samples.</p>
+<h1 id="installation">Installation</h1>
+<p>See the section <a href=00b_shell-prerequisites.html>Dependencies of the scripts</a> to learn about the installation process of TAPAS</p>
 <h1 id="workflow">Workflow</h1>
-<p>Click on the items to jump to the respective parts of the manual.</p>
-<h2 id="generate-reads-from-a-sample-genome">Generate reads from a sample genome</h2>
-<p>Refer to the section <a href="#generating-sample-reads">Generating sample reads</a>.</p>
-<h2 id="mutate-the-sample-reads">Mutate the sample reads</h2>
-<p>Simulate chemical damage and evolutionary distance. Read the section <a href="#mutation-of-reads">Mutation of reads</a></p>
+<p>TAPAS can be used to generate artificial NGS reads from a given reference genome, introduce mutations into them which follow a user-defined pattern and evaluate the mapping success of the reads with a user-supplied short read mapper.</p>
+<p>See the section about <a href="00c_input-files.html">Input files</a> to see which files must be supplied prior to the analysis.</p>
+<p>In the following, the workflow is outlined, where links are provided to manual chapters which give more detail on each step.</p>
+<ul class="incremental">
+<li><strong>Prepare the reference genome.</strong> See section <a href="01_genome-preparation.html">Genome Preparation</a></li>
+<li><strong>Generate artificial reads from a sample genome.</strong> See <a href="02_read-generation.html">Read generation</a></li>
+<li><strong>Mutations</strong> must be introduced into the reads to mimic chemical damage of <em>ancient DNA</em> and evolutionary distance of the reads to the reference. Read the section about <a href="03_read-mutation.html">Read mutation</a> for more information</li>
+<li>The mutated artificial reads are <strong>mapped</strong> back to the reference from which they originated. This simulates the process of mapping <em>ancient DNA</em> reads to a recent reference genome. TAPAS allows for comparison of different mapping parameters in terms of mapping success. Section <a href="04_mapping.html">Mapping</a> provides details on how the mapping commands and parameters are provided to TAPAS.</li>
+<li>The read mapping yields one SAM file for every mapping parameter set tested. The section <a href="05_sam-parsing.html">SAM parsing</a> provides information on how the mapping positions of the artificial reads can be compared to their known, true, positions in the reference to determine measures of mapping accuracy like <strong>sensitivity and specificity</strong>.</li>
+<li>Finally, the obtained accuracy values can be analysed to determine the <strong>importance of a certain mapping parameter choice</strong> for the mapping success. The section <a href="06_parameter_influence.html">Parameter influence</a> provides details.</li>
+</ul>
+<p>Apart from that, the <strong>Appendix</strong> lists additional information:</p>
+<ul class="incremental">
+<li>All commands from the tutorial, collated into one script for overview: <a href="A01_workflow.html">Appendix A1</a></li>
+<li>An overview of all scripts provided by TAPAS: <a href="A02_scripts.html">Appendix A2</a></li>
+<li>How to put together artificial FASTQ files from their parts (1) nucleotide strings, (2) quality strings and (3) read names to allow for more fine-grained read generation and incorporation of external tools: <a href="A03_advanced_read-generation.html">Appendix A3: Advanced Read generation</a></li>
+<li><a href="B99_glossary.html">Appendix B: Glossary</a></li>
+</ul>
 </div>
+<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
 </body>
 </html>
