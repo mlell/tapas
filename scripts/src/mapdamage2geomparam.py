@@ -7,6 +7,13 @@ import os.path
 import sys
 import re
 from collections import namedtuple
+from textwrap import dedent
+from numbers import Number
+
+import numpy as np
+from numpy import array 
+from scipy.optimize import curve_fit
+
 
 helpText="""\
 Convert mapDamage output into parameters of a fitted distribution.
@@ -39,11 +46,8 @@ DIST_FIT_R_SCRIPT = os.path.dirname(
                         sys.argv[0])  ) \
                     + "/../fit_geom"
 
-RResult         = namedtuple("RResult"
-                            , ['factor', 'geom_prob', 'intercept' ] )
 MapDamageHeader = namedtuple( "MapDamageHeader"
                             , ['direction', 'fromBase', 'toBase'] )
-
 
 def main():
     aparser=create_argument_parser()
@@ -71,7 +75,8 @@ def main():
             filename         = f,
             readMetadataFrom = args.metadata,
             plotFilename     = plot_filename)
-        outputList = [p.rstrip('\n') for p in outputParams]
+        outputList = [str(np.round(p,8)) if isinstance(p,Number) else str(p) 
+                      for p in outputParams ]
         print("\t".join(outputList))
 
 
@@ -102,14 +107,81 @@ def processMapDamageFile(filename,readMetadataFrom="filename"
         firstLine     = fd.readline()
         info          = readMetadata(filename,firstLine,readMetadataFrom)        
         # Read probabilities from file
-        probabilities = [ l.split()[1] for l in fd if l.strip() != "" ]
+        probabilities = [ float(l.split()[1]) for l in fd if l.strip() != "" ]
         
         # Fit geometrical distribution
-        par           = call_distribution_fitting(probabilities,
-                                                  plotFilename)
+        par  = fitScalableGeom(probabilities)
+
+        if plotFilename:
+            plotFitResult( filename = plotFilename
+                         , probabilities = probabilities
+                         , fit_parameters = par)
     
     return (info.direction, info.fromBase, info.toBase
-          , par.factor    , par.geom_prob, par.intercept)
+          , *par.tolist())
+
+
+def plotFitResult(filename, probabilities, fit_parameters,
+        imgFormat='png'):
+    try:
+        import matplotlib
+        if imgFormat == 'png':  
+            matplotlib.use('Agg') 
+        elif imgFormat == 'pdf':
+            matplotlib.use('PDF') 
+        elif imgFormat == 'show':
+            pass
+        else: 
+            raise ValueError("imgFormat must be png or pdf")
+
+        import matplotlib.pyplot as plt
+
+    except ImportError:
+        raise ImportError("The python package matplotlib is not "+
+            "installed but is required for plotting")
+
+
+    x = array(range(1,len(probabilities)+1))
+    y_fun = scalableGeom(x,factor    = fit_parameters[0]
+                          , p_success = fit_parameters[1]
+                          , added_constant=fit_parameters[2])
+    err = abs(probabilities - y_fun)
+
+    fig, (ax1, ax2) = plt.subplots(2,1,sharex=True, sharey=False)
+    ax2.set_yscale('log',basey=10)
+
+    # Commas behind hDat, etc. are needed because pyplot.plot always
+    # returns tuples of artists, even if only one artist is returned.
+    # Therefore, add the comma to unpack the tuple.
+    hDat, = ax1.plot(x, probabilities, 'ok')
+    hFit, = ax1.plot(x, y_fun, "b-")
+    ax1.set_ylabel("mutation probability")
+
+    ax2.plot(x, y_fun, "b-")
+
+    hErr, = ax2.plot(x, err, color="red")
+
+    ax1.legend( [hDat,hFit,hErr],["Data","Fit","Error"]
+              , bbox_to_anchor=(0.5,1), loc = "lower left"
+              , frameon = False, ncol = 3)
+    
+    # Write parameters in plot
+    plt.figtext(0.1,0.9,verticalalignment='bottom',
+                multialignment='left',s=dedent(r"""
+            $y=a\times\operatorname{{geom}}(x,p)+t$  
+            a = {:0.3g}; p = {:0.3g};  t = {:0.3g}""".format( fit_parameters[0],
+               fit_parameters[1], fit_parameters[2])))
+
+    ax2.set_xlabel("bp from read end")
+    ax2.set_ylabel("mutation probability (log)")
+
+    if imgFormat == 'show':
+        plt.show()
+    else:
+        plt.savefig(filename)
+
+
+
 
 
 def readMetadata(filename, firstLine, readMetadataFrom):
@@ -121,35 +193,31 @@ def readMetadata(filename, firstLine, readMetadataFrom):
         raise NotImplementedError("Illegal argument for \
             readMetadata!")
 
+def geom(xs, p):
+    """Geometric probability mass function. x=number of desired
+    Bernoulli trials, p=Success probability of a single Bernoulli
+    trial. Returns: Probability that the x's trial is the first
+    success"""
+    if any(xs<1) or p<0 or p>1: raise ValueError('function not defined')
+    return ((1-p)**(xs-1)) * p
 
-def call_distribution_fitting(probabilities, plotFilename=None):
-    " Expects a list of probability scores to be forwarded to the R script. \
-    Parses the output"
-    # Arguments for R script
-    outformat_arg="ofmt={factor},{geomprob},{intercept}"
-    data_arg="data=-"
-    plot_arg= None if plotFilename == None \
-              else "plot="+plotFilename
-    # Call R script
-    R_call = [DIST_FIT_R_SCRIPT, data_arg , outformat_arg]
+def scalableGeom(first_success,p_success,factor=1,added_constant=0):
+    """Geometric probability mass function which can be scaled by 
+    a factor and moved up and down the dependent variables axis by 
+    adding a constant."""
+    return factor * geom(first_success,p_success) + added_constant
 
-    if plot_arg != None: R_call.append(plot_arg)
-    R_process=sp.Popen(R_call         , stdin=sp.PIPE
-                     , stdout=sp.PIPE , stderr=None)
-    r_in = os.linesep.join(probabilities) + os.linesep
+def fitScalableGeom(probabilities):
+    x = array(range(1, len(probabilities)+1))
+    pars, cov = curve_fit(
+            lambda x,f,p,t: scalableGeom( first_success  = x
+                                        , factor         = f
+                                        , p_success      = p
+                                        , added_constant = t )
+            , x, probabilities, 
+            bounds=(array([0,0,0]),array([np.inf,1,np.inf])))
 
-    if PYTHON3 : 
-        r_in = r_in.encode()
-
-    r_out, r_err = R_process.communicate(r_in)
-   
-    if PYTHON3 : r_out = r_out.decode()
-    # split output by whitespace
-    r = r_out.split(',')
-    
-    return RResult( factor    = r[0]       
-                  , geom_prob = r[1]
-                  , intercept = r[2])
+    return pars
 
 
 # This function cannot be used due to a possible bug in mapDamage?
