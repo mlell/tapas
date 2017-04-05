@@ -231,8 +231,8 @@ scripts/mapdamage2geomparam \
 ```
 ```{.output}
 strand  from  to  factor      geom_prob   intercept
-3       G     A   0.79513996  0.26918746  0.039386893
-5       C     T   0.43360246  0.35249167  0.027965522
+3       G     A   0.79514141  0.26918657  0.03938687
+5       C     T   0.43360119  0.35249301  0.02796558
 ```
 
 The generated plots can be viewed 
