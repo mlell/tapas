@@ -82,7 +82,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="incremental">
 <li><p>The position-independent mutation probability <span class="math inline">\(t\)</span> (<span class="math inline">\(0&lt;t&lt;1\)</span>). This is the probability of any base to mutate, regardless of its proximity to the end of the read. This can be used to model evolutionary distance.</p></li>
 <li><p>The steepness <span class="math inline">\(p\)</span> (<span class="math inline">\(0&lt;p&lt;1\)</span>) of the mutation probability decline when moving away from the read end. The higher this parameter the steeper is the decline of mutation probability when moving away from the read end.</p></li>
-<li><p>The multiplying factor <span class="math inline">\(f\)</span>. At the read end, <span class="math inline">\(f+t\)</span> is the probability of the first base of the read to be mutated.</p></li>
+<li><p>The multiplying factor <span class="math inline">\(f\)</span>. At the read end, <span class="math inline">\(p\cdot f+t\)</span> is the probability of the first base of the read to be mutated.</p></li>
 </ul>
 <p>With this model, its possible to archive mutation probabilities greater than one. This makes of course no sense and the mutation probability is cut back to one in such cases.</p>
 <p>In mathematical notation, the mutation probability <span class="math inline">\(P_{\text{mut}}\)</span> of a base number <span class="math inline">\(x\)</span>, starting to count at the reads' end, is:</p>

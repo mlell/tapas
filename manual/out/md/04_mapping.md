@@ -217,7 +217,7 @@ Example: Run the previously generated mapper calls.
 [bwa_aln_core] 75 sequences have been processed.
 [main] Version: 0.7.15-r1140
 [main] CMD: bwa aln -n 0 -k 2 data/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.068 sec; CPU: 0.003 sec
+[main] Real time: 0.069 sec; CPU: 0.003 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
