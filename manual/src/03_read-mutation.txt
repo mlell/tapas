@@ -48,7 +48,7 @@ modelled. For this, three parameters are important:
     steeper is the decline of mutation probability when moving away
     from the read end.
 
-  * The multiplying factor $f$. At the read end, $f+t$ is the
+  * The multiplying factor $f$. At the read end, $p\cdot f+t$ is the
     probability of the first base of the read to be mutated.
 
 
