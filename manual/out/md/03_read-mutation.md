@@ -66,7 +66,7 @@ distribution, with parameters X = number of tries; P = success probability.
 
 The following sketch graphs illustrate the three parameters:
 
-<img src="../../fig/mut.svg" width="800" />
+<img src="fig/mut.svg" width="800" />
 
 
 Specifying the parameters
@@ -224,7 +224,7 @@ operator to write this output into a file suitable for
 
 ```{.bash}
 scripts/mapdamage2geomparam \
-    --fit-plots data/3/fit_ \
+    --fit-plots fig/fit_ \
     data/mapdamage/*.txt | \
     cut -f1-6 | \
     column -t
@@ -236,8 +236,8 @@ strand  from  to  factor      geom_prob   intercept
 ```
 
 The generated plots can be viewed 
-<a href="../../data/3/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
-<a href="../../data/3/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
+<a href="fig/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
+<a href="fig/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
 fit_000_GS136_3pGtoA_freq.txt.pdf
 
 Generating multiple damage patterns using a parameter table

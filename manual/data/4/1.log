@@ -1,9 +1,9 @@
-[bwa_aln_core] calculate SA coordinate... 0.14 sec
+[bwa_aln_core] calculate SA coordinate... 0.13 sec
 [bwa_aln_core] write to the disk... 0.00 sec
 [bwa_aln_core] 75 sequences have been processed.
 [main] Version: 0.7.15-r1140
 [main] CMD: bwa aln -n 4 -k 2 data/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.192 sec; CPU: 0.147 sec
+[main] Real time: 0.169 sec; CPU: 0.133 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec

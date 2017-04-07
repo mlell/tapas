@@ -45,15 +45,17 @@ for md in out/md/*.md; do
            --mathjax \
            --highlight-style=pygments \
            -f markdown+simple_tables \
-           --css ../../manual.css -i "$md" -o "$html"
+           --css manual.css -i "$md" -o "$html"
            #-V toctitle:"Table of contents" \
 done
 
 cat >toc.html <<EOF
 <ul>
+<li><a href="index.html">Package overview</a></li>
 EOF
 grep -I -r '<title>' out/html |sort |\
-    sed -E 's|^out/html/(.*):.*<title>(.*)</title>|<li><a href="\1">\2</a>|' \
+    sed -E 's|^out/html/(.*):.*<title>(.*)</title>|<li><a href="\1">\2</a>|' |\
+    grep -v "index.html" \
     >> toc.html
    
 cat >>toc.html <<EOF
@@ -89,6 +91,12 @@ for f in out/html/*.html; do
 
 done
 
+rm -rf   ../docs
+mkdir -p ../docs
+mv out/html/* ../docs
+cp fig-static/* fig
+mv fig    ../docs
+cp manual.css ../docs
 
         
 
