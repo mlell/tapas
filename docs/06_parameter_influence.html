@@ -43,14 +43,14 @@ code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Ann
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+  <link rel="stylesheet" href="manual.css" type="text/css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
 <div class="toc contentbox">
     <span class="tocheader">Table of contents</span>
 <ul>
-<li><a href="00b_Overview.html">Package overview</a>
+<li><a href="index.html">Package overview</a></li>
 <li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
 <li><a href="00c_input-files.html">Input files</a>
 <li><a href="01_genome-preparation.html">Genome Preparation</a>
@@ -113,16 +113,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
 <span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
                                --plot-format png \
-                               data/6/n.png
+                               fig/n.png
 
 <span class="co"># Plot k versus BCR</span>
 <span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \
                                --plot-format png \
-                               data/6/k.png</code></pre></div>
+                               fig/k.png</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>View the plots:</p>
-<p><img class="plot" src="../../data/6/n.png" width=500 /></p>
-<p><img class="plot" src="../../data/6/k.png" width=500 /></p>
+<p><img class="plot" src="fig/n.png" width=500 /></p>
+<p><img class="plot" src="fig/k.png" width=500 /></p>
 <p>It can be seen that n seems to have an impact on the BCR whereas k does not. The BCR rises and falls again because the gain in sensitivity is offset by the loss in specificity if n rises too high.</p>
 <p>However, for the sake of simplicity, in this tutorial the number of reads to map is very small. To draw serious conclusions about the influence of mapper parameters, large numbers of reads must be mapped and statistical inference methods must be employed.</p>
 </div>

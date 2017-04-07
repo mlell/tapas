@@ -74,21 +74,21 @@ aggregated coarsely to demonstrate the results.
 # Plot n versus BCR
 scripts/plot_parameter_effects --signif 1 data/6/performance n bcr \
                                --plot-format png \
-                               data/6/n.png
+                               fig/n.png
 
 # Plot k versus BCR
 scripts/plot_parameter_effects --signif 1 data/6/performance k bcr \
                                --plot-format png \
-                               data/6/k.png
+                               fig/k.png
 ```
 ```{.output}
 ```
 
 View the plots: 
 
-<img class="plot" src="../../data/6/n.png" width=500 /> 
+<img class="plot" src="fig/n.png" width=500 /> 
 
-<img class="plot" src="../../data/6/k.png" width=500 />
+<img class="plot" src="fig/k.png" width=500 />
 
  It can be seen that n seems to have an impact on the BCR whereas k
  does not. The BCR rises and falls again because the gain in

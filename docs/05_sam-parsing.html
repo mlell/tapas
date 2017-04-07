@@ -43,14 +43,14 @@ code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Ann
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="../../manual.css" type="text/css" />
+  <link rel="stylesheet" href="manual.css" type="text/css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
 <div class="toc contentbox">
     <span class="tocheader">Table of contents</span>
 <ul>
-<li><a href="00b_Overview.html">Package overview</a>
+<li><a href="index.html">Package overview</a></li>
 <li><a href="00b_shell-prerequisites.html">Dependencies of the scripts</a>
 <li><a href="00c_input-files.html">Input files</a>
 <li><a href="01_genome-preparation.html">Genome Preparation</a>
@@ -192,10 +192,10 @@ volpertinger   volpertinger     TRUE     17</code></pre>
                           --format png \
                           true_organism mapped_organism \
                           correct       count \
-                          data/5/1.png  data/5/1.agg</code></pre></div>
+                          fig/fate1.png  data/5/1.agg</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>The script produces the following plot:</p>
-<p><img class="plot" src="../../data/5/1.png" width=500 /></p>
+<p><img class="plot" src="fig/fate1.png" width=500 /></p>
 <p>The plot shows, which fractions of the input species (endogenous: <em>volpertinger</em>, contaminant: <em>R. etli</em>) are mapped and whether the mapping was correct. It can be seen that in this case, almost no contaminant reads were mapped, indicating high mapper specificity. However, only 75% of the endogenous reads were mapped.</p>
 <h2 id="sensitivity-and-specificity">Sensitivity and specificity</h2>
 <ul class="incremental">
@@ -261,7 +261,7 @@ volpertinger   volpertinger     TRUE     17</code></pre>
                               --format png \
                               true_organism    mapped_organism \
                               correct          count \
-                              data/5/<span class="va">${p}</span>.png  data/5/<span class="va">${p}</span>.agg
+                              fig/fate<span class="va">${p}</span>.png  data/5/<span class="va">${p}</span>.agg
 
     <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span>
     <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \
@@ -280,15 +280,15 @@ data/4/4.sam done. -&gt; Generated data/5/4.{tab,agg,pdf,performance}
 data/4/5.sam done. -&gt; Generated data/5/5.{tab,agg,pdf,performance}</code></pre>
 <p>All generated images:</p>
 <p><strong>1.png</strong>:</p>
-<p><img class="plot" src="../../data/5/1.png" width=500 /></p>
+<p><img class="plot" src="fig/fate1.png" width=500 /></p>
 <p><strong>2.png</strong>:</p>
-<p><img class="plot" src="../../data/5/2.png" width=500 /></p>
+<p><img class="plot" src="fig/fate2.png" width=500 /></p>
 <p><strong>3.png</strong>:</p>
-<p><img class="plot" src="../../data/5/3.png" width=500 /></p>
+<p><img class="plot" src="fig/fate3.png" width=500 /></p>
 <p><strong>4.png</strong>:</p>
-<p><img class="plot" src="../../data/5/4.png" width=500 /></p>
+<p><img class="plot" src="fig/fate4.png" width=500 /></p>
 <p><strong>5.png</strong>:</p>
-<p><img class="plot" src="../../data/5/5.png" width=500 /></p>
+<p><img class="plot" src="fig/fate5.png" width=500 /></p>
 </div>
 <div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
 </body>
