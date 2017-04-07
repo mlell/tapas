@@ -27,7 +27,7 @@ Dependencies
 
 This software package needs the following tools to be installed:
 
-  * R and several R packages
+  * R and several R packages (see section "Installation")
   * Python 3 and several Python packages
   * Standard UNIX tools like `head`, `awk`, `sort`, `join`, `sed`. These are
     included in all Linux and Mac distributions. On Windows you can install
@@ -60,8 +60,10 @@ to your specific needs.
 The manual
 -----------
 
-The manual lies in the `manual/` folder. Open the file `manual/manual.html`
+The manual lies in the `docs/` folder. Open the file `docs/index.html`
 with your browser.
+
+The manual can also be found online [via git Pages](https://mlell.github.io/tapas)
 
 If you just want to read the manual, and use the software, you can stop reading
 here. In the following the generation process of the manual is explained.

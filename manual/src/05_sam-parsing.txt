@@ -161,12 +161,12 @@ scripts/plot_read_fate    --exogenous retli \
                           --format png \
                           true_organism mapped_organism \
                           correct       count \
-                          data/5/1.png  data/5/1.agg
+                          fig/fate1.png  data/5/1.agg
 ```
 
 The script produces the following plot:
 
-<img class="plot" src="../../data/5/1.png" width=500 />
+<img class="plot" src="fig/fate1.png" width=500 />
 
 The plot shows, which fractions of the input species (endogenous:
 *volpertinger*, contaminant: *R. etli*) are mapped and whether the
@@ -265,7 +265,7 @@ for sam in data/4/*.sam; do
                               --format png \
                               true_organism    mapped_organism \
                               correct          count \
-                              data/5/${p}.png  data/5/${p}.agg
+                              fig/fate${p}.png  data/5/${p}.agg
 
     # Calculate sensitivity, specificity and balanced accuracy
     scripts/sensspec --c-morg mapped_organism \
@@ -282,23 +282,23 @@ All generated images:
 
 **1.png**:
 
-<img class="plot" src="../../data/5/1.png" width=500 />
+<img class="plot" src="fig/fate1.png" width=500 />
 
 **2.png**:
 
-<img class="plot" src="../../data/5/2.png" width=500 />
+<img class="plot" src="fig/fate2.png" width=500 />
 
 **3.png**:
 
-<img class="plot" src="../../data/5/3.png" width=500 />
+<img class="plot" src="fig/fate3.png" width=500 />
 
 **4.png**:
 
-<img class="plot" src="../../data/5/4.png" width=500 />
+<img class="plot" src="fig/fate4.png" width=500 />
 
 **5.png**:
 
-<img class="plot" src="../../data/5/5.png" width=500 />
+<img class="plot" src="fig/fate5.png" width=500 />
 
     
 

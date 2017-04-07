@@ -12,6 +12,9 @@ alteration of ancient DNA samples.
 Installation
 ============
 
+Download the package from the [project's GitHub
+page](https://github.com/mlell/tapas)
+
 See the section <a href=00b_shell-prerequisites.html>Dependencies of the scripts</a>
 to learn about the installation process of TAPAS
 
