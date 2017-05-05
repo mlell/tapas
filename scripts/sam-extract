@@ -15,7 +15,7 @@ function sh_launch(){
     basedir="$2"
     shift 2
 
-    "${basedir}/$scriptname" $@
+    "${basedir}/$scriptname" "$@"
 }
 
 

@@ -17,11 +17,11 @@ function sh_launch(){
     basedir="$2"
     shift 2
 
-    "${basedir}/$scriptname" $@
+    "${basedir}/$scriptname" "$@"
 }
 
 
 # Directory this script lives in
 thisdir="$(dirname "$(readlink -f "$0")")"
 # Launch the script and forward all command line arguments
-sh_launch src/cat_tables.sh "${thisdir}" $@
+sh_launch src/cat_tables.sh "${thisdir}" "$@"
