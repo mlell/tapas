@@ -132,9 +132,9 @@ def main():
         
     m = createMutationChain(args.param_file)
     while True:
-        line=sys.stdin.readline()
+        line=sys.stdin.readline().rstrip()
         if not line: break
-        sys.stdout.write(m.mutate(line))
+        print(m.mutate(line))
         # Don't buffer output to avoid deadlock in calling scripts
         sys.stdout.flush()
 
