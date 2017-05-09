@@ -17,11 +17,11 @@ genomes are needed: The genome to which reads shall be mapped is called genome
 of an *endogenous* species. The genome (or genomes) from which contaminant reads
 stem (e.g. soil bacteria or humans) is called genome(s) of *exogenous* species.
 
-In this tutorial, mutated reads of the genome `data/genome/volpertinger.fasta`
+In this tutorial, mutated reads of the genome `input/genome/volpertinger.fasta`
 shall be generated and mapped back to that genome. Therefore, `volpertinger` is
 the endogenous species. 
 
-The file `data/retli/retli_tr.fasta` contains an excerpt (if this were not a
+The file `input/retli/retli_tr.fasta` contains an excerpt (if this were not a
 demonstration, the whole genome would be used, of course) genome of the soil
 bacterium *R. etli*. Reads from this genome will be generated as exogenous,
 contaminant reads.
@@ -31,10 +31,10 @@ Read Mutation probabilities
 
 In order to simulate mutation of the synthetic reads, probabilities that a
 mutation happens must be set. An example of this can be found in the file
-`data/mut-tables/mut.tab`, which is shown below
+`input/mut-tables/mut.tab`, which is shown below
 
 ```{.sh}
-cat data/mut-tables/mut.tab
+cat input/mut-tables/mut.tab
 ```
 
 These mutation parameters can be set to user-defined values. If different
@@ -66,13 +66,13 @@ An example for the short read mapper is given below.
 set -ue
 
 bwa aln -n ${n} -k ${k}      \
-    data/genome/volpertinger \
+    input/genome/volpertinger \
     data/3/all.fastq         \
     > data/4/${runidx}.sai   \
     2> data/4/${runidx}.log   &&
 
 bwa samse                      \
-      data/genome/volpertinger \
+      input/genome/volpertinger \
       data/4/${runidx}.sai     \
       data/3/all.fastq         \
       > data/4/${runidx}.sam   \
@@ -106,18 +106,18 @@ will be merged in different combinations and the mapping script mentioned above
 will be run for each combination. 
 
 Example files, which are used in this tutorial, can be seen in he folder
-`data/mapping` and are printed below. The file names are arbitrary, however, the
+`input/mapping` and are printed below. The file names are arbitrary, however, the
 column names (first line of each file) determines the name of the variable in
 the mapping script (previous section) which will take the values of that column.
 
 In the following, the file contents are printed:
 
 ```{.sh}
-cat data/mapping/k.par
+cat input/mapping/k.par
 ```
 
 ```{.sh}
-cat data/mapping/n.par
+cat input/mapping/n.par
 ```
 
 It can be seen that the first line of each file contains a name for the

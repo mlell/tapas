@@ -75,10 +75,10 @@ soon, as the output is meant to replace the input file.
 ```{.sh}
 scripts/add_mapped_organisms \
     --endogenous volpertinger \
-                 data/genome/volpertinger.fasta.fai \
+                 input/genome/volpertinger.fasta.fai \
                  data/2/volpertinger.coord \
     --exogenous  retli \
-                 data/retli/retli.fasta.fai \
+                 input/retli/retli.fasta.fai \
                  data/2/retli.coord \
     data/5/1.tab \
     | scripts/write_later data/5/1.tab
@@ -234,10 +234,10 @@ for sam in data/4/*.sam; do
     # Mark correctly/incorrectly mapped reads
     scripts/add_mapped_organisms \
         --endogenous volpertinger \
-                     data/genome/volpertinger.fasta.fai \
+                     input/genome/volpertinger.fasta.fai \
                      data/2/volpertinger.coord \
         --exogenous  retli \
-                     data/retli/retli.fasta.fai \
+                     input/retli/retli.fasta.fai \
                      data/2/retli.coord \
         data/5/${p}.tab \
         | scripts/write_later data/5/${p}.tab

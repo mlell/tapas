@@ -8,13 +8,13 @@
 set -ue
 
 bwa aln -n ${n} -k ${k}      \
-    data/genome/volpertinger \
+    input/genome/volpertinger \
     data/3/all.fastq         \
     > data/4/${runidx}.sai   \
     2> data/4/${runidx}.log   &&
 
 bwa samse                      \
-      data/genome/volpertinger \
+      input/genome/volpertinger \
       data/4/${runidx}.sai     \
       data/3/all.fastq         \
       > data/4/${runidx}.sam   \

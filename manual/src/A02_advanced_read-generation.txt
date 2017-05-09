@@ -57,7 +57,7 @@ volpertinger.
 Execute the following script to generate random nucleotide sequences:
 
 ```{.sh}
-scripts/uniform data/genome/volpertinger.fasta \
+scripts/uniform input/genome/volpertinger.fasta \
     --seed 1234 \
     --output data/2e/volpertinger.coord data/2e/volpertinger.nucl \
     25 20 5 
@@ -189,10 +189,10 @@ these as well without problems.
 
 Index genome and sample nucleotide seqences:
 ```{.sh}
-samtools faidx data/retli/retli_tr.fasta
+samtools faidx input/retli/retli_tr.fasta
 
 scripts/uniform \
-    data/retli/retli_tr.fasta \
+    input/retli/retli_tr.fasta \
     --seed 2345 \
     --output data/2e/retli.{coord,nucl} \
     25 20 5 
