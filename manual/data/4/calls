@@ -1,6 +1,0 @@
-runidx=0 k=2 n=0 data/mapping/map-bwa.sh
-runidx=1 k=2 n=4 data/mapping/map-bwa.sh
-runidx=2 k=2 n=8 data/mapping/map-bwa.sh
-runidx=3 k=10 n=0 data/mapping/map-bwa.sh
-runidx=4 k=10 n=4 data/mapping/map-bwa.sh
-runidx=5 k=10 n=8 data/mapping/map-bwa.sh

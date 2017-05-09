@@ -1,6 +1,0 @@
-true_organism	mapped_organism	correct	count
-retli	*	FALSE	10
-volpertinger	*	FALSE	1
-retli	volpertinger	FALSE	40
-volpertinger	volpertinger	FALSE	1
-volpertinger	volpertinger	TRUE	23

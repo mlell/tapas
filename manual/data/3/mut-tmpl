@@ -1,5 +1,0 @@
-strand	from	to	factor	geom_prob	intercept
-5	C	T	{fac}	{geom}	0
-3	G	A	{fac}	{geom}	0
-3	*	*	0	0	{all_intercept}
-
