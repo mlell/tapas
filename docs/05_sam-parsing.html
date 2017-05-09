@@ -92,12 +92,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 volpertinger_1  4     *      0     0     *      *      0      0
 volpertinger_2  0     MT     3402  25    20M    *      0      0
 volpertinger_3  4     *      0     0     *      *      0      0
-volpertinger_4  4     *      0     0     *      *      0      0
-volpertinger_5  0     MT     3280  37    23M    *      0      0
+volpertinger_4  0     A3     5689  25    21M    *      0      0
+volpertinger_5  4     *      0     0     *      *      0      0
 volpertinger_6  0     A3     4936  37    25M    *      0      0
-volpertinger_7  0     A1     1320  23    21M    *      0      0
-volpertinger_8  0     A3     4480  37    25M    *      0      0
-volpertinger_9  4     *      0     0     *      *      0      0</code></pre>
+volpertinger_7  0     A1     1320  37    21M    *      0      0
+volpertinger_8  4     *      0     0     *      *      0      0
+volpertinger_9  0     X      2381  37    20M    *      0      0</code></pre>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">tail</span> data/5/1.tab <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>retli_41  0  A1  961  25  20M  *  0  0
 retli_42  4  *   0    0   *    *  0  0
@@ -118,10 +118,10 @@ retli_50  4  *   0    0   *    *  0  0</code></pre>
 <p>The call is shown below. The script <code>write_later</code> at the end of the pipe is to prevent <code>merge</code> from overwriting its own input file too soon, as the output is meant to replace the input file.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/add_mapped_organisms</span> \
     --endogenous volpertinger \
-                 data/genome/volpertinger.fasta.fai \
+                 input/genome/volpertinger.fasta.fai \
                  data/2/volpertinger.coord \
     --exogenous  retli \
-                 data/retli/retli.fasta.fai \
+                 input/retli/retli.fasta.fai \
                  data/2/retli.coord \
     data/5/1.tab \
     <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/1.tab
@@ -131,12 +131,12 @@ retli_50  4  *   0    0   *    *  0  0</code></pre>
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger
 volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger
 volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger
-volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger
-volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger
+volpertinger_4  0            A3            5689        25           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger
 volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger
-volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger
-volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger
-volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger</code></pre>
+volpertinger_7  0            A1            1320        37           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger</code></pre>
 <p>Now all the information is present to determine whether a read has been mapped correctly. The last step is writing in a new column whether a read was mapped correctly. This can be archieved using any means you can imagine, for this example we will use R. The <code>pocketR</code> tool is a thin wrapper which handles reading and writing of data for us. The input data will be available as a <code>data.frame</code> called <code>input</code>. The R calls must return a <code>data.frame</code>, which will be printed as a table.</p>
 <p>This step is exposed to the user, because this enables great flexibility in what exactly is considered a &quot;correct&quot; read mapping.</p>
 <p>The following command adds a new column to the input data which indicates whether a read was mapped correctly. In this tutorial, &quot;correct&quot; is defined as &quot;the read has been mapped exactly to the position from which it originated&quot;.</p>
@@ -154,12 +154,12 @@ volpertinger_9  4            *             0           0            *           
 volpertinger_1  4            *             0           0            *             *             0             0            *                B1           2143        2168      volpertinger   FALSE
 volpertinger_2  0            MT            3402        25           20M           *             0             0            volpertinger     MT           3402        3421      volpertinger   TRUE
 volpertinger_3  4            *             0           0            *             *             0             0            *                A3           1413        1436      volpertinger   FALSE
-volpertinger_4  4            *             0           0            *             *             0             0            *                A3           5689        5709      volpertinger   FALSE
-volpertinger_5  0            MT            3280        37           23M           *             0             0            volpertinger     MT           3280        3302      volpertinger   TRUE
+volpertinger_4  0            A3            5689        25           21M           *             0             0            volpertinger     A3           5689        5709      volpertinger   TRUE
+volpertinger_5  4            *             0           0            *             *             0             0            *                MT           3280        3302      volpertinger   FALSE
 volpertinger_6  0            A3            4936        37           25M           *             0             0            volpertinger     A3           4936        4960      volpertinger   TRUE
-volpertinger_7  0            A1            1320        23           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger   TRUE
-volpertinger_8  0            A3            4480        37           25M           *             0             0            volpertinger     A3           4480        4504      volpertinger   TRUE
-volpertinger_9  4            *             0           0            *             *             0             0            *                X            2381        2400      volpertinger   FALSE</code></pre>
+volpertinger_7  0            A1            1320        37           21M           *             0             0            volpertinger     A1           1320        1340      volpertinger   TRUE
+volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4504      volpertinger   FALSE
+volpertinger_9  0            X             2381        37           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE</code></pre>
 <h2 id="grouping-of-reads">Grouping of reads</h2>
 <p>As next step, the number of reads are counted which belong to certain categories. Here, the categories are:</p>
 <ul class="incremental">
@@ -184,9 +184,9 @@ volpertinger_9  4            *             0           0            *           
 <span class="fu">cat</span> data/5/1.agg <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>true_organism  mapped_organism  correct  count
 retli          *                FALSE    49
-volpertinger   *                FALSE    8
+volpertinger   *                FALSE    7
 retli          volpertinger     FALSE    1
-volpertinger   volpertinger     TRUE     17</code></pre>
+volpertinger   volpertinger     TRUE     18</code></pre>
 <p>This format may be used to plot the read fate of a single mapper run and to derive the measures sensitivity and specificity:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/plot_read_fate</span>    --exogenous retli \
                           --format png \
@@ -213,7 +213,7 @@ volpertinger   volpertinger     TRUE     17</code></pre>
 
 <span class="ex">column</span> -t data/5/1.performance</code></pre></div>
 <pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
-25        17        0.68         50          49          0.98         0.83</code></pre>
+25        18        0.72         50          49          0.98         0.85</code></pre>
 <h2 id="repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</h2>
 <p>The code needed to evaluate the data generated by the mapper might as well be included in the mapping template script introduced in the last section. If this is done, the data evaluation can be as well parallelized as the mapping process.</p>
 <p>All scripts used here were already introduced in this section.</p>
@@ -230,10 +230,10 @@ volpertinger   volpertinger     TRUE     17</code></pre>
     <span class="co"># Mark correctly/incorrectly mapped reads</span>
     <span class="ex">scripts/add_mapped_organisms</span> \
         --endogenous volpertinger \
-                     data/genome/volpertinger.fasta.fai \
+                     input/genome/volpertinger.fasta.fai \
                      data/2/volpertinger.coord \
         --exogenous  retli \
-                     data/retli/retli.fasta.fai \
+                     input/retli/retli.fasta.fai \
                      data/2/retli.coord \
         data/5/<span class="va">${p}</span>.tab \
         <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab

@@ -9,17 +9,17 @@ omitted.
 
 ```{.bash}
 # Prepare reference genome
-samtools faidx data/genome/volpertinger.fasta
+samtools faidx input/genome/volpertinger.fasta
 
 # Generate endogenous reads
-scripts/uniform data/genome/volpertinger.fasta \
+scripts/uniform input/genome/volpertinger.fasta \
     --seed 1234 \
     --name volpertinger_ \
     --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
     25 20 5
 
 # Generate exogenous reads
-scripts/uniform data/retli/retli_tr.fasta \
+scripts/uniform input/retli/retli_tr.fasta \
     --seed 1235 \
     --name retli_ \
     --output-fastq data/2/retli.coord data/2/retli.fastq \
@@ -27,7 +27,7 @@ scripts/uniform data/retli/retli_tr.fasta \
 
 # Introduce mutations into endogenous reads
 scripts/filter_fastq --nucleotide \
-  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
+  @ scripts/multiple_mutate --seed 123 input/mut-tables/mut.tab @ \
   < data/2/volpertinger.fastq \
   > data/3/volpertinger_mut.fastq
 
@@ -36,12 +36,12 @@ cat data/3/volpertinger_mut.fastq data/2/retli.fastq \
     > data/3/all.fastq
 
 # Generate the table of mapping parameters per run
-scripts/cross_tab --head 1 data/mapping/*.par | \
+scripts/cross_tab --head 1 input/mapping/*.par | \
 scripts/index_column --colname runidx > data/4/partab
 
 # Convert the mapping run parameter table into executable calls
 scripts/table2calls data/4/partab \
-                    data/mapping/map-bwa.sh \
+                    input/mapping/map-bwa.sh \
                   > data/4/calls
 
 # Start parallel mapping runs
@@ -62,10 +62,10 @@ for sam in data/4/*.sam; do
     # endogenous and exogenous reads, separately.
     scripts/add_mapped_organisms \
         --endogenous volpertinger \
-                     data/genome/volpertinger.fasta.fai \
+                     input/genome/volpertinger.fasta.fai \
                      data/2/volpertinger.coord \
         --exogenous  retli \
-                     data/retli/retli.fasta.fai \
+                     input/retli/retli.fasta.fai \
                      data/2/retli.coord \
         data/5/${p}.tab \
         | scripts/write_later data/5/${p}.tab

@@ -76,7 +76,7 @@ The mutation probabilities are saved as a text table. It looks like
 this:
 
 ```{.sh}
-cat data/mut-tables/mut.tab
+cat input/mut-tables/mut.tab
 ```
 Two types of per-base mutation probabilities are distinguished:
 
@@ -126,7 +126,7 @@ reproducable result.
 
 ```{.sh}
 scripts/filter_fastq --nucleotide \
-  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
+  @ scripts/multiple_mutate --seed 123 input/mut-tables/mut.tab @ \
   < data/2/volpertinger.fastq \
   > data/3/volpertinger_mut.fastq
 ```
@@ -202,8 +202,8 @@ operator to write this output into a file suitable for
 
 ```{.sh}
 scripts/mapdamage2geomparam \
-    --fit-plots data/3/fit.png \
-    data/mapdamage/misincorporation.txt | \
+    --fit-plots fig/fit.png \
+    input/mapdamage/misincorporation.txt | \
     cut -f1-6 | \
     column -t
 ```
@@ -215,7 +215,7 @@ This is the generated plot, which shows the mutation frequencies
 obtained from mapDamage (black dots) and the fitted mutation model
 (blue lines):
 
-<img src="../../data/3/fit.png" width=600/>
+<img src="fig/fit.png" width=600/>
 
 Generating multiple damage patterns using a parameter table
 -----------------------------------------------------------
@@ -236,7 +236,7 @@ to fill a prespecified template with values.
 For example, if a template is written which looks like this:
 
 ```{.sh}
-cp data/mut-tmpl/mut-tmpl data/3
+cp input/mut-tmpl/mut-tmpl data/3
 column -t data/3/mut-tmpl
 ```
 
@@ -244,7 +244,7 @@ column -t data/3/mut-tmpl
 expressions in braces `{...}` from the previous file:
 
 ```{.sh}
-cp data/mut-tmpl/tab data/3/mut-tab
+cp input/mut-tmpl/tab data/3/mut-tab
 column -t data/3/mut-tab
 ```
 

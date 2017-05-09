@@ -13,6 +13,9 @@ mkdir -p data/{1..6} data/2e
 rm -rf   out/html out/md
 mkdir -p out/html out/md
 
+rm -rf fig
+mkdir  fig
+
 mkdir tmp
 trap "rm -r tmp" EXIT
 

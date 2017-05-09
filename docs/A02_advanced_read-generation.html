@@ -91,7 +91,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>The base indices are 1-based because base indices are 1-based in SAM-files as well. (whereas in BAM-files, they are 0-based, but we don't need to deal with BAM-files here.)</p>
 <p>We will generate sample reads from our sample genome of a volpertinger.</p>
 <p>Execute the following script to generate random nucleotide sequences:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> data/genome/volpertinger.fasta \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
     --seed 1234 \
     --output data/2e/volpertinger.coord data/2e/volpertinger.nucl \
     25 20 5</code></pre></div>
@@ -198,10 +198,10 @@ TTGAACTCTATCTTCCGGGGCTCA</code></pre>
 </ul>
 <p>If you do not understand why these commands are equivalent to the commands listed above used to generate <code>reads.fastq</code>, you can use these as well without problems.</p>
 <p>Index genome and sample nucleotide seqences:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">samtools</span> faidx data/retli/retli_tr.fasta
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">samtools</span> faidx input/retli/retli_tr.fasta
 
 <span class="ex">scripts/uniform</span> \
-    data/retli/retli_tr.fasta \
+    input/retli/retli_tr.fasta \
     --seed 2345 \
     --output data/2e/retli.<span class="dt">{coord,nucl}</span> \
     25 20 5</code></pre></div>

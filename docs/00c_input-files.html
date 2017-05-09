@@ -76,15 +76,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>This chapter explains the input files needed for this tutorial.</p>
 <h2 id="reference-genomes">Reference genomes</h2>
 <p>A genome must be provided from which sample reads can be generated. Two types of genomes are needed: The genome to which reads shall be mapped is called genome of an <em>endogenous</em> species. The genome (or genomes) from which contaminant reads stem (e.g. soil bacteria or humans) is called genome(s) of <em>exogenous</em> species.</p>
-<p>In this tutorial, mutated reads of the genome <code>data/genome/volpertinger.fasta</code> shall be generated and mapped back to that genome. Therefore, <code>volpertinger</code> is the endogenous species.</p>
-<p>The file <code>data/retli/retli_tr.fasta</code> contains an excerpt (if this were not a demonstration, the whole genome would be used, of course) genome of the soil bacterium <em>R. etli</em>. Reads from this genome will be generated as exogenous, contaminant reads.</p>
+<p>In this tutorial, mutated reads of the genome <code>input/genome/volpertinger.fasta</code> shall be generated and mapped back to that genome. Therefore, <code>volpertinger</code> is the endogenous species.</p>
+<p>The file <code>input/retli/retli_tr.fasta</code> contains an excerpt (if this were not a demonstration, the whole genome would be used, of course) genome of the soil bacterium <em>R. etli</em>. Reads from this genome will be generated as exogenous, contaminant reads.</p>
 <h2 id="read-mutation-probabilities">Read Mutation probabilities</h2>
-<p>In order to simulate mutation of the synthetic reads, probabilities that a mutation happens must be set. An example of this can be found in the file <code>data/mut-tables/mut.tab</code>, which is shown below</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mut-tables/mut.tab</code></pre></div>
+<p>In order to simulate mutation of the synthetic reads, probabilities that a mutation happens must be set. An example of this can be found in the file <code>input/mut-tables/mut.tab</code>, which is shown below</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mut-tables/mut.tab</code></pre></div>
 <pre class="output"><code>strand   from   to   factor  geom_prob  intercept
-3        C      T    0.3     0.4        0.1
-5        C      T    0.1     0.2        0.0
-3        *      *    0.0     0.1        0.12</code></pre>
+3p       C      T    0.3     0.4        0.1
+5p       C      T    0.1     0.2        0.0
+3p       *      *    0.0     0.1        0.12</code></pre>
 <p>These mutation parameters can be set to user-defined values. If different sets of mutations are to be compared, multiple files of this format can be created using the script <code>fill_template</code>.</p>
 <p>Alternatively, a file like shown above can be created by deriving the mutation parameters from mapDamage output. Both possibilities are detailed in the section about introducing read mutations.</p>
 <h2 id="mapping-script">Mapping script</h2>
@@ -100,13 +100,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">set</span> <span class="ex">-ue</span>
 
 <span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \
-    data/genome/volpertinger \
+    input/genome/volpertinger \
     data/3/all.fastq         \
     <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \
     <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span>
 
 <span class="ex">bwa</span> samse                      \
-      data/genome/volpertinger \
+      input/genome/volpertinger \
       data/4/<span class="va">${runidx}</span>.sai     \
       data/3/all.fastq         \
       <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \
@@ -117,14 +117,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2 id="parameter-files">Parameter files</h2>
 <p>The parameter values which are to be compared must be written into dedicated files. For each parameter which is to be tested in differing combinations with other parameters, one file must be created. Parameters which always vary together must be written into the same file.</p>
 <p>To compare different combinations of parameter values, the lines of these files will be merged in different combinations and the mapping script mentioned above will be run for each combination.</p>
-<p>Example files, which are used in this tutorial, can be seen in he folder <code>data/mapping</code> and are printed below. The file names are arbitrary, however, the column names (first line of each file) determines the name of the variable in the mapping script (previous section) which will take the values of that column.</p>
+<p>Example files, which are used in this tutorial, can be seen in he folder <code>input/mapping</code> and are printed below. The file names are arbitrary, however, the column names (first line of each file) determines the name of the variable in the mapping script (previous section) which will take the values of that column.</p>
 <p>In the following, the file contents are printed:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mapping/k.par</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mapping/k.par</code></pre></div>
 <pre class="output"><code>k
 2
 10
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> data/mapping/n.par</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mapping/n.par</code></pre></div>
 <pre class="output"><code>n
 0
 4

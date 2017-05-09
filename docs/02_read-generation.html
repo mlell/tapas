@@ -78,8 +78,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><em>Exogenous reads</em> mimic contaminant DNA which should not be mapped to the reference</li>
 </ul>
 <h2 id="generating-endogenous-reads">Generating endogenous reads</h2>
-<p>In this tutorial, endogenous reads are generated from the sample genome <code>volpertinger.fasta</code>, which is stored in the <code>data/genome</code> folder of this manual. The script <code>uniform</code> is used to sample reads uniformly from the reference:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> data/genome/volpertinger.fasta \
+<p>In this tutorial, endogenous reads are generated from the sample genome <code>volpertinger.fasta</code>, which is stored in the <code>input/genome</code> folder of this manual. The script <code>uniform</code> is used to sample reads uniformly from the reference:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
     --seed 1234 \
     --name volpertinger_ \
     --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2 id="generating-exogenous-reads">Generating exogenous reads</h2>
 <p>In this tutorial, contaminant reads are generated from the genome <code>retli_tr.fasta</code>, which is a part of the <em>Rhizobium etli</em> genome.</p>
 <p>The process of read generation is very similar to the previous section:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> data/retli/retli_tr.fasta \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/retli/retli_tr.fasta \
     --seed 1235 \
     --name retli_ \
     --output-fastq data/2/retli.coord data/2/retli.fastq \

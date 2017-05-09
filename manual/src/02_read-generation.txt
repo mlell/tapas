@@ -14,12 +14,12 @@ Generating endogenous reads
 ---------------------------
 
 In this tutorial, endogenous reads are generated from the sample genome 
-`volpertinger.fasta`, which is stored in the `data/genome` folder of this
+`volpertinger.fasta`, which is stored in the `input/genome` folder of this
 manual. The script `uniform` is used to sample reads uniformly from the
 reference: 
 
 ```{.sh}
-scripts/uniform data/genome/volpertinger.fasta \
+scripts/uniform input/genome/volpertinger.fasta \
     --seed 1234 \
     --name volpertinger_ \
     --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
@@ -50,7 +50,7 @@ In this tutorial, contaminant reads are generated from the genome
 The process of read generation is very similar to the previous section:
 
 ```{.sh}
-scripts/uniform data/retli/retli_tr.fasta \
+scripts/uniform input/retli/retli_tr.fasta \
     --seed 1235 \
     --name retli_ \
     --output-fastq data/2/retli.coord data/2/retli.fastq \
