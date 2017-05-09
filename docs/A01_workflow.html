@@ -74,17 +74,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <!-- CONTENT -------------------------------------->
 <p>This page lists all the commands which were used to perform the tasks in the tutorial. Commands like <code>column -t</code> which serve only formatting issues are omitted.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Prepare reference genome</span>
-<span class="ex">samtools</span> faidx data/genome/volpertinger.fasta
+<span class="ex">samtools</span> faidx input/genome/volpertinger.fasta
 
 <span class="co"># Generate endogenous reads</span>
-<span class="ex">scripts/uniform</span> data/genome/volpertinger.fasta \
+<span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
     --seed 1234 \
     --name volpertinger_ \
     --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
     25 20 5
 
 <span class="co"># Generate exogenous reads</span>
-<span class="ex">scripts/uniform</span> data/retli/retli_tr.fasta \
+<span class="ex">scripts/uniform</span> input/retli/retli_tr.fasta \
     --seed 1235 \
     --name retli_ \
     --output-fastq data/2/retli.coord data/2/retli.fastq \
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <span class="co"># Introduce mutations into endogenous reads</span>
 <span class="ex">scripts/filter_fastq</span> --nucleotide \
-  @ scripts/multiple_mutate --seed 123 data/mut-tables/mut.tab @ \
+  @ scripts/multiple_mutate --seed 123 input/mut-tables/mut.tab @ \
   <span class="op">&lt;</span> data/2/volpertinger.fastq \
   <span class="op">&gt;</span> data/3/volpertinger_mut.fastq
 
@@ -101,12 +101,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <span class="op">&gt;</span> data/3/all.fastq
 
 <span class="co"># Generate the table of mapping parameters per run</span>
-<span class="ex">scripts/cross_tab</span> --head 1 data/mapping/*.par <span class="kw">|</span> <span class="kw">\</span>
+<span class="ex">scripts/cross_tab</span> --head 1 input/mapping/*.par <span class="kw">|</span> <span class="kw">\</span>
 <span class="ex">scripts/index_column</span> --colname runidx <span class="op">&gt;</span> data/4/partab
 
 <span class="co"># Convert the mapping run parameter table into executable calls</span>
 <span class="ex">scripts/table2calls</span> data/4/partab \
-                    data/mapping/map-bwa.sh \
+                    input/mapping/map-bwa.sh \
                   <span class="op">&gt;</span> data/4/calls
 
 <span class="co"># Start parallel mapping runs</span>
@@ -127,10 +127,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <span class="co"># endogenous and exogenous reads, separately.</span>
     <span class="ex">scripts/add_mapped_organisms</span> \
         --endogenous volpertinger \
-                     data/genome/volpertinger.fasta.fai \
+                     input/genome/volpertinger.fasta.fai \
                      data/2/volpertinger.coord \
         --exogenous  retli \
-                     data/retli/retli.fasta.fai \
+                     input/retli/retli.fasta.fai \
                      data/2/retli.coord \
         data/5/<span class="va">${p}</span>.tab \
         <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab
