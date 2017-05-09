@@ -10,32 +10,35 @@ from collections import namedtuple
 from textwrap import dedent
 from numbers import Number
 
+from itertools import product
+
 import numpy as np
+import pandas as pd
 from numpy import array 
 from scipy.optimize import curve_fit
 
 
 helpText="""\
-Convert mapDamage output into parameters of a fitted distribution.
-Currently, the R script fit_geom.R is used to perform the fitting.
+Convert mapDamage output into parameters of a function which returs
+the per-base probability that it is subjected to a certain base exchange. 
+The parameters 'factor', 'geom_prob' and 'intercept' are estimated,
+which relate to the following function:
 
-Input is expected to begin with a header line matching the following
-regular expression:
+    P_from(i, end, to) = factor × geom(i, geom_prob) + intercept
 
-    ^pos [35]p[ATGC]>[ATGC]$
+P is the probability that the base on position i, as counted 1-based from
+the read end 'end' (end = 3' or 5') is subjected to the base exchange
+'from' -> 'to' (where 'from' and 'to' may be A,T,G or C). 'geom' is the
+geometric distribution density function with support {1,2,3...} and
+probability parameter 'geom_prob'.
 
-where whitespace can be of arbitrary length >0 and contain tab stops.
+The input is the 'misincorporation.txt' file which is produced by the
+mapDamage program (Jónsson et al. Bioinformatics 2013 and Ginolhac et
+al. Bioinformatics 2011). Least-squares fitting is used to determine
+the parameters of the aforementioned function.
 
-Following the input, lines are expected to contain two columns of
-text, of which the second column holds the base exchange probabilities
-for a distance in bp from the end of the read. The header specifies,
-which end.
-
-***NOTE:*** Due to a bug in mapDamage, the header reports incorrect
-information about the read direction (5'>3' or vice versa). Therefore
-this script currently determines the aforementioned informations from
-the file name. The header line is ignored. The --metadata switch can
-be used to change this behaviour. (as of mapDamage version 2.0.2-8)
+The parameters are printed in a text table for each combination of
+read end, mutation origin and target base.
 """
 
 # Are we using Python3?
@@ -46,83 +49,138 @@ DIST_FIT_R_SCRIPT = os.path.dirname(
                         sys.argv[0])  ) \
                     + "/../fit_geom"
 
-MapDamageHeader = namedtuple( "MapDamageHeader"
-                            , ['direction', 'fromBase', 'toBase'] )
+GeomPars = namedtuple("GeomPar", 
+            ['factor', 'geom_prob', 'intercept' ])
+
+mapDamageHeaders = ['strand', 'from', 'to']
 
 def main():
     aparser=create_argument_parser()
     args=aparser.parse_args()
 
-    # Create Plot folder
-    plot_prefix = args.fit_plots
-    if plot_prefix != None:
-        create_plot_folder(plot_prefix)
-    
     # List of files to process
     mdfiles=args.mdfiles
 
-    print("strand\tfrom\tto\tfactor\tgeom_prob\tintercept")
+    M = readMisincorporationTxt(mdfiles)
+    M.drop(['Chr','Std'],axis=1,inplace=True)
+    M = M.groupby(['End','Pos'])
+    A = M.aggregate(np.sum)
+    A = A.ix[A.Total != 0,:]
+
+    # Calculate per-base substitution rates
+    for f,t in product('ATCG','ATCG'):
+        if f == t: continue
+        A[f+'>'+t] = A[f+'>'+t] / A[f]
     
-    for i,f in enumerate(mdfiles):
-        if plot_prefix != None:
-            plot_filename="{prefix}{i:03d}_{filename}.pdf".format(
-                    prefix   = plot_prefix
-                  , i        = i
-                  , filename = os.path.basename(f))
-        else:
-            plot_filename = None
-        outputParams=processMapDamageFile(
-            filename         = f,
-            readMetadataFrom = args.metadata,
-            plotFilename     = plot_filename)
-        outputList = [str(np.round(p,8)) if isinstance(p,Number) else str(p) 
-                      for p in outputParams ]
-        print("\t".join(outputList))
+    A = A.iloc[A.index.get_level_values('Pos') <= args.n_bp,]
 
+    results = processMapDamageFile(A)
 
-def create_plot_folder(plotPrefix):
-    """ Creates the folder specified in the plotPrefix 
-    ( dir1/dir2/plot_ --> dir1/dir2 ). If the folder exists already,
-    raise an error in order to prevent accidential overwriting"""
-  
-    plot_folder = os.path.dirname(plotPrefix)
+    # Make sure that only one intercept value is reported for each
+    # base exchange. There may be two, derived from 3' and 5' read
+    # ends, respectively. Assign the mean to one of the output lines
+    # for that base exchange and set the value in the other output
+    # line to NA.
+    nIntercepts = results.groupby(['from','to']).size()
+    for f,t in nIntercepts.index.tolist():
+        if nIntercepts.loc[f,t] > 1:
+            #import pdb;pdb.set_trace()
+            i = np.flatnonzero((results['from'] == f) & (results['to'] == t))
+            m = np.mean(results.loc[i,'intercept'])
+            results.loc[i,'intercept']    = np.nan
+            results.loc[i[0],'intercept'] = m
 
-    if plot_folder == '': return
+    # Print output
+    float_format="%.{}g".format(args.print_digits)
+    print(results.to_csv(sep="\t",index=False,na_rep="NA",float_format=float_format), end="")
 
-    if os.path.isfile(plot_folder) : 
-        raise IOError(("Cannot create a folder named {}: File of"+ 
-                "that name exists already").format(plot_folder))
-    if os.path.isdir(plot_folder):
-        return
-    os.makedirs(plot_folder)
+    # Create Plot folder
+    plot_filename = args.fit_plots
+    
+    if plot_filename != None:
+        plotFitResult(A, results, plot_filename)
 
-def processMapDamageFile(filename,readMetadataFrom="filename"
+def processMapDamageFile(A,readMetadataFrom="filename"
                        , plotFilename=None):
     """ Open a file, read base exchange and strand direction, 
     read probability values, fit a function and print the parameters."""
-    
-    with open(filename,"rt") as fd:
-        # Read strand direction and mutated base
-        # Deal with mapDamage bug
-        firstLine     = fd.readline()
-        info          = readMetadata(filename,firstLine,readMetadataFrom)        
-        # Read probabilities from file
-        probabilities = [ float(l.split()[1]) for l in fd if l.strip() != "" ]
-        
-        # Fit geometrical distribution
-        par  = fitScalableGeom(probabilities)
 
-        if plotFilename:
-            plotFitResult( filename = plotFilename
-                         , probabilities = probabilities
-                         , fit_parameters = par)
-    
-    return (info.direction, info.fromBase, info.toBase
-          , *par.tolist())
+    nRows = 2*4*3 # 2 strand ends, 4*3 base combinations
+    pars = pd.DataFrame( index = np.arange(0, nRows) 
+                       , columns=[*mapDamageHeaders, *GeomPars._fields]
+                       )
+    # Convert the parameter columns to numeric dtype to facilitate 
+    # pretty printing of floats
+    pars.factor = pd.to_numeric(pars.factor)
+    pars.geom_prob = pd.to_numeric(pars.geom_prob)
+    pars.intercept = pd.to_numeric(pars.intercept)
 
+    iRow = 0
 
-def plotFitResult(filename, probabilities, fit_parameters,
-        imgFormat='png'):
+    for e in ['3p','5p']:
+        A2 = A.xs(e,level='End')
+        for (f,t) in product('ACGT','ACGT'):
+
+            A2 = A.xs(e,level='End')
+            if f == t: continue
+            par = fitScalableGeom(np.array(A2.index), A2[f+'>'+t])
+            pars.loc[iRow] = [e,f,t,*par]
+            iRow = iRow + 1
+
+    return pars
+
+def readMisincorporationTxt(filename):
+    """Convert the 'misincorporation.txt' file, as output by
+    mapDamage, to a numpy array"""
+    sep = "\t"
+    with open(filename,'r') as fd:
+        while True:
+            line = fd.readline()
+            if not line.startswith('#'): break
+        header = line.split(sep)
+
+        d = {k:'int' for k in header}
+        for k in ['Chr','End','Std']: d[k] = 'category'
+        M = pd.read_table(fd,names=header
+                         , delimiter=sep
+                         , dtype=d
+                         )
+    return M
+
+def plotFitResult(probabilities, fit_parameters,filename, imgFormat='png'):
+    """Plot the fit versus the data (mutation probabilities per base
+    type and base position.
+
+    Parameters:
+        probabilities:
+            Data frame containing the mutation probabilities per base
+            position and base exchange
+
+            index columns: End (5' or 3' read end), 
+                           Pos (bp distance from respective end)
+            columns:       A>C, A>T, A>G, C>A, C>G, ... 
+                           which denote the respective base substitutions
+        fit_parameters:
+            Data frame containing parameters of geometric
+            distributions modelling the base substitution probability
+            per base substitution type and position
+
+            columns: strand (3p or 5p)
+                     from   (substitution origin base)
+                     to     (substitution target base)
+                     factor, geom_prob, intercept 
+                            (parameters of the
+                             geometric distribution which models the
+                             respective substitution probability)
+        filename:
+            String which contains the file name of the plot to be
+            created. 
+        imgFormat (png [default] | pdf | show):
+            png:  Output a PNG file. 
+            pdf:  Output a PDF file.
+            show: Show the plot on screen.
+    """
+
     try:
         import matplotlib
         if imgFormat == 'png':  
@@ -141,57 +199,116 @@ def plotFitResult(filename, probabilities, fit_parameters,
             "installed but is required for plotting")
 
 
-    x = array(range(1,len(probabilities)+1))
-    y_fun = scalableGeom(x,factor    = fit_parameters[0]
-                          , p_success = fit_parameters[1]
-                          , added_constant=fit_parameters[2])
-    err = abs(probabilities - y_fun)
+    nEnds = 2  # 3' and 5' end of DNA short read
+    bases = 'ATCG'
 
-    fig, (ax1, ax2) = plt.subplots(2,1,sharex=True, sharey=False)
-    ax2.set_yscale('log',basey=10)
+    ylim = max(max(probabilities[a+">"+b]) for (a,b) in product(bases,bases) if a!=b)
 
-    # Commas behind hDat, etc. are needed because pyplot.plot always
-    # returns tuples of artists, even if only one artist is returned.
-    # Therefore, add the comma to unpack the tuple.
-    hDat, = ax1.plot(x, probabilities, 'ok')
-    hFit, = ax1.plot(x, y_fun, "b-")
-    ax1.set_ylabel("mutation probability")
+    fig, ax = plt.subplots(len(bases),len(bases)*nEnds,sharex=False, sharey=True)
+    fig.subplots_adjust(left=0.13, bottom=0.13, right=0.9, top=0.85,
+            wspace=0.2, hspace=0.1)
+    fig.set_size_inches(8,5)
 
-    ax2.plot(x, y_fun, "b-")
+    fit_parameters.set_index(['from','to','strand'],inplace=True)
 
-    hErr, = ax2.plot(x, err, color="red")
+    for (iF,f),(iT,t) in product(enumerate(bases),enumerate(bases)):
 
-    ax1.legend( [hDat,hFit,hErr],["Data","Fit","Error"]
-              , bbox_to_anchor=(0.5,1), loc = "lower left"
-              , frameon = False, ncol = 3)
-    
-    # Write parameters in plot
-    plt.figtext(0.1,0.9,verticalalignment='bottom',
-                multialignment='left',s=dedent(r"""
-            $y=a\times\operatorname{{geom}}(x,p)+t$  
-            a = {:0.3g}; p = {:0.3g};  t = {:0.3g}""".format( fit_parameters[0],
-               fit_parameters[1], fit_parameters[2])))
+        for iEnd, (sign,e) in enumerate(zip([1,-1],['5p','3p'])):
+            cAx = ax[iT, iF*2+iEnd] # cAx is used outside the for loop!
+            cPos = cAx.get_position()
+            cWidth = cPos.width
 
-    ax2.set_xlabel("bp from read end")
-    ax2.set_ylabel("mutation probability (log)")
+            # No plots on diagonal
+            if f == t: 
+                fig.delaxes(cAx)
+                continue
+
+            cPos.x0 = cPos.x0 + 0.05*cPos.width*sign
+            cPos.x1 = cPos.x0 + cWidth
+
+            cAx.set_position(cPos)
+
+            p = probabilities.xs([e],level=['End'])[f+'>'+t]
+            x = np.array(p.index.get_level_values('Pos'))
+
+            pars = fit_parameters.loc[f,t,e].to_dict()
+
+            # If no intercept is specified for this end, take the
+            # intercept parameter from the other end.
+            if np.isnan(pars['intercept']): 
+                otherend = next(iter(set(['5p','3p']) - set([e])))
+                pars['intercept'] = fit_parameters.loc[(f,t,otherend),'intercept']
+
+            y_fun = scalableGeom( first_success  = x
+                                , p_success      = pars["geom_prob"]
+                                , factor         = pars["factor"]
+                                , added_constant = pars["intercept"]
+                                )
+
+            cAx.plot(sign*x, p, 'ok', ms=2)
+            cAx.plot(sign*x, y_fun, "b-")
+            cAx.set_ylim([0, ylim])
+            for tck in cAx.get_xticklabels(): tck.set_rotation(45)
+
+            # Only show x tick labels for the plots at the bottom end
+            # of the figure
+            if (iT,iF) not in [(3,0), (3,1), (3,2), (2,3)]:
+                cAx.set_xticklabels([])
+        
+
+    xmin = min(a.get_position().xmin for a in ax.flat)
+    ymin = min(a.get_position().ymin for a in ax.flat)
+    xmax = max(a.get_position().xmax for a in ax.flat)
+    ymax = max(a.get_position().ymax for a in ax.flat)
+
+    # Print the bases at the outer plot margins
+    for i,b in enumerate(bases): 
+        # A,T,C,G label offsets and spreads
+        ttop, ftop = 0.21, 0.2    # top labels ("from")
+        trgt, frgt = 0.24, 0.195  # right labels ("to")
+        # Mutation from:
+        figText(fig, b , i*ftop+ttop, 0.9   , va='bottom')
+        # Mutation to:
+        figText(fig, b , 0.92 , 1-(i*frgt+trgt) , ha='left')
+
+    # Print the other outer plot margin annotations
+    figText(fig, "from", 0.5, 0.95)
+    figText(fig, "to"  , 0.97,0.5, rotation=90)
+    figText(fig, "mutation probability"  , 0.03,0.5, rotation=90)
+    figText(fig, "Base pairs"  , 0.5,0.01, va='bottom')
+
+    # Print the markers for 5' and 3' end
+    ax[1,0].annotate( "5' end", xy=(0,1), xytext=(0,20) 
+                    , xycoords=('axes fraction', 'axes fraction')
+                    , arrowprops = dict(arrowstyle='-'
+                          , connectionstyle="angle,angleA=45,angleB=90"
+                    )
+                    , textcoords = 'offset points')
+    ax[1,1].annotate( "3' end", xy=(1,1), xytext=(-30,20) 
+                    , xycoords=('axes fraction', 'axes fraction')
+                    , arrowprops = dict(arrowstyle='-'
+                          , connectionstyle="angle,angleA=-45,angleB=90"
+                    )
+                    , textcoords = 'offset points')
 
     if imgFormat == 'show':
         plt.show()
-    else:
-        plt.savefig(filename)
+    elif imgFormat == 'png':
+        plt.savefig(filename, format='png', dpi=300)
+    elif imgFormat == 'pdf':
+        plt.savefig(filename, format='pdf')
 
+def figText(fig, text, x, y
+           , coord='figure fraction',ha='center',va='center' 
+           , **kwargs):
+    cAx = fig.axes[0]
+    cAx.annotate(text
+                , xy=(x, y)
+                , xycoords='figure fraction'
+                , size=14
+                , ha=ha, va=va
+                , **kwargs)
 
-
-
-
-def readMetadata(filename, firstLine, readMetadataFrom):
-    if readMetadataFrom == "header":
-        return(parseFirstLine(firstLine))
-    elif readMetadataFrom == "filename":
-        return(parseFileName(filename))
-    else: 
-        raise NotImplementedError("Illegal argument for \
-            readMetadata!")
 
 def geom(xs, p):
     """Geometric probability mass function. x=number of desired
@@ -207,17 +324,15 @@ def scalableGeom(first_success,p_success,factor=1,added_constant=0):
     adding a constant."""
     return factor * geom(first_success,p_success) + added_constant
 
-def fitScalableGeom(probabilities):
-    x = array(range(1, len(probabilities)+1))
-    pars, cov = curve_fit(
-            lambda x,f,p,t: scalableGeom( first_success  = x
-                                        , factor         = f
-                                        , p_success      = p
-                                        , added_constant = t )
-            , x, probabilities, 
-            bounds=(array([0,0,0]),array([np.inf,1,np.inf])))
+def fitScalableGeom(pos,probabilities):
+    pars, cov = curve_fit(scalableGeom, pos, probabilities, 
+            p0 = array([1e-1,0,0]), 
+            bounds=(array([1e-1,0,0]),array([1,np.inf,np.inf])))
 
-    return pars
+    # pars holds values in the same order as in the signature of
+    # fitScalableGeom
+    return GeomPars(geom_prob=pars[0], factor=pars[1],
+            intercept=pars[2])
 
 
 # This function cannot be used due to a possible bug in mapDamage?
@@ -239,9 +354,9 @@ def parseFirstLine(line):
         ("The line {} is not a proper mapDamage header! "+
          "An Example for a proper format: 'pos 5pG>A'").format(line))
     
-    return(MapDamageHeader( direction = m.group(1)
-                          , fromBase  = m.group(2)
-                          , toBase    = m.group(3)))
+    return(MapDamageHeader( strand   = m.group(1)
+                          , fromBase = m.group(2)
+                          , toBase   = m.group(3)))
 
 
 def parseFileName(filename):
@@ -261,37 +376,58 @@ def parseFileName(filename):
          "An Example for a proper format:"+
          "'5pGtoA_freq.txt'").format(basename))
     
-    return(MapDamageHeader( direction = m.group(1)
+    return(MapDamageHeader( strand    = m.group(1)
                           , fromBase  = m.group(2)
                           , toBase    = m.group(3)))
 
     
 def create_argument_parser():
     aparser=argparse.ArgumentParser(description=helpText
-                       , formatter_class=argparse.RawDescriptionHelpFormatter)
-    aparser.add_argument("mdfiles",metavar="mapdamage-files...",nargs="+",
-            help=\
-    """Filenames of mapDamage output files. If no files are given, standard
-    input is read. The first line of the file is expected to be a with a 
-    header, as described in the --metadata help. The following lines
-    are expected to be two columns of numbers. The second column is saved as
-    base exchange probabilities""")
-    aparser.add_argument("--metadata", choices=["filename","header"],
-            default="filename",help=\
-    """Whether the information about read direction, and mutated base
-    shall be inferred from the filename or the first line of the file.
+                       , formatter_class=argparse.RawTextHelpFormatter)
+    aparser.add_argument("mdfiles"
+        , metavar="misincorporation.txt", help=
+    """`misincorporation.txt` output file of mapDamage""")
 
-    ***NOTE:*** Inferring from the header line doesn't work currently
-    due to a bug in mapDamage which reports always 5'>3' in its header
-    line! Filename is expected to be of the form
-    '.*[3|5]p[ATGC]to[ATGC]_freq.txt', XXX being an arbitrary
-    string.""")
+    aparser.add_argument("--fit-plots", default=None
+        , metavar="FILENAME", help=dedent(
+    """If this switch is given, data vs. fitted plots are created.
+    The file name of the plot is expected as an argument"""))
 
-    aparser.add_argument("--fit-plots", default=None,
-            help=\
-    """If this switch is given, data vs. fitted plots are created. A
-    prefix for the plot names is expected. This can contain folders.
-    Folders are created as needed.""")
+    aparser.add_argument("--n-bp", default=20, type=int
+            , metavar="N", help=dedent("""\
+    The number of base pairs from the respective read end (3' or
+    5') to use for fitting. Too high values might lead to higher noise
+    in the mutation probabilities due to few reads bein so long, too
+    low values limit the amount of data points available for fitting.
+    If in doubt, create plots using `--fit-plots` and check whether the
+    mutation probabilities look sensible."""))
+
+    aparser.add_argument('--print-digits', default=4, type=int
+        , metavar="N", help=dedent("""\
+    The number of digits after the decimal dot to print."""))
+
+    aparser.add_argument('--min-gp', default=0.1, type=float
+        , metavar="N" , help=dedent("""\
+    [default: 0.1] The minimum value which may be estimated for
+    'geom_prob'. This is to avoid high values of 'factor' if no
+    elevated mutation probability near the read ends is visible.
+
+    A position-independent mutation rate shall be modelled by the
+    estimating the 'intercept' parameter with this script. However, if
+    the parameter 'geom_prob' becomes small, position-independent
+    mutation rate can also be modelled by the 'factor' parameter.   If
+    the provided mapDamage data indicates no elevated damage near the
+    read end, prohibiting very small values for geom_prob will force
+    the 'factor' parameter to be estimated very small, so that the
+    mutation rate of the data is solely estimated by the 'intercept'
+    value.
+
+    Increase this value if the result estimates 'intercept' lower than
+    the mutation baseline visible in the plot, together with a
+    non-negligible value for 'factor' and a small 'geom_prob'. 
+    Decrease this value if the fitted mutation probability (blue line in plot) 
+    decreases too steep compared to its data (black dots) and
+    geom_prob is estimated near the value set here."""))
 
     return aparser
  

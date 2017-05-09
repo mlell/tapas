@@ -1,4 +1,4 @@
 strand   from   to   factor  geom_prob  intercept
-3        C      T    0.3     0.4        0.1
-5        C      T    0.1     0.2        0.0
-3        *      *    0.0     0.1        0.12
+3p       C      T    0.3     0.4        0.1
+5p       C      T    0.1     0.2        0.0
+3p       *      *    0.0     0.1        0.12

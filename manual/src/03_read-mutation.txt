@@ -190,7 +190,7 @@ Obtaining mutation rates from mapDamage
 
 Damage patterns from mapDamage can be converted into a table
 with mutation parameters by least-squares fitting. For this purpose,
-the mapDamage output files ending with `... _freq.txt` are needed.
+the mapDamage output file `misincorporation.txt` is needed.
 
 The following command fits a geometric distribution to mapDamage data, 
 shows the derived parameters and plots the data with the fitted curve.
@@ -202,16 +202,20 @@ operator to write this output into a file suitable for
 
 ```{.sh}
 scripts/mapdamage2geomparam \
-    --fit-plots fig/fit_ \
-    data/mapdamage/*.txt | \
+    --fit-plots data/3/fit.png \
+    data/mapdamage/misincorporation.txt | \
     cut -f1-6 | \
     column -t
 ```
 
-The generated plots can be viewed 
-<a href="fig/fit_001_GS136_5pCtoT_freq.txt.pdf">here (C→T)</a> and
-<a href="fig/fit_000_GS136_3pGtoA_freq.txt.pdf">here (G→A)</a>.
-fit_000_GS136_3pGtoA_freq.txt.pdf
+For each base exchange, the position-independent parameter `intercept`
+is only listed for one strand end. 
+
+This is the generated plot, which shows the mutation frequencies
+obtained from mapDamage (black dots) and the fitted mutation model
+(blue lines):
+
+<img src="../../data/3/fit.png" width=600/>
 
 Generating multiple damage patterns using a parameter table
 -----------------------------------------------------------
