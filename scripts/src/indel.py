@@ -23,6 +23,7 @@ description = dedent("""
     string. Example:
 
         –––––––––––––––––––––––
+        seq             cigar
         GGTGACATAAAGGC  8M5I
         TTCCGCAGGG      10M
         CTCGTGGAGT      5M2D5M
@@ -53,26 +54,36 @@ def parse_arguments(argv):
         Do not read CIGAR strings from standard input, but assume a 
         complete (mis)match (no indels, CIGAR character M) for every 
         nucleotide string."""))
-    p.add_argument('--input-fmt', default = ['lines'],
-        nargs='+', metavar='',
-        help =dedent("""\
-        Format of the file containing the CIGAR strings. 
-        Usage: --input-fmt lines
-               --input-fmt tab COL-NUCL COL-CIGAR 
-        Choices: 
-        'lines': One nucleotide and CIGAR string per input line
-        (use --cigar-new to assume only M instead of giving 
-        CIGAR input)
-        
-        +++ NOT YET IMPLEMENTED +++++++++++++++++++++++++++++++++
-        'tab COL-NUCL COL-CIGAR': The file is in a tabular format.
-        The first line contains the column names, the following
-        files contain the content.  Only the contents of the
-        columns named COL-NUCL and COL-CIGAR are used.  Columns 
-        are separated by a tab character (\\t), unless another 
-        character is specified by the --sep argument
-        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        """))
+    p.add_argument('--col-seq', default = 'seq', type = str,
+        help = "Column name of the nucleotide strings")
+    p.add_argument('--col-cigar', default = 'cigar', type = str,
+        help = "Column name of the CIGAR strings")
+   # p.add_argument('--input-fmt', default = ['lines'],
+   #     nargs='+', metavar='',
+   #     help =dedent("""\
+   #     Format of the file containing the CIGAR strings. 
+   #     Usage: --input-fmt lines
+   #            --input-fmt tab COL-NUCL COL-CIGAR 
+   #     Choices: 
+   #     'lines': One nucleotide and CIGAR string per input line
+   #     (use --cigar-new to assume only M instead of giving 
+   #     CIGAR input)
+   #     
+   #     'tab COL-NUCL COL-CIGAR': The file is in a tabular format.
+   #     The first line contains the column names, the following
+   #     files contain the content.  Only the contents of the
+   #     columns named COL-NUCL and COL-CIGAR are used.  Columns 
+   #     are separated by a tab character (\\t), unless another 
+   #     character is specified by the --sep argument
+   #     """))
+   # p.add_argument('--change-coords', nargs=2, 
+   #     help=dedent("""\
+   #     If an output CIGAR string begins or ends with an insertion
+   #     or a deletion, change the true read coordinates instead.
+   #     Else, such reads would not be assigned to their true position.
+   #     """))
+    p.add_argument('--no-header',default = False, action = 'store_true',
+        help="Do not expect a table header. Specify column indices instead.")
     p.add_argument('--sep', default='\t', help=dedent("""\
         Character separating the input columns if the input is 
         in tabular format (see --input-fmt). Common choices
@@ -90,18 +101,11 @@ def parse_arguments(argv):
     if len(args.sep) != 1:
         raise ValueError('--sep must be followed by only one character')
 
-    if args.input_fmt[0] not in ['lines','tab']:
-        raise ValueError("Argument --input-fmt must be followed "+ 
-                "by 'lines' or 'tab'")
-    if args.input_fmt[0] == 'tab' and len(args.input_fmt) != 3:
-        raise ValueError("Argument '--input-fmt tab' must be followed by "+
-            "one or two further Arguments (column name and column separator")
     return args
 
 def main(argv):
+    # --- Argument checks ----------------------------------------
     args = parse_arguments(argv[1:])
-    if args.input_fmt == 'tab':
-        raise NotImplementedError("Tabular input is not yet implemented")
     if args.in_prob != 0:
         if args.in_exp is None:
             raise ValueError("--in-prob requires --in-exp")
@@ -111,26 +115,64 @@ def main(argv):
     if args.seed is not None:
         random.seed(args.seed, version=2)
 
-    if args.cigar_new:
-        input = addCIGAR(inputNormalizer(sys.stdin, 1, args.sep))
+    # --- Input parsing --------------------------------------------
+    input = sys.stdin
+    header = next(input).rstrip().split(args.sep)
+    def safe_index(l, what):
+        try: return l.index(what)
+        except ValueError: return None
+    if not args.no_header:
+        i_nucl, i_cigar =  \
+            (safe_index(header, x) for x in \
+            (args.col_seq, args.col_cigar))#, cn_start, cn_stop))
+        if i_nucl is None or i_cigar is None:
+            raise ValueError('Non-existent column names specified')
     else:
-        input = inputNormalizer(sys.stdin, 2, args.sep)
+        i_nucl, i_cigar = 0, 1
 
-    output = mutatorExpLen(input, args.in_prob
+    i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
+    rows = (s.rstrip() for s in input)
+    fields = (s.split(args.sep) for s in rows if s != '')
+    if args.cigar_new:
+        step1 = splitter(fields, [(i_nucl,), i_rest])
+        step1a = (n for (n,),r in step1)
+        step2 = ((x,) for x in addCIGAR(step1a)) 
+    else:
+        step2 = splitter(fields, [(i_nucl,i_cigar)])
+
+    step3 = mutatorExpLen((s[0] for s in step2), args.in_prob
             , args.in_exp, args.del_prob, args.del_exp)
 
-    for x in output:
+    if not args.no_header:
+        print(args.sep.join([args.col_seq, args.col_cigar]))
+    for x in step3:
         print(args.sep.join(x))
 
-def inputNormalizer(strings, ncols, sep):
+def splitter(tuples, idxs):
+    """idxs: list of tuples of indices (integer).  Returns a tuple with one 
+    element for each element i in `idxs`. Return tuple i contains all tuples[j]
+    for all j in idxs[i].
+    >>> l = [(1,2,3), (4,5,6), (7,8,9)]
+    >>> list(splitter(l, [(1), (2,3)]))
+    [((1), (2, 3)), ((4), (5, 6)), ((7), (8, 9))]
+    """
+    for n in tuples:
+        yield tuple(tuple(n[j] for j in idx) for idx in idxs) 
+
+
+        
+
+def inputNormalizer(strings, sep):
     """Make sure no invalid data format (too many columns)
     is specified and remove newlines"""
     iLine = 0
+    ncols = None
     while True:
         s = next(strings)
         iLine += 1
         s.rstrip("\n")
         s = s.split(sep)
+        if ncols is None: ncols = len(s)
         if len(s) != ncols:
             raise ValueError(("Invalid input in line {}: {} columns "+
             "expected on every input line. Got: {}. (Wrong column separator?)")
@@ -141,8 +183,7 @@ def inputNormalizer(strings, ncols, sep):
         yield s
 
 def addCIGAR(nucl):
-    while True:
-        n = next(nucl)
+    for n in nucl:
         yield (n, str(len(n))+'M')
 
 def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
