@@ -45,7 +45,7 @@ def parse_arguments(argv):
             type = checkPositive(float), metavar='P', help=
             "Per-base probability of a seqence {}".format(l))
         p.add_argument('--{}-exp'.format(s), default=None, metavar = 'L',
-            type = checkPositive(int), help=dedent("""\
+            type = float, help=dedent("""\
                 Length distribution of {}s shall be exponentially
                 distributed, with 50%% of reads longer than L""")\
                .format(l))
@@ -101,6 +101,15 @@ def parse_arguments(argv):
     if len(args.sep) != 1:
         raise ValueError('--sep must be followed by only one character')
 
+    if args.in_exp is not None and (args.in_exp >= 1 or args.in_exp < 0):
+        raise ValueError('--in-exp must be >=0 and < 1')
+    if args.del_exp is not None and (args.del_exp >= 1 or args.del_exp < 0):
+        raise ValueError('--del-exp must be >=0 and < 1')
+    if args.in_prob < 0 or args.in_prob > 1:
+        raise ValueError('--in-prob must be >= 0 and <= 1')
+    if args.del_prob < 0 or args.del_prob > 1:
+        raise ValueError('--del-prob must be >= 0 and <= 1')
+
     return args
 
 def main(argv):
@@ -117,20 +126,21 @@ def main(argv):
 
     # --- Input parsing --------------------------------------------
     input = sys.stdin
-    header = next(input).rstrip().split(args.sep)
     def safe_index(l, what):
         try: return l.index(what)
         except ValueError: return None
     if not args.no_header:
+        header = next(input).rstrip().split(args.sep)
         i_nucl, i_cigar =  \
             (safe_index(header, x) for x in \
             (args.col_seq, args.col_cigar))#, cn_start, cn_stop))
         if i_nucl is None or i_cigar is None:
             raise ValueError('Non-existent column names specified')
+        i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
     else:
         i_nucl, i_cigar = 0, 1
+        i_rest = []
 
-    i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
     rows = (s.rstrip() for s in input)
     fields = (s.split(args.sep) for s in rows if s != '')
     if args.cigar_new:
@@ -199,11 +209,14 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
     exponentially distributed with rate `1/i_len` or `1/d_len`,
     respectively.
     """
-    rndPos = lambda p: math.floor(random.expovariate(p)) \
-                        if p != 0 else inf
-    rndLen = lambda s: math.floor(random.expovariate(1/s)) + 1 \
-                        if s is not None else None
+    ln2 = math.log(2)
+    #rndPos = lambda p: math.floor(random.expovariate(p))+1 if p != 0 else inf
+    #rndLen = lambda s: math.floor(random.expovariate(ln2/s))+ 1 \
+    #                    if s is not None else None
+    rndPos = lambda p: rGeom(p)+1 if p != 0 else inf
+    rndLen = lambda s: rGeom(1-s)+1 if s is not None else None
     toCIGAR = lambda x: CIGAR.fromString(x) if isinstance(x,str) else x
+
     # State automaton:
     # ================
     # -- Possible states:
@@ -218,9 +231,9 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
     # -- Current state:
     l = 0
     nucl, cigar = "", ""
-    bpToNextIns  = rndPos(i_prob)
+    bpToNextIns  = rndPos(i_prob)-1 # only for the first time may this also be 0
     bpInsLen    = rndLen(i_len) 
-    bpToNextDel = rndPos(d_prob)
+    bpToNextDel = rndPos(d_prob) # same as bpToNextIns
     bpDelLen    = rndLen(d_len)
     # -- State transitions:
     # The loop ends if StopIteration is thrown by next(.)
@@ -267,6 +280,7 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
             nucl = insertRandom(nucl, bpToNextIns, bpInsLen)
             cigar = toCIGAR(cigar)
             cigar.operationAt('I',bpInsLen, bpToNextIns)
+            print(f'insert {bpInsLen} at {bpToNextIns}')
             l = len(nucl) # String gets longer
             # Skip the insert when calculating the bp to the next operation
             bpToNextDel += bpInsLen
@@ -317,7 +331,8 @@ def rGeom(p):
     # insert a uniform random number in [0;1] for CDF to 
     # obtain geometrically distributed numbers
     u = random.random()
-    return math.ceil( (log(1-u)/log(1-p))-1 )
+    if p == 1 : return 0
+    return math.ceil( (math.log(1-u,1-p))-1 )
 
 
 def zip_samelen(*streams):
