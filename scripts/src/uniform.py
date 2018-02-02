@@ -13,6 +13,7 @@ import contextlib
 import io
 import subprocess as sp
 import argparse
+import math
 
 # Set this to True to print stack trace on error
 debug = True
@@ -252,7 +253,7 @@ def read_sampler(mfasta, index, nreads, rlen_min, rlen_decay,
 
             # Randomly choose sequence length 
             # But never generate 0
-            rlen = int(rnd.expovariate(1/rlen_decay))+rlen_min
+            rlen = int(rnd.expovariate(math.log(2)/rlen_decay))+rlen_min
             if rlen > len_record:
                 rlen = len_record
             # Random beginning position uniformly sampled from
