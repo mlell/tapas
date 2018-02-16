@@ -6,7 +6,7 @@
   <meta name="generator" content="pandoc" />
   <title>Glossary</title>
   <style type="text/css">code{white-space: pre;}</style>
-  <link rel="stylesheet" href="manual.css" type="text/css" />
+  <link rel="stylesheet" href="manual.css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
@@ -22,9 +22,9 @@
 <li><a href="04_mapping.html">Generate mapper calls</a>
 <li><a href="05_sam-parsing.html">Parsing of SAM files</a>
 <li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
-<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
-<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
-<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
+<li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
 <li class="tocthis"><a href="B99_glossary.html">Glossary</a>
 </ul>
 </div>
@@ -38,19 +38,16 @@
 <p>Some terms are explained here, which are used in the rest of the manual and may have a special meaning:</p>
 <p>~table: A text table is the most widely used data format in this project. It is a simple text file, where the columns are separated by a special character. Usually this is a tabulator (tab) character, but sometimes space-separated tables are also used.</p>
 <p>~FASTA record: A FASTA record is a block in a fasta file which is delimited by two &gt; signs. It consists of the following parts:</p>
-<ol class="incremental" style="list-style-type: decimal">
-<li>The header line: &gt;.................(line end).
-<ol class="incremental" style="list-style-type: lower-alpha">
-<li>The FASTA identifier, which is the first 'word' of the header line. E.g. in a header line</li>
+<ol class="incremental" type="1">
+<li>The header line: &gt;……………..(line end). a) The FASTA identifier, which is the first ‘word’ of the header line. E.g. in a header line</li>
 </ol>
-<blockquote>
-<p>A1 Felis catus genome ID:012345...</p>
-</blockquote>
-<pre><code>the FASTA identifier is &#39;A1&#39;.</code></pre>
-<ol class="incremental" start="2" style="list-style-type: lower-alpha">
-<li>The FASTA record description: All the text between identifier and line end.</li>
-</ol></li>
-<li>Biological sequence data, IUPAC one-character-code. Should not be wider than 80 characters and may contain whitespace. E.g. nucleotides: ACCTCTCTACCT...</li>
+<pre><code>&gt;A1 Felis catus genome ID:012345...
+    
+    the FASTA identifier is &#39;A1&#39;.
+b) The FASTA record description: All the text between identifier
+   and line end. </code></pre>
+<ol class="incremental" start="2" type="1">
+<li>Biological sequence data, IUPAC one-character-code. Should not be wider than 80 characters and may contain whitespace. E.g. nucleotides: ACCTCTCTACCT…</li>
 </ol>
 <p>~FASTA identifier: -&gt; FASTA record</p>
 <p>~FASTA description: -&gt; FASTA record</p>
@@ -59,10 +56,10 @@
 <p>~i-based index: An index is i-based if it starts counting with number i. For example, the mapping position (pos) field of a SAM file is a 1-based index. If the position 1 is written there, the read maps to the first base of the genome. Conversely, if the index were 0-based, the first base of the genome would be referenced with the number 0.</p>
 <p>~0-based: -&gt; i-based index</p>
 <p>~1-based: -&gt; i-based index</p>
-<p>~standard input: Many commands expect input on this stream. Input can be provided either by typing into the console, by using the &lt; operator to provide input from a file or by the | operator, which forwards the content on standard output of a previous command to standard input of this command. Refer to the &quot;Redirection&quot; section of your shell for more information.</p>
-<p>~standard output: All output a command writes is by default redirected to the standard output or standard error streams. Per convention, standard output is used for the results of the program, whereas standard error is used for status and error messages. Content on standard output can be written in a file by using the &gt; operator or redirected to standard input of another command by using the | operator. Standard error output can be redirected to a file using the 2&gt; operator. Consult the &quot;Redirection&quot; section of your shell for more information.</p>
+<p>~standard input: Many commands expect input on this stream. Input can be provided either by typing into the console, by using the &lt; operator to provide input from a file or by the | operator, which forwards the content on standard output of a previous command to standard input of this command. Refer to the “Redirection” section of your shell for more information.</p>
+<p>~standard output: All output a command writes is by default redirected to the standard output or standard error streams. Per convention, standard output is used for the results of the program, whereas standard error is used for status and error messages. Content on standard output can be written in a file by using the &gt; operator or redirected to standard input of another command by using the | operator. Standard error output can be redirected to a file using the 2&gt; operator. Consult the “Redirection” section of your shell for more information.</p>
 <p>~standard error: -&gt; standard output</p>
-<p>~command line argument: a value which is written on the command line behind the name of the program which shall be invoked. They are forwarded to the program and influence it. The valid parameters of a program are described in the program's manual. (often accessible via the <code>--help</code> command line argument.</p>
+<p>~command line argument: a value which is written on the command line behind the name of the program which shall be invoked. They are forwarded to the program and influence it. The valid parameters of a program are described in the program’s manual. (often accessible via the <code>--help</code> command line argument.</p>
 <p>~command line switch: -&gt; command line argument</p>
 </div>
 <div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
