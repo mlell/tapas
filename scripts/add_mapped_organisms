@@ -21,10 +21,10 @@ function python_launch(){
     basedir="$2"
     shift 2
 
-    libdir="${basedir}/lib/python" 
+    libdir="${basedir}/lib/python:${basedir}/lib/python-ext" 
 
 
-    PYTHONPATH="${libdir}:${PYTHONPATH-}"
+    PYTHONPATH="${libdir}"
     PYTHONPATH="${PYTHONPATH}" python3 "${basedir}/${scriptname}" "$@"
 }
 
