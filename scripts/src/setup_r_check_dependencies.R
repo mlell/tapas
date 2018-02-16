@@ -16,7 +16,7 @@ damaged = c()
 for(p in pkgs){
     loc = find.package(p,quiet=TRUE)    
     if(length(loc) == 0){
-        cat(file=stderr(),sprintf("%s NOT FOUND.\n",p))
+        cat(sprintf("%s NOT FOUND.\n",p))
         not.found = c(not.found, p)
         all.ok = FALSE
     }else{
@@ -27,7 +27,7 @@ for(p in pkgs){
             all.ok = FALSE
             damaged = c(damaged, p)
         }
-        cat(file=stderr(),sprintf("%s FOUND and %s (%s)\n",
+        cat(sprintf("%s FOUND and %s (%s)\n",
             p, 
             if(loadable) "LOADABLE" else "NOT LOADABLE",
             loc))

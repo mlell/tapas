@@ -1,9 +1,0 @@
-argDefaultVal           Return default value of an optional argument
-arglist                 Return a list of named arguments and flags
-                        converted to boolean named arguments.
-parseArguments          Invoke argument parser for a given textual
-                        description of expected arguments
-parseCommandLine        Parse command line using type and default value
-                        information
-parseExpectedArgs       Parse textual information about expected
-                        variables.

@@ -1,10 +1,33 @@
 #!/bin/sh
 set -ue
 
-## This script generates launchers for every script in the scripts
-## directory. The purpose of the launchers is to set the appropriate
-## library paths before R or Python are started which run the actual 
-## script.   
+unset extlib
+
+if [ -z "${1-}" ]; then
+   : # do nothing
+elif [ "${1-}" = "--help" ]; then
+    cat >&2 <<EOF
+Usage: gen-launchers.sh [--help | --ext-libs]
+
+This script generates launchers for every script in the scripts
+directory. The purpose of the launchers is to set the appropriate
+library paths before R or Python are started which run the actual 
+script.   
+
+Per default, only the Python and R libraries saved within the TAPAS
+folders are used. They live under tapas/scripts/lib, if tapas is the
+folder where TAPAS is installed.
+
+Use the switch --ext-libs to let TAPAS tools look for packages which
+are saved in the systems' default package locations.
+EOF
+elif [ "${1-}" = "--ext-libs" ]; then
+    extlib="true"
+else
+    echo "Unknown parameter ${1-}. See --help"
+    exit 1
+fi
+
 
 # Directory this script lives in 
 thisdir="$(dirname "$(readlink -f "$0")")"
@@ -36,7 +59,7 @@ function generate_launcher(){
     echo 
     echo "## ----- Launcher follows -----------------------------"
     echo 
-    cat "${thisdir}/${launcher_function}"
+    cat "${thisdir}/launcher_templates/${launcher_function}"
     echo 
     echo "# Directory this script lives in"
     echo 'thisdir="$(dirname "$(readlink -f "$0")")"'
@@ -60,7 +83,7 @@ function generate_deprecated_launcher(){
     echo 
     echo "## ----- Launcher follows -----------------------------"
     echo 
-    cat "${thisdir}/${launcher_function}"
+    cat "${thisdir}/launcher_templates/${launcher_function}"
     echo 
     echo "# Directory this script lives in"
     echo 'thisdir="$(dirname "$(readlink -f "$0")")"'
@@ -82,7 +105,7 @@ for py in $(ls "$scriptsdir"/*.py); do
     # but without the extension and in the launcher directory,
     # not in `src/`.
     launcher_name="${launcher_dir}/$(basename "${py%.py}")"
-    generate_launcher "${py}" python_launch \
+    generate_launcher "${py}" python_launch${extlib+_extlib} \
         > "${launcher_name}"
 
     chmod u+x "${launcher_name}"
@@ -94,7 +117,7 @@ for r in $(ls "$scriptsdir"/*.R); do
     # but without the extension and in the launcher directory,
     # not in `src/`.
     launcher_name="${launcher_dir}/$(basename "${r%.R}")"
-    generate_launcher "${r}" r_launch \
+    generate_launcher "${r}" r_launch${extlib+_extlib} \
         > "${launcher_name}"
 
     chmod u+x "${launcher_name}"

@@ -1,0 +1,15 @@
+# Usage: r_launch SCRIPT BASEDIR
+#
+# Launch an R script after setting the appropriate
+# library paths. The libraries are expected in 
+# BASEDIR/lib/r, SCRIPT is a path relative to BASEDIR
+function r_launch(){
+    scriptname="$1"
+    basedir="$2"
+    shift 2
+    libdir="${basedir}/lib/r-ext" 
+
+    R_LIBS="${libdir}"
+    R_LIBS="${R_LIBS}" R_LIBS_USER= R_LIBS_SITE= Rscript --vanilla "${basedir}/$scriptname" "$@"
+}
+
