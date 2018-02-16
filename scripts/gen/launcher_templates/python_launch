@@ -1,0 +1,19 @@
+# Usage: python_launch SCRIPT BASEDIR ARGS...
+#
+# Launch a python script after setting the appropriate
+# library paths. The libraries are expected in 
+# BASEDIR/lib/python, SCRIPT is a path relative to BASEDIR
+# All arguments except SCRIPT and BASEDIR are forwarded to
+# the launched script.
+function python_launch(){
+    scriptname="$1"
+    basedir="$2"
+    shift 2
+
+    libdir="${basedir}/lib/python:${basedir}/lib/python-ext" 
+
+
+    PYTHONPATH="${libdir}"
+    PYTHONPATH="${PYTHONPATH}" python3 "${basedir}/${scriptname}" "$@"
+}
+
