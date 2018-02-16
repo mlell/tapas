@@ -9,8 +9,9 @@ thisFolder="$(dirname "$(readlink -f "$0")")"
 
 libFolder="$(readlink -f "$thisFolder/../lib")"
 
+# pandas>=0.19.0
 python_deps=(pandas docopt numpy scipy)
-r_deps=(stringr magrittr ggplot2 docopt dplyr gridExtra)
+r_deps=(stringr magrittr ggplot2 docopt gridExtra)
 
 # Generate a temporary output file to filter for installation instructions
 tmpf=$(mktemp)
