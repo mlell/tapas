@@ -1,0 +1,57 @@
+#!/bin/bash
+set -ue
+
+function help(){
+    cat <<EOF
+Usage: setup_dependencies [--help]
+
+Install all R and python packages which are needed to run TAPAS.
+
+Per default the packages are installed inside the tapas/lib directory.
+Thereby the global or user-level configuration is not altered. 
+
+EOF
+}
+
+while [[ $# -gt 0 ]] ; do
+    a=${1-}
+    case ${1-} in
+        --help)
+        help >&2
+        exit 0 ;;
+        --)
+        shift
+        break ;;
+        *)
+        cat "Unknown parameter ${1}" >&2
+        exit 127
+        ;;
+    esac
+done
+
+# --- End Argument parsing --------------------------------------------------
+
+thisdir="$(dirname "$(readlink -f "$0")")"
+rlib="../lib/r-ext"
+rsrc="../lib/r-src"
+pylib="../lib/python-ext"
+
+cd "$thisdir"
+
+echo "Download R dependencies..."
+
+"${thisdir}"/dl_r_pkgs.R
+
+echo "Install R dependencies..."
+cat r_deps.txt |\
+while read pkg ver; do 
+    if [ -d "$rlib/$pkg" ]; then 
+        echo "Skip $pkg"
+        continue
+    fi
+    R_LIBS="$rlib" R CMD INSTALL -l "$rlib" "$rsrc/${pkg}_${ver}.tar.gz"
+done
+
+echo "Install python dependencies..."
+pip install -r py_requirements.txt --target="${pylib}"
+
