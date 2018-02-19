@@ -3,6 +3,7 @@ import sys
 import csv
 import argparse
 import shlex
+import re
 
 description="""Usage: tablecalls.py [options] TAB SCRIPT
 
@@ -71,6 +72,11 @@ def parseArguments():
         "Text table with variable values to translate into calls")
     p.add_argument('SCRIPT', help=
         "Program or script which is to be executed")
+    p.add_argument('--const', type=str, nargs = 2, action = 'append', 
+        metavar=['NAME' 'VALUE'], default = [], help=
+        "In addition to the variables in TAB, set a variable called NAME "+\
+        "with the value VALUE. This is handy to forward constant values, "+\
+        "like file paths from the main analysis script to SCRIPT")
     #p.add_argument('--omit', default="<>", metavar="<>",
     #            help=
     #    "Character sequence in TAB which indicates a certain\n" +
@@ -117,7 +123,36 @@ def main(argv):
         dr = csv.DictReader(fd, delimiter='\t')
         lines = [line for line in dr]
 
+    # Make dictionary of constants
+    consts = {name:val for name,val in args.const}
+
+    # Attention: these names are unquoted (use shlex.quote before 
+    # using in shell calls)
     variableNames = lines[0].keys() if lines else []
+    constantNames = consts.keys()
+    allNames = list(variableNames) + list(constantNames)
+    dupNames = set(e for e in allNames if allNames.count(e) > 1)
+    if(len(dupNames) > 0):
+        raise ValueError("Duplicate variable names: "+", ".join(dupNames))
+
+    # Check if any constant names contain illegal characters
+    illegalConsts = \
+            [e for e,n in enumerate(constantNames, start = 1)
+             if not re.match("^[a-zA-Z_]+[a-zA-Z0-9_]*$", n)]
+    # Check if any variable names contain illegal characters
+    illegalVariables = \
+            [e for e,n in enumerate(variableNames, start = 1)
+             if not re.match("^[a-zA-Z_]+[a-zA-Z0-9_]*$", n)]
+    if illegalVariables or illegalConsts: 
+        l = len(illegalVariables) if illegalVariables else len(illegalConsts)
+        raise ValueError(("{}{} {}: Illegal name: Names must "+ \
+            "be alphanumerical or underscores and must not start with "+\
+            "a number.").format(
+                "Variable" if illegalVariables else "Constant",
+                "s" if l > 1 else "",
+                 ", ".join(str(x) for x in (
+                          illegalVariables if illegalVariables 
+                          else illegalConsts))))
 
     surroundingCode = VariableChecks(variableNames) \
                       if print_variable_checks \
@@ -129,6 +164,7 @@ def main(argv):
         # A subshell is used to prevent the scripts from influencing
         # each other
         for row in lines:
+            row.update(consts)
             print(program(args.SCRIPT, **row))
 
 
