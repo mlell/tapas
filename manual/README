@@ -1,0 +1,16 @@
+This folder contains the manual sources and the examples. 
+
+The manual is written in a literate programming style with executable examples
+weaved into the text. It can be compiled from the markdown-formatted chapters
+in the `manual/src/` folder by using the script 
+
+    gen-html.sh
+
+In the process, the program calls written in the manual are executed and the
+output is weaved into the manual text. Samtools and the mapper BWA is needed
+for the examples and Pandoc is needed to convert the resulting Markdown
+document into HTML.
+
+The result is written as HTML pages to the `TAPAS/docs` folder, where `TAPAS`
+is the installation folder of TAPAS.
+
