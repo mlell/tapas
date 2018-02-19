@@ -2,12 +2,12 @@ body{
     font-family: Helvetica, sans-serif;
     font-size: 16px;
     padding-top:20px;
-    background:#ddd;
+    background:#eee;
 }
 
 /* -------------- Main boxes ------------------- */
 div.contentbox{
-    background:#efefef;
+    background:#fcfcfc;
     max-width:50em;
     margin:auto;
     -webkit-box-shadow: 0px 0px 5px #aaa;
@@ -37,14 +37,14 @@ div.toc ul{
 }
 div.toc li{
     list-style-type: none;
-    background: #eee;
     padding: 0px 8px;
 }
 div.toc li:hover{
     background: #ddd;
 }
 div.toc li.tocthis{
-    background: #edd;
+    background: #dde;
+    border: 1px solid #bbc;
 }
 div.toc a{
     padding: 2px 0px;
@@ -65,7 +65,7 @@ h1 {
     text-align: center;
 }
 
-p{
+p,ul{
     text-align:justify;
     line-height:150%;
 }
@@ -79,18 +79,26 @@ pre{
     margin:0.2em 0;
 }
 
+a{
+    text-decoration: none;
+    color: #22d;
+}
+a:hover{
+    text-decoration: underline;
+}
+
 pre.output, body>pre{
-    border: 1px solid #EEE;
+    border: 1px solid #eee;
 }
 
 pre.sourceCode{
     max-height:700px;
-    background:#F9F9E4;
+    background:#fbfbe4;
     resize: vertical;
 }
 
 div.sourceCode{
-    border: 1px solid #E9E9D4;
+    border: 1px solid #fbfbe4;
 }
 
 .math{
@@ -103,7 +111,7 @@ pre code{
 }
  
 p code{
-    background: #f9f9d4;
+    background: #fbfbd4;
     border: 1px solid #f0f0d0;
     padding: 0px 2px;
 }
