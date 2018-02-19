@@ -2,7 +2,8 @@
 
 ## This script performs a mapping using BWA.
 ## It requires the variables k, n, runidx and fastq be set 
-## prior to its execution.
+## prior to its execution. That step can be performed by 
+## the tool table2calls.
 
 # Fail if any needed variable is not set
 set -ue

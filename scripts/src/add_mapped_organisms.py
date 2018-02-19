@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
- 
+
 """
+Look up information about a read (the name is given in the "qname" column)
+in tables given via the --endogenous and --exogenous options. The read is
+identified via its name. The value of the "rname" (a FASTA record name)
+column is looked up in the endogenous reference genomes to determine to
+which genome the read had been mapped (one genome might consist of multiple
+FASTA records)
+
+All information is appended to the input line.
 
 From tabular information about mapped reads, infer the organisms the
 reads should be mapped to, and are actually mapped, from the FASTA
-record the reads were mapped to. 
+record the reads were mapped to.
 """
 
 import sys
@@ -18,34 +26,53 @@ import pandas as pd
 help_params = {
 
 'readtab':
-"""A text table containing at least the following columns. 
-Column names can be changed by additional parameters to 
+"""A text table containing at least the following columns.
+Column names can be changed by additional parameters to
 this command:
 
-    ─── readtab ──────────
-    qname       rname
+    ─── readtab ────────────────
+    qname       rname     ... (additional columns allowed)
     read_0      record1
     read_1      record2
     read_2      *
     read_3      record1
     ...         ...
-    ─────────────────────
+    ────────────────────────────
+
 """,
 
 "--endogenous":
-"""A set of endogenous reads. 
+"""A set of endogenous reads. Specify all the reference
+genomes used by the mapper here. This option can be used
+multiple times if multiple reference genomes were used
+by the mapper.
 
-ORG is a string holding the
-organism"s name, FAI is a .fai file (see samtools) of the
-reference genome and RNAME is a file containing a 
-newline-separated list of read names which belong to
-this organism.""",
+ORG   is an arbitrary string holding the organism's name.
+FAI   is a .fai file (see samtools) of the reference genome.
+RNAME is a file containing a newline-separated list of
+      read names which belong to this organism.
+
+This read information is used to find the true source
+organism and genome position of reads and to look up
+the organism the read has actually been mapped to (via
+the SAM rname field)""",
 
 "--exogenous":
-"""A set of exogenous reads. These reads will carry "*" as 
-true organism name. RLIST is a file containing a 
-newline-separated list of read names which are considered 
-exogenous reads.""",
+"""A set of exogenous (contaminant) reads. It is
+expected that the short read mapper didn't try to map
+reads to the genome where these reads stem from. This
+option can be used multiple times if reads from
+multiple genomes were used as sources of exogenous
+reads.
+
+ORG   is an arbitrary string holding the organism's name.
+FAI   is a .fai file (see samtools) of the reference genome.
+RNAME is a file containing a newline-separated list of
+      read names which belong to this organism.
+
+This read information is only used to find the true
+source organism and genome position of reads.
+""",
 
 "--read-col"   : "The name of the read name column of READTAB (default: qname)",
 
@@ -54,13 +81,13 @@ exogenous reads.""",
 }
 
 # Character representing a non-mapped read <=> "no organism"
-NO_ORGANISM = "*" 
+NO_ORGANISM = "*"
 
 def main(argv):
     args = parseArguments(argv)
 
     # Run self-test if requested
-    if args.doctest: 
+    if args.doctest:
         import doctest
         doctest.testmod(verbose=True)
         sys.exit(0)
@@ -99,7 +126,7 @@ def main(argv):
 
     # Make sure the record names of the endogenous organisms are
     # unique
-    if not allUnique(endoRecordToOrganismTab['record']): 
+    if not allUnique(endoRecordToOrganismTab['record']):
         raise Exception("The record names of all endogenous "+
         "organisms must be all unique among each other!")
 
@@ -135,7 +162,7 @@ def main(argv):
     mapped_reads.columns = c
     mapped_reads = mapped_reads.merge(endoRecordToOrganismTab, \
             how='left', left_on=['mapped_rname'], right_index=True)
-    mapped_reads = mapped_reads.merge(readnameToTrueOrganismTab, 
+    mapped_reads = mapped_reads.merge(readnameToTrueOrganismTab,
             how='left', left_on=['qname'], right_index=True)
 
 
@@ -180,7 +207,7 @@ def allUnique(x):
 
 
 def parseArguments(argv):
-    p = argparse.ArgumentParser(description=__doc__, 
+    p = argparse.ArgumentParser(description=__doc__,
             formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('readtab', help=help_params['readtab'])
     p.add_argument('--endogenous','--endo', nargs=3,
@@ -206,7 +233,7 @@ def uniquefy(name, existingNames):
         i += 1
     return name+str(i)
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     try:
         main(sys.argv[1:])
     except Exception as e:
