@@ -82,6 +82,8 @@ where you replace `TAPAS` by the folder where you installed TAPAS into. The
 tool downloads and installs the needed R and Python packages. The packages 
 are installed inside the TAPAS folder and do no affect the rest of the system.
 
+### Alternative method: Use global R and Python packages
+
 If you want to run TAPAS using R and Python packages which are installed 
 globally on your system, instead of the `install_dependencies` script, run
 
