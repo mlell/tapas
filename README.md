@@ -58,17 +58,17 @@ This software package needs the following tools to be installed:
     Cygwin to get these programs. However, this software package is not yet
     tested on Windows.
 
-    These are the commands needed to install these dependencies on your 
-    system. Select those which match your GNU/Linux distribution:
+These are the commands needed to install these dependencies on your 
+system. Select those which match your GNU/Linux distribution:
 
-    **Ubuntu** and derivatives, like **Scientific Linux** and **Linux Mint**:
+**Ubuntu** and derivatives, like **Scientific Linux** and **Linux Mint**:
 
-        sudo apt-get install r python3 python3-pip
+    sudo apt-get install r python3 python3-pip
 
-    **CentOS** or **Red Hat Linux**:
+**CentOS** or **Red Hat Linux**:
 
-        sudo yum --enablerepo=extras install epel-release
-        sudo yum install r python3 python3-pip
+    sudo yum --enablerepo=extras install epel-release
+    sudo yum install r python3 python3-pip
 
 
 To install TAPAS, first download it from the 
