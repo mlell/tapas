@@ -1,0 +1,192 @@
+---
+title: 
+  - Writing a mapper script
+---
+
+The mapping script is an adapter
+--------------------------------
+
+TAPAS can be used with any short read mapping program. However, every mapper 
+has its own program name or may even consist of multiple programs. It has
+its own command line arguments and possibly unique preparation or further
+processing steps until its result is in the SAM file format. 
+
+Therefore, in order that TAPAS can test parameter values for this mapper,
+an adapter must be created which is provided with the parameter values to 
+be tested as input and which produces a SAM file of the mapping which
+was performed using that parameter values. The resulting SAM file will then
+be analysed in the following chapters. 
+
+Variables
+---------
+
+The mapping script will contain the commands needed for the mapping as they 
+would be entered in the command line when performing a standard mapping outside
+of TAPAS. However, the difference is that in TAPAS, the parameter values are 
+replaced by **variables**. For example, a variable named `k` looks like this:
+`${k}`.
+
+The names of the variables which are used in the mapping script are determined
+by the first line of the table, which was provided to the tool `table2calls`
+in the previous chapter: `data/4/partab`. Additionally, all variable names
+which are provided to `table2calls` via the `--const` option. 
+
+Therefore, in the case of this example, the first line of `data/4/partab`
+contains the names
+
+``` 
+runidx k n
+```
+
+and the call to `table2calls` is
+
+```
+scripts/table2calls --const genome "input/genome/volpertinger" \
+                    --const reads  "data/3/all.fastq" \
+                    --const outdir "data/4" \
+                ...
+```
+
+Therefore, we can use the variables `${runidx}`, `${k}`, `${n}`, `${genome}`,
+`${reads}` and `${outdir}` in the mapping script. 
+
+Writing the mapping script
+--------------------------
+
+Each mapping script should start with these two lines. There may be no empty
+lines or comments before this:
+
+```{.bash}
+#!/bin/bash
+set -ueC
+```
+The first line identifies the file as a script which can be executed like a
+program, the second line makes sure that the script aborts with an error if
+there is a mistake like when an unknown variable name is used or when the
+mapper returns an error. The last letter, `C`, is a safety measure against
+accidential overwriting of files. In the case of mappers whose output file 
+is determined via the `>` operator, like in `bwa aln .... > out.sam`, it 
+protects against accidential overwriting of output files due to a programming
+error. If the command does not contain the `>` character, e.g. 
+`other_mapper --output out.sam`, this can provide no safety.
+
+Following this, there may be a line which saves all status and error messages
+which are produced during the mapping into a log file. This is optional but
+handy to check if a mapping run was completed correctly or if it produced any
+errors:
+
+```{.bash}
+exec 2>"${outdir}/${runidx}.log" >&2
+```
+
+This command belongs to the bash language. It redirects all the output which 
+is produced during the remainder of this script into the file `"${runidx}.log"`,
+inside the folder `${outdir}`. Note that this is the first use of variables in
+the script. The part `${runidx}` will be replaced by one of the values in the
+column `runidx` in the file `data/4/partab`. This column contains a steadily
+rising number in each line, therefore, the log of each mapping run will be put
+into its own file. The `${outdir}` part will be constant every time because 
+it will be set using `table2calls --const outdir "...SOMEFOLDER..."`, like
+it was shown in the previous chapter.
+
+This is an important idea: **Each mapping run should have its own set of 
+output files**. The reason is that several mapping runs can be executed 
+in parallel by TAPAS, to save time. If all mapping runs would write into
+the same file in parallel, the file would only contain a messy mixture of all
+outputs afterwards. That's bad in the case of logfiles, but still worse in the
+case of mapping results!
+
+Therefore, it is good practice to always include a counting column to the
+table which holds the parameter combinations for each run (`data/4/partab`) 
+by using `add_index_column`, like it was done in the previous chapter.
+
+Finally, it can be seen that the filename (actually, its placeholder using
+the `runidx` variable) is enclosed in double quotes. This is another 
+recommended practice which is important when writing file names and file
+paths, because those can contain spaces: **Wrap variables which might
+contain spaces into double quotes!**
+
+The rest of the script is only the needed program calls to perform the mapping. 
+Below, an example for the mapper BWA is shown:
+
+```{.bash}
+bwa aln -n ${n} -k ${k} \
+    "${genome}" \
+    "${reads}" \
+    > "${outdir}/${runidx}.sai"
+
+bwa samse \
+      "${genome}" \
+      "${outdir}/${runidx}.sai" \
+      "${reads}" \
+      > "${outdir}/${runidx}.sam"
+```
+Note again:
+
+  * The values which follow the BWA parameters `-n` and `-k` are replaced by
+    **variables**
+  * Locations where file paths might pop up or other variables which might
+    turn out to yield strings with spaces should be put in **double quotes**
+  * Each run of the script should produce a **unique set of output files**.
+    This can be ensured by using a counter variable like `runidx` in this 
+    case. 
+
+Parameter on/off switches
+-------------------------
+
+So far we've only considered parametes which follow the form `-p VALUE`, 
+`--parameter VALUE` or similar. However, there are also parameters which
+are on/off switches, hence, they are either appended to the command line
+or they are not. There is no explicit value. 
+
+These parameters can be tested in TAPAS by writing the parameter itself
+and another, arbitrary string into the corresponding `*.par` file. 
+
+This is an example with the BWA `-L` switch, which enables log scaling
+of gap penalties instead of linearly rising gap penalty. 
+
+`bwa aln GENOME READS > OUTPUT.sam` is the standard call where this setting
+is disabled. `bwa aln -L GENOME READS > OUTPUT.sam` is the call where this
+setting is enabled. 
+
+Write the following file which serves as an input to `cross_tab` (see
+previous chapter). In this example, it would go into the `input/mapping` 
+folder and would be named `L.par`, though this is an arbitrary choice:
+
+```
+L
+-L
+xx
+```
+
+The first line determines the variable name in the mapping script, the
+second line shows the parameter which is used to switch on the setting
+and the third line shows an arbitrary string which indicates the setting
+is switched off.
+
+In the mapping script, before the variable `${L}` is used for the first time,
+include the following line. Take care that you insert whitespace exactly as
+shown below. The strings `L` and `xx` must correspond to the first and third
+line of the above-mentioned `L.par` file. 
+
+```{.bash}
+if [ ${L} = xx ]; then unset L; fi
+```
+
+Then, use the parameter in the mapping call **without quotes** (`"..."`) and
+**append a minus (-) sign**. For example, to amend the code given in the 
+section "Writing the mapping script" above:
+
+```{.bash}
+bwa aln -n ${n} -k ${k} ${L-} \
+    "${genome}" \
+    "${reads}" \
+    > "${outdir}/${runidx}.sai"
+
+  (...)
+
+```
+
+
+
+vim:tw=80
