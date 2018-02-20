@@ -38,8 +38,17 @@ for f in tmp/*.txt; do
     mv "${md}.tmp" "$md"
 done
 
-
-for md in out/md/*.md; do
+mds=(out/md/index.md out/md/[0-9A]*.md)
+for i in $(seq 0 $((${#mds[@]}-1))); do
+    md=${mds[$i]}
+    nextmd=${mds[$((i+1))]-}
+    if [ $((i-1)) -lt 0 ]; then 
+        prevmd=
+    else
+        prevmd=${mds[$((i-1))]}
+    fi
+    prevmd=$(basename "$prevmd")
+    nextmd=$(basename "$nextmd")
     fn="$(basename "$md")"
     html="out/html/${fn%.md}.html"
     echo "Pandoc $md -> $html ..."
@@ -47,6 +56,8 @@ for md in out/md/*.md; do
            --template="pandoc.html.template" \
            --mathjax \
            --highlight-style=pygments \
+           ${nextmd:+-M next=${nextmd%.md}.html} \
+           ${prevmd:+-M prev=${prevmd%.md}.html} \
            -f markdown+simple_tables \
            --css manual.css -i "$md" -o "$html"
            #-V toctitle:"Table of contents" \
@@ -98,7 +109,7 @@ rm -rf   ../docs
 mkdir -p ../docs
 mv out/html/* ../docs
 cp fig-static/* fig
-mv fig    ../docs
+cp -r fig    ../docs
 cp manual.css ../docs
 
         

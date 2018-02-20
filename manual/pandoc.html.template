@@ -75,6 +75,20 @@ $for(include-after)$
 $include-after$
 $endfor$
 </div>
-<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
+<div class="contentbox" id="navlinksbox">
+<div>
+$if(prev)$
+<a href="$prev$">&lt;&nbsp;Prev</a>
+$else$
+<span> &lt;&nbsp;Prev </span>
+$endif$
+&nbsp;|&nbsp;<a href="#top">Go to top</a>&nbsp;|&nbsp;
+$if(next)$
+<a href="$next$">Next&nbsp;&gt;</a>
+$else$
+<span>Next&nbsp;&gt;</span>
+$endif$
+</div>
+</div>
 </body>
 </html>
