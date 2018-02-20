@@ -104,10 +104,3 @@ detailed information about the script's functionality and how it can be tailored
 to your specific needs.
 
 
-The manual is written in a literate programming style with executable examples
-weaved into the text. It can be compiled from the markdown-formatted chapters
-in the `manual/src/` folder by using the script `gen-html.sh`. In the process,
-the program calls written in the manual are executed and the output is weaved
-into the manual text. Samtools and the mapper BWA is needed for the examples
-and Pandoc is needed to convert the resulting Markdown document into HTML.
-

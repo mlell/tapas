@@ -6,71 +6,6 @@
   <meta name="generator" content="pandoc" />
   <title>Dependencies of the scripts</title>
   <style type="text/css">code{white-space: pre;}</style>
-  <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
   <link rel="stylesheet" href="manual.css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
@@ -102,21 +37,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <!-- CONTENT -------------------------------------->
 <p>The scripts consisting this software depend on</p>
 <ul class="incremental">
-<li>A Python 3 installation</li>
+<li>A Python 3 installation and Pip, the Python package manager</li>
 <li>R</li>
 </ul>
-<p>Furthermore, the scripts depend on several packages for R and Python.</p>
-<p>To check whether all dependencies are met, execute the following command. It is included in the <code>scripts/</code> folder.</p>
-<pre><code>scripts/setup_check_dependencies</code></pre>
-<p>Check the output of this script to find package names which are not installed or can’t be loaded because of eventual errors.</p>
-<p>Then install these packages manually by using</p>
-<h2 id="install-packages-for-r">Install packages for R</h2>
-<p>Install missing packages in R by executing the following command inside the R command prompt (type <code>R</code> into your shell to invoke it)</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;PACKAGENAME&quot;</span>)</a></code></pre></div>
-<h2 id="install-packages-for-python">Install packages for Python</h2>
-<p>Invoke the Python package manager <code>pip3</code> to install packages for Python:</p>
-<pre><code>pip3 install PACKAGENAME...</code></pre>
-<p>You may specify multiple package names by writing them one after another, separated by whitespace.</p>
+<p>Download TAPAS from <a href="https://github.com/mlell/tapas/releases">this link</a>. Then extract the downloaded .tar.gz file on your system.</p>
+<p>Then open the README file, which you can find in the TAPAS folder, or <a href="https://github.com/mlell/tapas">on the GitHub page</a>, for installation instructions.</p>
 </div>
 <div class="contentbox" id="navlinksbox">
 <div>
