@@ -6,18 +6,18 @@
 ## the tool table2calls.
 
 # Fail if any needed variable is not set
-set -ue
+set -ueC
+# Redirect all output to a log file
+exec 2>"${outdir}/${runidx}.log" >&2
 
-bwa aln -n ${n} -k ${k}      \
-    input/genome/volpertinger \
-    data/3/all.fastq         \
-    > data/4/${runidx}.sai   \
-    2> data/4/${runidx}.log   &&
+bwa aln -n ${n} -k ${k} \
+    "${genome}" \
+    "${reads}" \
+    > "${outdir}/${runidx}.sai"
 
-bwa samse                      \
-      input/genome/volpertinger \
-      data/4/${runidx}.sai     \
-      data/3/all.fastq         \
-      > data/4/${runidx}.sam   \
-      2>> data/4/${runidx}.log
+bwa samse \
+      "${genome}" \
+      "${outdir}/${runidx}.sai" \
+      "${reads}" \
+      > "${outdir}/${runidx}.sam"
 

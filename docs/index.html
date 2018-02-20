@@ -20,12 +20,12 @@
 <li><a href="02_read-generation.html">Generation of simulated read sets</a>
 <li><a href="03_read-mutation.html">Mutation of reads</a>
 <li><a href="04_mapping.html">Generate mapper calls</a>
-<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
-<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
+<li><a href="06_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
 <li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
 <li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
 <li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
-<li><a href="B99_glossary.html">Glossary</a>
 </ul>
 </div>
 <div class="content contentbox">
@@ -47,9 +47,9 @@
 <li><strong>Prepare the reference genome.</strong> See section <a href="01_genome-preparation.html">Genome Preparation</a></li>
 <li><strong>Generate artificial reads from a sample genome.</strong> See <a href="02_read-generation.html">Read generation</a></li>
 <li><strong>Mutations</strong> must be introduced into the reads to mimic chemical damage of <em>ancient DNA</em> and evolutionary distance of the reads to the reference. Read the section about <a href="03_read-mutation.html">Read mutation</a> for more information</li>
-<li>The mutated artificial reads are <strong>mapped</strong> back to the reference from which they originated. This simulates the process of mapping <em>ancient DNA</em> reads to a recent reference genome. TAPAS allows for comparison of different mapping parameters in terms of mapping success. Section <a href="04_mapping.html">Mapping</a> provides details on how the mapping commands and parameters are provided to TAPAS.</li>
-<li>The read mapping yields one SAM file for every mapping parameter set tested. The section <a href="05_sam-parsing.html">SAM parsing</a> provides information on how the mapping positions of the artificial reads can be compared to their known, true, positions in the reference to determine measures of mapping accuracy like <strong>sensitivity and specificity</strong>.</li>
-<li>Finally, the obtained accuracy values can be analysed to determine the <strong>importance of a certain mapping parameter choice</strong> for the mapping success. The section <a href="06_parameter_influence.html">Parameter influence</a> provides details.</li>
+<li>The mutated artificial reads are <strong>mapped</strong> back to the reference from which they originated. This simulates the process of mapping <em>ancient DNA</em> reads to a recent reference genome. TAPAS allows for comparison of different mapping parameters in terms of mapping success. Section <a href="04_mapping.html">Mapping</a> and <a href="05_writing-a-mapper-script.html">How to write a mapping script</a> provide details on how the mapping commands and parameters are provided to TAPAS.</li>
+<li>The read mapping yields one SAM file for every mapping parameter set tested. The section <a href="06_sam-parsing.html">SAM parsing</a> provides information on how the mapping positions of the artificial reads can be compared to their known, true, positions in the reference to determine measures of mapping accuracy like <strong>sensitivity and specificity</strong>.</li>
+<li>Finally, the obtained accuracy values can be analysed to determine the <strong>importance of a certain mapping parameter choice</strong> for the mapping success. The section <a href="07_parameter_influence.html">Parameter influence</a> provides details.</li>
 </ul>
 <p>Apart from that, the <strong>Appendix</strong> lists additional information:</p>
 <ul class="incremental">
@@ -59,6 +59,12 @@
 <li><a href="B99_glossary.html">Appendix B: Glossary</a></li>
 </ul>
 </div>
-<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
+<div class="contentbox" id="navlinksbox">
+<div>
+<span> &lt;&nbsp;Prev </span>
+&nbsp;|&nbsp;<a href="#top">Go to top</a>&nbsp;|&nbsp;
+<a href="00b_shell-prerequisites.html">Next&nbsp;&gt;</a>
+</div>
+</div>
 </body>
 </html>

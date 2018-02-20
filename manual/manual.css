@@ -21,8 +21,7 @@ div.content{
 }
 div.toc{
 }
-div.linktotop a{
-    display: block;
+#navlinksbox{
     text-align: center;
 }
 /* ---------- Table of contents ---------------- */

@@ -69,6 +69,17 @@ scripts/cross_tab --head 1 input/mapping/*.par > data/4/partab
 head data/4/partab | column -t
 ```
 
+*Hint*: Alternatively, instead of creating the parameter files `*.par`
+explicitly, the following command determines the parameter values and
+converts them to the same output as in the previous paragraph:
+
+```
+scripts/cross_tab --head 1 \
+   <(printf "%s\n" k 2 10) \
+   <(printf "%s\n" n 0 4 8) \
+   > data/4/partab
+```
+
 Mark the parameter combinations with a unique index
 ----------------------------------------------------
 
@@ -95,25 +106,26 @@ Read now the script `input/mapping/map-bwa.sh`.
 
 ## This script performs a mapping using BWA.
 ## It requires the variables k, n, runidx and fastq be set 
-## prior to its execution.
+## prior to its execution. That step can be performed by 
+## the tool table2calls.
 
 # Fail if any needed variable is not set
-set -ue
+set -ueC
+# Redirect all output to a log file
+exec 2>"${outdir}/${runidx}.log" >&2
 
-bwa aln -n ${n} -k ${k}      \
-    input/genome/volpertinger \
-    data/3/all.fastq         \
-    > data/4/${runidx}.sai   \
-    2> data/4/${runidx}.log   &&
+bwa aln -n ${n} -k ${k} \
+    "${genome}" \
+    "${reads}" \
+    > "${outdir}/${runidx}.sai"
 
-bwa samse                      \
-      input/genome/volpertinger \
-      data/4/${runidx}.sai     \
-      data/3/all.fastq         \
-      > data/4/${runidx}.sam   \
-      2>> data/4/${runidx}.log
-
+bwa samse \
+      "${genome}" \
+      "${output}/${runidx}.sai" \
+      "${reads}" \
+      > "${outdir}/${runidx}.sam"
 ```
+
 
 As you can see, the script uses several variables, denoted like this:
 `${variable}`. These are not defined inside the script, but will be
@@ -138,7 +150,10 @@ can be executed on the shell.
 
 ```{.sh}
 # Convert the table into calls that can be executed in the next section
-scripts/table2calls  data/4/partab \
+scripts/table2calls --const genome "input/genome/volpertinger" \
+                    --const reads  "data/3/all.fastq" \
+                    --const outdir "data/4" \
+                    data/4/partab \
                     input/mapping/map-bwa.sh \
                   > data/4/calls
 cat data/4/calls

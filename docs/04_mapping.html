@@ -85,12 +85,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="02_read-generation.html">Generation of simulated read sets</a>
 <li><a href="03_read-mutation.html">Mutation of reads</a>
 <li class="tocthis"><a href="04_mapping.html">Generate mapper calls</a>
-<li><a href="05_sam-parsing.html">Parsing of SAM files</a>
-<li><a href="06_parameter_influence.html">Comparing multiple mapper runs</a>
+<li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
+<li><a href="06_sam-parsing.html">Parsing of SAM files</a>
+<li><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
 <li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
 <li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
 <li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
-<li><a href="B99_glossary.html">Glossary</a>
 </ul>
 </div>
 <div class="content contentbox">
@@ -134,12 +134,17 @@ input/mapping/n.par</code></pre>
 10  0
 10  4
 10  8</code></pre>
+<p><em>Hint</em>: Alternatively, instead of creating the parameter files <code>*.par</code> explicitly, the following command determines the parameter values and converts them to the same output as in the previous paragraph:</p>
+<pre><code>scripts/cross_tab --head 1 \
+   &lt;(printf &quot;%s\n&quot; k 2 10) \
+   &lt;(printf &quot;%s\n&quot; n 0 4 8) \
+   &gt; data/4/partab</code></pre>
 <h2 id="mark-the-parameter-combinations-with-a-unique-index">Mark the parameter combinations with a unique index</h2>
 <p>As stated above, this is not nessecary, but facilitates the naming of the output text files.</p>
 <p>Again, <code>scripts/index_column</code> can be used for this purpose. This script prepends a counting number to each input line. It can be used to generate index columns for text tables.</p>
 <p>Add an index column called runidx:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="ex">scripts/index_column</span> --colname runidx --inplace data/4/partab</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="fu">head</span> data/4/partab <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="ex">scripts/index_column</span> --colname runidx --inplace data/4/partab</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="fu">head</span> data/4/partab <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
 <pre class="output"><code>runidx  k   n
 0       2   0
 1       2   4
@@ -149,62 +154,66 @@ input/mapping/n.par</code></pre>
 5       10  8</code></pre>
 <h2 id="the-mapping-script">The mapping script</h2>
 <p>Read now the script <code>input/mapping/map-bwa.sh</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">#!/bin/bash</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="co">## This script performs a mapping using BWA.</span></a>
-<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="co">## It requires the variables k, n, runidx and fastq be set </span></a>
-<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="co">## prior to its execution.</span></a>
-<a class="sourceLine" id="cb9-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="co"># Fail if any needed variable is not set</span></a>
-<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="kw">set</span> <span class="ex">-ue</span></a>
-<a class="sourceLine" id="cb9-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb9-10" data-line-number="10"><span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \</a>
-<a class="sourceLine" id="cb9-11" data-line-number="11">    input/genome/volpertinger \</a>
-<a class="sourceLine" id="cb9-12" data-line-number="12">    data/3/all.fastq         \</a>
-<a class="sourceLine" id="cb9-13" data-line-number="13">    <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \</a>
-<a class="sourceLine" id="cb9-14" data-line-number="14">    <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span></a>
-<a class="sourceLine" id="cb9-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb9-16" data-line-number="16"><span class="ex">bwa</span> samse                      \</a>
-<a class="sourceLine" id="cb9-17" data-line-number="17">      input/genome/volpertinger \</a>
-<a class="sourceLine" id="cb9-18" data-line-number="18">      data/4/<span class="va">${runidx}</span>.sai     \</a>
-<a class="sourceLine" id="cb9-19" data-line-number="19">      data/3/all.fastq         \</a>
-<a class="sourceLine" id="cb9-20" data-line-number="20">      <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \</a>
-<a class="sourceLine" id="cb9-21" data-line-number="21">      <span class="op">2&gt;&gt;</span> data/4/<span class="va">${runidx}</span>.log</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co">#!/bin/bash</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="co">## This script performs a mapping using BWA.</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="co">## It requires the variables k, n, runidx and fastq be set </span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5"><span class="co">## prior to its execution. That step can be performed by </span></a>
+<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="co">## the tool table2calls.</span></a>
+<a class="sourceLine" id="cb10-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="co"># Fail if any needed variable is not set</span></a>
+<a class="sourceLine" id="cb10-9" data-line-number="9"><span class="kw">set</span> <span class="ex">-ueC</span></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10"><span class="co"># Redirect all output to a log file</span></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11"><span class="bu">exec</span> <span class="op">2&gt;</span><span class="st">&quot;</span><span class="va">${outdir}</span><span class="st">/</span><span class="va">${runidx}</span><span class="st">.log&quot;</span> <span class="op">&gt;&amp;2</span></a>
+<a class="sourceLine" id="cb10-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb10-13" data-line-number="13"><span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span> \</a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">    <span class="st">&quot;</span><span class="va">${genome}</span><span class="st">&quot;</span> \</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15">    <span class="st">&quot;</span><span class="va">${reads}</span><span class="st">&quot;</span> \</a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">    <span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">${outdir}</span><span class="st">/</span><span class="va">${runidx}</span><span class="st">.sai&quot;</span></a>
+<a class="sourceLine" id="cb10-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb10-18" data-line-number="18"><span class="ex">bwa</span> samse \</a>
+<a class="sourceLine" id="cb10-19" data-line-number="19">      <span class="st">&quot;</span><span class="va">${genome}</span><span class="st">&quot;</span> \</a>
+<a class="sourceLine" id="cb10-20" data-line-number="20">      <span class="st">&quot;</span><span class="va">${output}</span><span class="st">/</span><span class="va">${runidx}</span><span class="st">.sai&quot;</span> \</a>
+<a class="sourceLine" id="cb10-21" data-line-number="21">      <span class="st">&quot;</span><span class="va">${reads}</span><span class="st">&quot;</span> \</a>
+<a class="sourceLine" id="cb10-22" data-line-number="22">      <span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">${outdir}</span><span class="st">/</span><span class="va">${runidx}</span><span class="st">.sam&quot;</span></a></code></pre></div>
 <p>As you can see, the script uses several variables, denoted like this: <code>${variable}</code>. These are not defined inside the script, but will be set from outside at the time this script will be run.</p>
 <p>The variable names are exactly equal to the column names of the file <code>data/4/partab</code> and therefore to the column names of all the files which lie in <code>input/mapping/*.par</code>. They are the means how the different parameter values will be fed to the mapper.</p>
 <p>You will be required to write a script like this for your mapper. All it must do is to call the mapper, to specify the output file names and to forward the parameters values on to the mapper using the <code>${variable}</code> syntax.</p>
 <h2 id="generate-mapper-calls">Generate mapper calls</h2>
 <p>The script <code>table2calls</code> converts the table with the parameter value combinations and the filename of the mapping script to calls which can be executed on the shell.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># Convert the table into calls that can be executed in the next section</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="ex">scripts/table2calls</span>  data/4/partab \</a>
-<a class="sourceLine" id="cb10-3" data-line-number="3">                    input/mapping/map-bwa.sh \</a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">                  <span class="op">&gt;</span> data/4/calls</a>
-<a class="sourceLine" id="cb10-5" data-line-number="5"><span class="fu">cat</span> data/4/calls</a></code></pre></div>
-<pre class="output"><code>runidx=0 k=2 n=0 input/mapping/map-bwa.sh
-runidx=1 k=2 n=4 input/mapping/map-bwa.sh
-runidx=2 k=2 n=8 input/mapping/map-bwa.sh
-runidx=3 k=10 n=0 input/mapping/map-bwa.sh
-runidx=4 k=10 n=4 input/mapping/map-bwa.sh
-runidx=5 k=10 n=8 input/mapping/map-bwa.sh</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># Convert the table into calls that can be executed in the next section</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="ex">scripts/table2calls</span> --const genome <span class="st">&quot;input/genome/volpertinger&quot;</span> \</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">                    --const reads  <span class="st">&quot;data/3/all.fastq&quot;</span> \</a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">                    --const outdir <span class="st">&quot;data/4&quot;</span> \</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">                    data/4/partab \</a>
+<a class="sourceLine" id="cb11-6" data-line-number="6">                    input/mapping/map-bwa.sh \</a>
+<a class="sourceLine" id="cb11-7" data-line-number="7">                  <span class="op">&gt;</span> data/4/calls</a>
+<a class="sourceLine" id="cb11-8" data-line-number="8"><span class="fu">cat</span> data/4/calls</a></code></pre></div>
+<pre class="output"><code>runidx=0 k=2 n=0 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh
+runidx=1 k=2 n=4 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh
+runidx=2 k=2 n=8 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh
+runidx=3 k=10 n=0 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh
+runidx=4 k=10 n=4 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh
+runidx=5 k=10 n=8 genome=input/genome/volpertinger reads=data/3/all.fastq outdir=data/4 input/mapping/map-bwa.sh</code></pre>
 <h1 id="executing-multiple-mapping-runs-in-parallel">Executing multiple mapping runs in parallel</h1>
 <p>For this task, many programs can be used, from simple shell background spawning using &amp; (in bash) to job managers orchestrating a big network of worker machines. In this package, a simple program is implemented which executes a user-definable number of jobs in parallel and waits with spawning new ones until another of its already started jobs finishes.</p>
 <p>Note that some mappers can use more than one processor core themselves. Therefore if you spawn multiple mapper processes where each mapper process utilizes multiple cores, the total number of utilized cores is the number of cores used per mapper multiplied with the number of mapper processes launched in parallel.</p>
 <p>Invoke <code>scripts/mcall --help</code> to get more information about this tool.</p>
 <p>Example: Run the previously generated mapper calls.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb12-1" data-line-number="1">    <span class="co"># Execute calls, at 2 cores</span></a>
-<a class="sourceLine" id="cb12-2" data-line-number="2">    <span class="ex">scripts/mcall</span> -c data/4/calls -t 2 \</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">                  --status</a>
-<a class="sourceLine" id="cb12-4" data-line-number="4">    <span class="co"># Standard error was piped to log files,</span></a>
-<a class="sourceLine" id="cb12-5" data-line-number="5">    <span class="co"># Standard output was piped to sam files, as specified in the</span></a>
-<a class="sourceLine" id="cb12-6" data-line-number="6">    <span class="co"># `tmpl` file.</span></a>
-<a class="sourceLine" id="cb12-7" data-line-number="7">    <span class="fu">head</span> data/4/0.log</a>
-<a class="sourceLine" id="cb12-8" data-line-number="8">    <span class="fu">head</span> -n15 data/4/0.sam</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb13-1" data-line-number="1">    <span class="co"># Execute calls, at 2 cores</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">    <span class="ex">scripts/mcall</span> -c data/4/calls -t 2 \</a>
+<a class="sourceLine" id="cb13-3" data-line-number="3">                  --status</a>
+<a class="sourceLine" id="cb13-4" data-line-number="4">    <span class="co"># Standard error was piped to log files,</span></a>
+<a class="sourceLine" id="cb13-5" data-line-number="5">    <span class="co"># Standard output was piped to sam files, as specified in the</span></a>
+<a class="sourceLine" id="cb13-6" data-line-number="6">    <span class="co"># `tmpl` file.</span></a>
+<a class="sourceLine" id="cb13-7" data-line-number="7">    <span class="fu">head</span> data/4/0.log</a>
+<a class="sourceLine" id="cb13-8" data-line-number="8">    <span class="fu">head</span> -n15 data/4/0.sam</a></code></pre></div>
 <pre class="output"><code>[bwa_aln_core] calculate SA coordinate... 0.00 sec
 [bwa_aln_core] write to the disk... 0.00 sec
 [bwa_aln_core] 75 sequences have been processed.
 [main] Version: 0.7.15-r1140
 [main] CMD: bwa aln -n 0 -k 2 input/genome/volpertinger data/3/all.fastq
-[main] Real time: 0.116 sec; CPU: 0.000 sec
+[main] Real time: 0.069 sec; CPU: 0.000 sec
 [bwa_aln_core] convert to sequence coordinate... 0.00 sec
 [bwa_aln_core] refine gapped alignments... 0.00 sec
 [bwa_aln_core] print alignments... 0.00 sec
@@ -225,6 +234,12 @@ volpertinger_3  4   *   0   0   *   *   0   0   TCGGACTTTATCTTCCGCCGCTCAAC  FFFF
 volpertinger_4  4   *   0   0   *   *   0   0   TCATTAGGGTTCCTATCTAGA   FFFFFFFFFFFFFFFFFFFFF
 volpertinger_5  4   *   0   0   *   *   0   0   TGGGACCTCGATGTTGGATCAGGAT   FFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
 </div>
-<div class="contentbox linktotop"><a href="#top">Go to top</a></div> 
+<div class="contentbox" id="navlinksbox">
+<div>
+<a href="03_read-mutation.html">&lt;&nbsp;Prev</a>
+&nbsp;|&nbsp;<a href="#top">Go to top</a>&nbsp;|&nbsp;
+<a href="05_writing-a-mapper-script.html">Next&nbsp;&gt;</a>
+</div>
+</div>
 </body>
 </html>
