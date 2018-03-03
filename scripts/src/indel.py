@@ -83,7 +83,10 @@ def parse_arguments(argv):
    #     Else, such reads would not be assigned to their true position.
    #     """))
     p.add_argument('--no-header',default = False, action = 'store_true',
-        help="Do not expect a table header. Specify column indices instead.")
+        help="""Do not expect a table header. Nucleotide strings
+        are expected as first input column and CIGAR strings as
+        second column.  If no CIGAR strings are available, use
+        --cigar-new in addition to this option.""")
     p.add_argument('--sep', default='\t', help=dedent("""\
         Character separating the input columns if the input is 
         in tabular format (see --input-fmt). Common choices
@@ -134,8 +137,15 @@ def main(argv):
         i_nucl, i_cigar =  \
             (safe_index(header, x) for x in \
             (args.col_seq, args.col_cigar))#, cn_start, cn_stop))
-        if i_nucl is None or i_cigar is None:
-            raise ValueError('Non-existent column names specified')
+        if i_nucl is None:
+            raise ValueError(('The specified nucleotide column {} does '+
+                    'not exist. Use the --col-seq parameter to set an '+
+                    'existing column name.').format(args.col_seq))
+        if i_cigar is None and not args.cigar_new:
+            raise ValueError(('The specified CIGAR column {} does '+
+                    'not exist. Use the --col-cigar parameter to set an '+
+                    'existing column name or use the --cigar-new parameter '+
+                    'to create new CIGAR strings.').format(args.col_cigar))
         i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
     else:
         i_nucl, i_cigar = 0, 1
