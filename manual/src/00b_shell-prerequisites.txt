@@ -1,6 +1,5 @@
 ---
-title:
-  - Dependencies of the scripts
+title: Dependencies of the scripts
 ---
 
 The scripts consisting this software depend on 

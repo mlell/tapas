@@ -1,6 +1,5 @@
 ---
-title: 
-  - Writing a mapper script
+title: Writing a mapper script
 ---
 
 The mapping script is an adapter

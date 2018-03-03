@@ -1,6 +1,5 @@
 ---
-title:
-  - Appendix A2 -- Advanced read generation
+title: Appendix A2 -- Advanced read generation
 ---
 
 This more verbose but also more flexible way of generating artificial 

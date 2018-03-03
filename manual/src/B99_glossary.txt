@@ -1,6 +1,5 @@
 ---
-title:
-  - Glossary
+title: Glossary
 ---
 
 Some terms are explained here, which are used in the rest of the

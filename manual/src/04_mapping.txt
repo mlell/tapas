@@ -1,6 +1,5 @@
 ---
-title: 
-  - Generate mapper calls
+title: Generate mapper calls
 ---
 
 A call is an order to the computer to execute a program. It is a

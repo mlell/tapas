@@ -1,6 +1,5 @@
 ---
-title: 
-  - Genome Preparation
+title: Genome Preparation
 ---
 
 Record index table

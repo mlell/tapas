@@ -1,6 +1,5 @@
 ---
-title:
-  - Appendix A3 -- Overview of the scripts by category
+title: Appendix A3 -- Overview of the scripts by category
 ---
 
 Below you find a list of the scripts in this package, grouped by rough

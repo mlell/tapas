@@ -1,6 +1,5 @@
 ---
-title: 
-  - Generation of simulated read sets
+title: Generation of simulated read sets
 ---
 
 Two sets of reads are needed:

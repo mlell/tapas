@@ -1,6 +1,5 @@
 ---
-title:
-  - Package overview
+title: "TAPAS: Package overview"
 ---
 
 **TAPAS (Testing Aligner Performance for Ancient Samples)** is a software

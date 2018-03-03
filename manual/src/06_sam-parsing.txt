@@ -1,6 +1,5 @@
 ---
-title: 
-  - Parsing of SAM files
+title: Parsing of SAM files
 ---
 
 With the following tools, SAM files can be parsed to gain information of read

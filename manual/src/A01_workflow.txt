@@ -1,6 +1,5 @@
 ---
-title:
-  - Appendix A1 -- Tutorial script
+title: Appendix A1 -- Tutorial script
 ---
 
 This page lists all the commands which were used to perform the tasks in the

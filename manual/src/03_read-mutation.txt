@@ -1,6 +1,5 @@
 ---
-title: 
-  - Mutation of reads
+title: Mutation of reads
 ---
 
 Mutations must be introduced into the artificial reads in order to
