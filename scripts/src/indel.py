@@ -280,7 +280,6 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
             nucl = insertRandom(nucl, bpToNextIns, bpInsLen)
             cigar = toCIGAR(cigar)
             cigar.operationAt('I',bpInsLen, bpToNextIns)
-            print(f'insert {bpInsLen} at {bpToNextIns}')
             l = len(nucl) # String gets longer
             # Skip the insert when calculating the bp to the next operation
             bpToNextDel += bpInsLen
