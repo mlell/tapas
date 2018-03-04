@@ -76,12 +76,11 @@ def parse_arguments(argv):
    #     are separated by a tab character (\\t), unless another 
    #     character is specified by the --sep argument
    #     """))
-   # p.add_argument('--change-coords', nargs=2, 
+   # p.add_argument('--change-coords', nargs=2,
    #     help=dedent("""\
-   #     If an output CIGAR string begins or ends with an insertion
-   #     or a deletion, change the true read coordinates instead.
-   #     Else, such reads would not be assigned to their true position.
-   #     """))
+   #     If an output CIGAR string begins or ends with a deletion, change
+   #     the true read coordinates instead.  Else, such reads would not be
+   #     assigned to their true position."""))
     p.add_argument('--no-header',default = False, action = 'store_true',
         help="""Do not expect a table header. Nucleotide strings
         are expected as first input column and CIGAR strings as
@@ -146,25 +145,34 @@ def main(argv):
                     'not exist. Use the --col-cigar parameter to set an '+
                     'existing column name or use the --cigar-new parameter '+
                     'to create new CIGAR strings.').format(args.col_cigar))
-        i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
+        #i_rest = [i for i in range(0,len(header)) if i not in (i_nucl, i_cigar)]
     else:
         i_nucl, i_cigar = 0, 1
-        i_rest = []
+        #i_rest = []
 
     rows = (s.rstrip() for s in input)
     fields = (s.split(args.sep) for s in rows if s != '')
     if args.cigar_new:
-        step1 = splitter(fields, [(i_nucl,), i_rest])
-        step1a = (n for (n,),r in step1)
-        step2 = ((x,) for x in addCIGAR(step1a)) 
+        if not args.no_header:
+            if not args.col_cigar in header:
+                header = header + [args.col_cigar]
+            else:
+                raise ValueError((
+                    "The column name {} for the new CIGAR column "+
+                    "already exists in the input. Choose a new column name "+
+                    "using the --col-cigar option or omit the --cigar-new "+
+                    "option if CIGAR strings exist already in the input.")
+                    .format(args.col_cigar))
+        step1 = ( r + [addCIGAR(r[i_nucl])] for r in fields )
+        i_cigar = -1 # The last element of the row
     else:
-        step2 = splitter(fields, [(i_nucl,i_cigar)])
+        step1 = fields 
 
-    step3 = mutatorExpLen((s[0] for s in step2), args.in_prob
-            , args.in_exp, args.del_prob, args.del_exp)
+    step3 = mutatorExpLen(step1, args.in_prob
+            , args.in_exp, args.del_prob, args.del_exp, (i_nucl,i_cigar))
 
     if not args.no_header:
-        print(args.sep.join([args.col_seq, args.col_cigar]))
+        print(args.sep.join(header))
     for x in step3:
         print(args.sep.join(x))
 
@@ -178,9 +186,6 @@ def splitter(tuples, idxs):
     """
     for n in tuples:
         yield tuple(tuple(n[j] for j in idx) for idx in idxs) 
-
-
-        
 
 def inputNormalizer(strings, sep):
     """Make sure no invalid data format (too many columns)
@@ -203,10 +208,9 @@ def inputNormalizer(strings, sep):
         yield s
 
 def addCIGAR(nucl):
-    for n in nucl:
-        yield (n, str(len(n))+'M')
+    return str(len(nucl))+'M'
 
-def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
+def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len, idxs=(0,1) ):
     """`inputTuples` is a interable on string tuples `(nucl, cigar)`.
     `cigar` may also be of class CIGAR, this way unnessecary conversions
     to and from strings can be avoided if this method is applied multiple
@@ -218,6 +222,9 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
     per-character (per-base) probability and the operation length is
     exponentially distributed with rate `1/i_len` or `1/d_len`,
     respectively.
+
+    idxs: use these elements of the inputTuples as (nucl, cigar). The 
+    rest is copied to the output as-is.
     """
     ln2 = math.log(2)
     #rndPos = lambda p: math.floor(random.expovariate(p))+1 if p != 0 else inf
@@ -239,6 +246,7 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
     #    end)
     todo = [NEXT_STRING]
     # -- Current state:
+    inputRecord = None
     l = 0
     nucl, cigar = "", ""
     bpToNextIns  = rndPos(i_prob)-1 # only for the first time may this also be 0
@@ -262,7 +270,9 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
         if do == NEXT_STRING:
             bpToNextIns -= l
             bpToNextDel -= l
-            nucl, cigar = next(inputTuples)
+            inputRecord = next(inputTuples)
+            nucl  = inputRecord[idxs[0]]
+            cigar = inputRecord[idxs[1]]
             l = len(nucl)
             todo.append(DET_NEXT_OP)
 
@@ -313,7 +323,9 @@ def mutatorExpLen(inputTuples, i_prob, i_len, d_prob, d_len ):
             todo.insert(0, DET_NEXT_OP)
 
         elif do == YIELD:
-            yield (nucl, str(cigar))
+            inputRecord[idxs[0]] = nucl
+            inputRecord[idxs[1]] = str(cigar)
+            yield tuple(inputRecord)
             todo.append(NEXT_STRING)
         #print((nucl, str(cigar), f'I={bpToNextIns}/{bpInsLen}, D={bpToNextDel}/{bpDelLen}'))
 
@@ -342,7 +354,6 @@ def rGeom(p):
     u = random.random()
     if p == 1 : return 0
     return math.ceil( (math.log(1-u,1-p))-1 )
-
 
 def zip_samelen(*streams):
     """`streams` are multiple iterables. Does the same as zip, except if
