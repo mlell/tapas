@@ -115,7 +115,21 @@ scripts/pocketR '
 
  head data/5/1.tab | column -t
 ```
+
+As another example to perform the same step, below is shown how to 
+allow for 5 bp of tolerance when determining whether the read was
+mapped correctly:
  
+```{.bash}
+scripts/pocketR '
+    within(input, { 
+        correct =    
+            abs(mapped_pos - true_start) < 5 &
+            mapped_rname == true_record &
+            mapped_organism == true_organism })
+'  data/5/1.tab \
+| scripts/write_later data/5/1.tab
+```
 
 
 Grouping of reads

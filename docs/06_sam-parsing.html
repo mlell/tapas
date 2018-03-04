@@ -188,6 +188,15 @@ volpertinger_6  0            A3            4936        25           27M         
 volpertinger_7  0            A1            1320        25           22M           *             0             0            volpertinger     A1           1320        1341      volpertinger   TRUE
 volpertinger_8  4            *             0           0            *             *             0             0            *                A3           4480        4506      volpertinger   FALSE
 volpertinger_9  0            X             2381        25           20M           *             0             0            volpertinger     X            2381        2400      volpertinger   TRUE</code></pre>
+<p>As another example to perform the same step, below is shown how to allow for 5 bp of tolerance when determining whether the read was mapped correctly:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="st">    within(input, { </span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="st">        correct =    </span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="st">            abs(mapped_pos - true_start) &lt; 5 &amp;</span></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="st">            mapped_rname == true_record &amp;</span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="st">            mapped_organism == true_organism })</span></a>
+<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="st">&#39;</span>  data/5/1.tab \</a>
+<a class="sourceLine" id="cb11-8" data-line-number="8"><span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/1.tab</a></code></pre></div>
 <h2 id="grouping-of-reads">Grouping of reads</h2>
 <p>As next step, the number of reads are counted which belong to certain categories. Here, the categories are:</p>
 <ul class="incremental">
@@ -203,24 +212,24 @@ volpertinger_9  0            X             2381        25           20M         
 </ul>
 <p>… and count the reads belonging to each category:</p>
 <p>the <code>cbind</code> function is needed in order to rename the column containing the read count. <code>qname</code> can be substituted here by any valid input column name, as its only used for counting (each column is equal in length).</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
-<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="st">    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span></a>
-<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="st">        FUN=length, data=input)</span></a>
-<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="st">&#39;</span> data/5/1.tab \</a>
-<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="op">&gt;</span> data/5/1.agg</a>
-<a class="sourceLine" id="cb11-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="fu">cat</span> data/5/1.agg <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2"><span class="st">    aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span></a>
+<a class="sourceLine" id="cb12-3" data-line-number="3"><span class="st">        FUN=length, data=input)</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4"><span class="st">&#39;</span> data/5/1.tab \</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5"><span class="op">&gt;</span> data/5/1.agg</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb12-7" data-line-number="7"><span class="fu">cat</span> data/5/1.agg <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
 <pre class="output"><code>true_organism  mapped_organism  correct  count
 retli          *                FALSE    49
 volpertinger   *                FALSE    9
 retli          volpertinger     FALSE    1
 volpertinger   volpertinger     TRUE     16</code></pre>
 <p>This format may be used to plot the read fate of a single mapper run and to derive the measures sensitivity and specificity:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="ex">scripts/plot_read_fate</span>    --exogenous retli \</a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">                          --format png \</a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">                          true_organism mapped_organism \</a>
-<a class="sourceLine" id="cb13-4" data-line-number="4">                          correct       count \</a>
-<a class="sourceLine" id="cb13-5" data-line-number="5">                          fig/fate1.png  data/5/1.agg</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="ex">scripts/plot_read_fate</span>    --exogenous retli \</a>
+<a class="sourceLine" id="cb14-2" data-line-number="2">                          --format png \</a>
+<a class="sourceLine" id="cb14-3" data-line-number="3">                          true_organism mapped_organism \</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4">                          correct       count \</a>
+<a class="sourceLine" id="cb14-5" data-line-number="5">                          fig/fate1.png  data/5/1.agg</a></code></pre></div>
 <pre class="output"><code></code></pre>
 <p>The script produces the following plot:</p>
 <p><img class="plot" src="fig/fate1.png" width=500 /></p>
@@ -234,12 +243,12 @@ volpertinger   volpertinger     TRUE     16</code></pre>
 <p>If non-endogenous reads were included in the reads, like we did by including the <em>R. etli</em> reads, both measures can be calculated.</p>
 <p>The following script needs the same kind of input as the <code>plot-read-fate</code> script. Additionally, a list of organisms must be specified, whose genomes the mapper used as a reference.</p>
 <p>If you specify multiple organisms, separate them by commas and don’t include any spaces.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="ex">scripts/sensspec</span> --c-morg mapped_organism \</a>
-<a class="sourceLine" id="cb15-2" data-line-number="2">                 --c-torg true_organism \</a>
-<a class="sourceLine" id="cb15-3" data-line-number="3">                 data/5/1.agg volpertinger \</a>
-<a class="sourceLine" id="cb15-4" data-line-number="4">    <span class="op">&gt;</span> data/5/1.performance</a>
-<a class="sourceLine" id="cb15-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb15-6" data-line-number="6"><span class="ex">column</span> -t data/5/1.performance</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="ex">scripts/sensspec</span> --c-morg mapped_organism \</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">                 --c-torg true_organism \</a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">                 data/5/1.agg volpertinger \</a>
+<a class="sourceLine" id="cb16-4" data-line-number="4">    <span class="op">&gt;</span> data/5/1.performance</a>
+<a class="sourceLine" id="cb16-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb16-6" data-line-number="6"><span class="ex">column</span> -t data/5/1.performance</a></code></pre></div>
 <pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr
 25        16        0.64         50          49          0.98         0.81</code></pre>
 <h2 id="repeat-all-steps-for-every-sam-file">Repeat all steps for every SAM file</h2>
@@ -247,59 +256,59 @@ volpertinger   volpertinger     TRUE     16</code></pre>
 <p>All scripts used here were already introduced in this section.</p>
 <p>The files <code>data/5/all.tab</code> and <code>data/5/all.recids</code> must be calculated prior to execution of this script. This has been done in this section as well.</p>
 <p>Browse the <a href="data/5">directory <code>data/5</code></a> to see the results.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">for</span> <span class="ex">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span></a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">    <span class="co"># Generate output prefix p from input name: `4.sam` -&gt; `4`</span></a>
-<a class="sourceLine" id="cb17-3" data-line-number="3">    <span class="va">bn=$(</span><span class="fu">basename</span> <span class="va">$sam)</span></a>
-<a class="sourceLine" id="cb17-4" data-line-number="4">    <span class="va">p=${bn%</span>.sam<span class="va">}</span></a>
-<a class="sourceLine" id="cb17-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb17-6" data-line-number="6">    <span class="co"># Convert SAM to table</span></a>
-<a class="sourceLine" id="cb17-7" data-line-number="7">    <span class="ex">scripts/sam2table</span> data/4/<span class="va">${p}</span>.sam <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.tab</a>
-<a class="sourceLine" id="cb17-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb17-9" data-line-number="9">    <span class="co"># Mark correctly/incorrectly mapped reads</span></a>
-<a class="sourceLine" id="cb17-10" data-line-number="10">    <span class="ex">scripts/add_mapped_organisms</span> \</a>
-<a class="sourceLine" id="cb17-11" data-line-number="11">        --endogenous volpertinger \</a>
-<a class="sourceLine" id="cb17-12" data-line-number="12">                     input/genome/volpertinger.fasta.fai \</a>
-<a class="sourceLine" id="cb17-13" data-line-number="13">                     data/2/volpertinger.coord \</a>
-<a class="sourceLine" id="cb17-14" data-line-number="14">        --exogenous  retli \</a>
-<a class="sourceLine" id="cb17-15" data-line-number="15">                     input/retli/retli.fasta.fai \</a>
-<a class="sourceLine" id="cb17-16" data-line-number="16">                     data/2/retli.coord \</a>
-<a class="sourceLine" id="cb17-17" data-line-number="17">        data/5/<span class="va">${p}</span>.tab \</a>
-<a class="sourceLine" id="cb17-18" data-line-number="18">        <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab</a>
-<a class="sourceLine" id="cb17-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb17-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb17-21" data-line-number="21">    <span class="co"># Determine whether each read was correctly mapped</span></a>
-<a class="sourceLine" id="cb17-22" data-line-number="22">    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
-<a class="sourceLine" id="cb17-23" data-line-number="23"><span class="st">        within(input, {</span></a>
-<a class="sourceLine" id="cb17-24" data-line-number="24"><span class="st">            correct =</span></a>
-<a class="sourceLine" id="cb17-25" data-line-number="25"><span class="st">                mapped_pos == true_start  &amp;</span></a>
-<a class="sourceLine" id="cb17-26" data-line-number="26"><span class="st">                mapped_rname == true_record &amp;</span></a>
-<a class="sourceLine" id="cb17-27" data-line-number="27"><span class="st">                mapped_organism == true_organism })</span></a>
-<a class="sourceLine" id="cb17-28" data-line-number="28"><span class="st">    &#39;</span>  data/5/<span class="va">${p}</span>.tab \</a>
-<a class="sourceLine" id="cb17-29" data-line-number="29">    <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab</a>
-<a class="sourceLine" id="cb17-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb17-31" data-line-number="31">    <span class="co"># Count reads per origin/target organism and mapping status</span></a>
-<a class="sourceLine" id="cb17-32" data-line-number="32">    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
-<a class="sourceLine" id="cb17-33" data-line-number="33"><span class="st">        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span></a>
-<a class="sourceLine" id="cb17-34" data-line-number="34"><span class="st">            FUN=length, data=input) &#39;</span> \</a>
-<a class="sourceLine" id="cb17-35" data-line-number="35">    data/5/<span class="va">${p}</span>.tab \</a>
-<a class="sourceLine" id="cb17-36" data-line-number="36">    <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.agg</a>
-<a class="sourceLine" id="cb17-37" data-line-number="37"></a>
-<a class="sourceLine" id="cb17-38" data-line-number="38">    <span class="co"># Plot mapping targets per origin organism</span></a>
-<a class="sourceLine" id="cb17-39" data-line-number="39">    <span class="ex">scripts/plot_read_fate</span>    --exogenous retli \</a>
-<a class="sourceLine" id="cb17-40" data-line-number="40">                              --format png \</a>
-<a class="sourceLine" id="cb17-41" data-line-number="41">                              true_organism    mapped_organism \</a>
-<a class="sourceLine" id="cb17-42" data-line-number="42">                              correct          count \</a>
-<a class="sourceLine" id="cb17-43" data-line-number="43">                              fig/fate<span class="va">${p}</span>.png  data/5/<span class="va">${p}</span>.agg</a>
-<a class="sourceLine" id="cb17-44" data-line-number="44"></a>
-<a class="sourceLine" id="cb17-45" data-line-number="45">    <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span></a>
-<a class="sourceLine" id="cb17-46" data-line-number="46">    <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \</a>
-<a class="sourceLine" id="cb17-47" data-line-number="47">                     --c-torg true_organism \</a>
-<a class="sourceLine" id="cb17-48" data-line-number="48">                     data/5/<span class="va">${p}</span>.agg volpertinger \</a>
-<a class="sourceLine" id="cb17-49" data-line-number="49">        <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.performance</a>
-<a class="sourceLine" id="cb17-50" data-line-number="50"></a>
-<a class="sourceLine" id="cb17-51" data-line-number="51">    <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$sam</span><span class="st"> done. -&gt; Generated data/5/</span><span class="va">${p}</span><span class="st">.{tab,agg,pdf,performance}&quot;</span></a>
-<a class="sourceLine" id="cb17-52" data-line-number="52"></a>
-<a class="sourceLine" id="cb17-53" data-line-number="53"><span class="kw">done</span></a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">for</span> <span class="ex">sam</span> in data/4/*.sam<span class="kw">;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb18-2" data-line-number="2">    <span class="co"># Generate output prefix p from input name: `4.sam` -&gt; `4`</span></a>
+<a class="sourceLine" id="cb18-3" data-line-number="3">    <span class="va">bn=$(</span><span class="fu">basename</span> <span class="va">$sam)</span></a>
+<a class="sourceLine" id="cb18-4" data-line-number="4">    <span class="va">p=${bn%</span>.sam<span class="va">}</span></a>
+<a class="sourceLine" id="cb18-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb18-6" data-line-number="6">    <span class="co"># Convert SAM to table</span></a>
+<a class="sourceLine" id="cb18-7" data-line-number="7">    <span class="ex">scripts/sam2table</span> data/4/<span class="va">${p}</span>.sam <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.tab</a>
+<a class="sourceLine" id="cb18-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb18-9" data-line-number="9">    <span class="co"># Mark correctly/incorrectly mapped reads</span></a>
+<a class="sourceLine" id="cb18-10" data-line-number="10">    <span class="ex">scripts/add_mapped_organisms</span> \</a>
+<a class="sourceLine" id="cb18-11" data-line-number="11">        --endogenous volpertinger \</a>
+<a class="sourceLine" id="cb18-12" data-line-number="12">                     input/genome/volpertinger.fasta.fai \</a>
+<a class="sourceLine" id="cb18-13" data-line-number="13">                     data/2/volpertinger.coord \</a>
+<a class="sourceLine" id="cb18-14" data-line-number="14">        --exogenous  retli \</a>
+<a class="sourceLine" id="cb18-15" data-line-number="15">                     input/retli/retli.fasta.fai \</a>
+<a class="sourceLine" id="cb18-16" data-line-number="16">                     data/2/retli.coord \</a>
+<a class="sourceLine" id="cb18-17" data-line-number="17">        data/5/<span class="va">${p}</span>.tab \</a>
+<a class="sourceLine" id="cb18-18" data-line-number="18">        <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab</a>
+<a class="sourceLine" id="cb18-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb18-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb18-21" data-line-number="21">    <span class="co"># Determine whether each read was correctly mapped</span></a>
+<a class="sourceLine" id="cb18-22" data-line-number="22">    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
+<a class="sourceLine" id="cb18-23" data-line-number="23"><span class="st">        within(input, {</span></a>
+<a class="sourceLine" id="cb18-24" data-line-number="24"><span class="st">            correct =</span></a>
+<a class="sourceLine" id="cb18-25" data-line-number="25"><span class="st">                mapped_pos == true_start  &amp;</span></a>
+<a class="sourceLine" id="cb18-26" data-line-number="26"><span class="st">                mapped_rname == true_record &amp;</span></a>
+<a class="sourceLine" id="cb18-27" data-line-number="27"><span class="st">                mapped_organism == true_organism })</span></a>
+<a class="sourceLine" id="cb18-28" data-line-number="28"><span class="st">    &#39;</span>  data/5/<span class="va">${p}</span>.tab \</a>
+<a class="sourceLine" id="cb18-29" data-line-number="29">    <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/5/<span class="va">${p}</span>.tab</a>
+<a class="sourceLine" id="cb18-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb18-31" data-line-number="31">    <span class="co"># Count reads per origin/target organism and mapping status</span></a>
+<a class="sourceLine" id="cb18-32" data-line-number="32">    <span class="ex">scripts/pocketR</span> <span class="st">&#39;</span></a>
+<a class="sourceLine" id="cb18-33" data-line-number="33"><span class="st">        aggregate( cbind(count=qname) ~ true_organism + mapped_organism + correct,</span></a>
+<a class="sourceLine" id="cb18-34" data-line-number="34"><span class="st">            FUN=length, data=input) &#39;</span> \</a>
+<a class="sourceLine" id="cb18-35" data-line-number="35">    data/5/<span class="va">${p}</span>.tab \</a>
+<a class="sourceLine" id="cb18-36" data-line-number="36">    <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.agg</a>
+<a class="sourceLine" id="cb18-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb18-38" data-line-number="38">    <span class="co"># Plot mapping targets per origin organism</span></a>
+<a class="sourceLine" id="cb18-39" data-line-number="39">    <span class="ex">scripts/plot_read_fate</span>    --exogenous retli \</a>
+<a class="sourceLine" id="cb18-40" data-line-number="40">                              --format png \</a>
+<a class="sourceLine" id="cb18-41" data-line-number="41">                              true_organism    mapped_organism \</a>
+<a class="sourceLine" id="cb18-42" data-line-number="42">                              correct          count \</a>
+<a class="sourceLine" id="cb18-43" data-line-number="43">                              fig/fate<span class="va">${p}</span>.png  data/5/<span class="va">${p}</span>.agg</a>
+<a class="sourceLine" id="cb18-44" data-line-number="44"></a>
+<a class="sourceLine" id="cb18-45" data-line-number="45">    <span class="co"># Calculate sensitivity, specificity and balanced accuracy</span></a>
+<a class="sourceLine" id="cb18-46" data-line-number="46">    <span class="ex">scripts/sensspec</span> --c-morg mapped_organism \</a>
+<a class="sourceLine" id="cb18-47" data-line-number="47">                     --c-torg true_organism \</a>
+<a class="sourceLine" id="cb18-48" data-line-number="48">                     data/5/<span class="va">${p}</span>.agg volpertinger \</a>
+<a class="sourceLine" id="cb18-49" data-line-number="49">        <span class="op">&gt;</span> data/5/<span class="va">${p}</span>.performance</a>
+<a class="sourceLine" id="cb18-50" data-line-number="50"></a>
+<a class="sourceLine" id="cb18-51" data-line-number="51">    <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$sam</span><span class="st"> done. -&gt; Generated data/5/</span><span class="va">${p}</span><span class="st">.{tab,agg,pdf,performance}&quot;</span></a>
+<a class="sourceLine" id="cb18-52" data-line-number="52"></a>
+<a class="sourceLine" id="cb18-53" data-line-number="53"><span class="kw">done</span></a></code></pre></div>
 <pre class="output"><code>data/4/0.sam done. -&gt; Generated data/5/0.{tab,agg,pdf,performance}
 data/4/1.sam done. -&gt; Generated data/5/1.{tab,agg,pdf,performance}
 data/4/2.sam done. -&gt; Generated data/5/2.{tab,agg,pdf,performance}
