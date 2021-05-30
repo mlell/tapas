@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ## Launch the script sam-extract.
 ## This is DEPRECATED. You should rather use sam_extract
 

@@ -48,7 +48,7 @@ function generate_launcher(){
     scriptname="$1"
     launcher_function="$2"
 
-    echo "#!/bin/sh"
+    echo "#!/usr/bin/env bash"
     echo "## Launch the script ${scriptname}."
     echo "## Set appropriate environment variables in advance."
     echo "## See the help of the launched scripts by invoking"
@@ -74,7 +74,7 @@ function generate_deprecated_launcher(){
     new_scriptname="$2"
     launcher_function="$3"
 
-    echo "#!/bin/sh"
+    echo "#!/usr/bin/env bash"
     echo "## Launch the script ${deprecated_scriptname}."
     echo "## This is DEPRECATED. You should rather use ${new_scriptname}"
     echo 

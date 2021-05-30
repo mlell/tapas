@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ## Launch the script src/mcall.py.
 ## Set appropriate environment variables in advance.
 ## See the help of the launched scripts by invoking

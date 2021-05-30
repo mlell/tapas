@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ## Launch the script index-column.
 ## This is DEPRECATED. You should rather use index_column
 
