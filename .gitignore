@@ -5,3 +5,4 @@ scripts/lib/r-ext
 scripts/lib/r-src
 scripts/lib/python-ext
 scripts/lib/python-src
+__pycache__
