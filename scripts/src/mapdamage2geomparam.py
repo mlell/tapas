@@ -24,7 +24,7 @@ the per-base probability that it is subjected to a certain base exchange.
 The parameters 'factor', 'geom_prob' and 'intercept' are estimated,
 which relate to the following function:
 
-    P_from(i, end, to) = factor × geom(i, geom_prob) + intercept
+    P_from(i, end, to) = factor x geom(i, geom_prob) + intercept
 
 P is the probability that the base on position i, as counted 1-based from
 the read end 'end' (end = 3' or 5') is subjected to the base exchange
@@ -33,7 +33,7 @@ geometric distribution density function with support {1,2,3...} and
 probability parameter 'geom_prob'.
 
 The input is the 'misincorporation.txt' file which is produced by the
-mapDamage program (Jónsson et al. Bioinformatics 2013 and Ginolhac et
+mapDamage program (Jonsson et al. Bioinformatics 2013 and Ginolhac et
 al. Bioinformatics 2011). Least-squares fitting is used to determine
 the parameters of the aforementioned function.
 
@@ -140,7 +140,7 @@ def readMisincorporationTxt(filename):
         header = line.split(sep)
 
         d = {k:'int' for k in header}
-        for k in ['Chr','End','Std']: d[k] = 'category'
+        for k in ['Chr','End','Std']: d[k] = 'str'
         M = pd.read_table(fd,names=header
                          , delimiter=sep
                          , dtype=d

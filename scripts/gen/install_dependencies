@@ -56,5 +56,5 @@ while read pkg ver; do
 done
 
 echo "Install python dependencies..."
-pip install -r py_requirements.txt --target="${pylib}"
+pip install -r py_requirements.txt --target="${pylib}" --system
 
