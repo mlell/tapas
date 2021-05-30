@@ -7,71 +7,43 @@
   <title>Comparing multiple mapper runs</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="manual.css" />
+  <link rel="stylesheet" href="manual.css" type="text/css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
@@ -88,9 +60,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
 <li><a href="06_sam-parsing.html">Parsing of SAM files</a>
 <li class="tocthis"><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
-<li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
-<li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
-<li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
 </ul>
 </div>
 <div class="content contentbox">
@@ -103,50 +75,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The file <code>data/4/partab</code> holds the information which parameters were used for which mapping run. By relating the output measures like sensitivity, specificity or balanced accuracy to these parameters, the influence of individual parameters can be assessed.</p>
 <p>First step is to combine the output measures of all runs:</p>
 <p>To this effect, to each of the <code>.performance</code>-files (contain sensitivity, specificity, bcr) generated in the last section, the run number is added as a separate column, then the <code>.performance</code>-files of all runs are concatenated to one table. Because the run number was added before, the origin of all values is still clear.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Add the run number to each .performance file</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">for</span> <span class="ex">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">    <span class="va">i=$(</span><span class="fu">basename</span> <span class="va">${f%</span>.performance<span class="va">})</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="ex">scripts/add_const_column</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> runidx <span class="st">&quot;</span><span class="va">$i</span><span class="st">&quot;</span> \</a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">        <span class="op">&gt;</span> <span class="st">&quot;data/6/</span><span class="va">${i}</span><span class="st">.performance&quot;</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw">done</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># Concatenate all tables, but print the header line only once.</span></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="ex">scripts/cat_tables</span> data/6/*.performance \</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11">                 <span class="op">&gt;</span> data/6/performance</a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="fu">cat</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
-<pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
-25        1         0.04         50          50          1            0.52  0
-25        16        0.64         50          49          0.98         0.81  1
-25        21        0.84         50          15          0.3          0.57  2
-25        1         0.04         50          50          1            0.52  3
-25        17        0.68         50          49          0.98         0.83  4
-25        25        1            50          15          0.3          0.65  5</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Add the run number to each .performance file</span>
+<span class="kw">for</span> <span class="ex">f</span> in data/5/*.performance<span class="kw">;</span> <span class="kw">do</span>
+    <span class="va">i=$(</span><span class="fu">basename</span> <span class="va">${f%</span>.performance<span class="va">})</span>
+
+    <span class="ex">scripts/add_const_column</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> runidx <span class="st">&quot;</span><span class="va">$i</span><span class="st">&quot;</span> \
+        <span class="op">&gt;</span> <span class="st">&quot;data/6/</span><span class="va">${i}</span><span class="st">.performance&quot;</span>
+<span class="kw">done</span>
+
+<span class="co"># Concatenate all tables, but print the header line only once.</span>
+<span class="ex">scripts/cat_tables</span> data/6/*.performance \
+                 <span class="op">&gt;</span> data/6/performance
+
+<span class="fu">cat</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>Next, the parameter values belonging to the run indices are joined in, appending the parameter columns to <code>data/6/parameters</code> itself.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="ex">scripts/merge</span> -a data/6/performance runidx \</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">              -b data/4/partab      runidx \</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">              --all-a-cols --all-b-cols --all-a \</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">           <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/6/performance</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="fu">head</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
-<pre class="output"><code>runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
-0       25        1         0.04         50          50          1            0.52  2   0
-1       25        16        0.64         50          49          0.98         0.81  2   4
-2       25        21        0.84         50          15          0.3          0.57  2   8
-3       25        1         0.04         50          50          1            0.52  10  0
-4       25        17        0.68         50          49          0.98         0.83  10  4
-5       25        25        1            50          15          0.3          0.65  10  8</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/merge</span> -a data/6/performance runidx \
+              -b data/4/partab      runidx \
+              --all-a-cols --all-b-cols --all-a \
+           <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/6/performance
+
+<span class="fu">head</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
+<pre class="output"><code></code></pre>
 <p>The value of one parameter can be plotted against some measure. The following command shows plots where the X and Y axis are free to choose. If multiple runs yield a similar score on the Y axis, their data points are merged to form one bigger dot on the plot. Here all numbers are rounded to one significant digit, because only 8 mapping runs are compared in this example. Therefore results must be aggregated coarsely to demonstrate the results.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Plot n versus BCR</span></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">                               --plot-format png \</a>
-<a class="sourceLine" id="cb5-4" data-line-number="4">                               fig/n.png</a>
-<a class="sourceLine" id="cb5-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co"># Plot k versus BCR</span></a>
-<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \</a>
-<a class="sourceLine" id="cb5-8" data-line-number="8">                               --plot-format png \</a>
-<a class="sourceLine" id="cb5-9" data-line-number="9">                               fig/k.png</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
+                               --plot-format png \
+                               fig/n.png
+
+<span class="co"># Plot k versus BCR</span>
+<span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance k bcr \
+                               --plot-format png \
+                               fig/k.png</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>View the plots:</p>
 <p><img class="plot" src="fig/n.png" width=500 /></p>

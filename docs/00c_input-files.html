@@ -7,71 +7,43 @@
   <title>Input files</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="manual.css" />
+  <link rel="stylesheet" href="manual.css" type="text/css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
@@ -88,9 +60,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
 <li><a href="06_sam-parsing.html">Parsing of SAM files</a>
 <li><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
-<li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
-<li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
-<li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
 </ul>
 </div>
 <div class="content contentbox">
@@ -103,12 +75,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In this tutorial different parameters for the short read mapper BWA will be compared for their recall and accuracy in mapping damaged reads to a refence genome.</p>
 <p>This chapter explains the input files needed for this tutorial.</p>
 <h2 id="reference-genomes">Reference genomes</h2>
-<p>A genome must be provided from which sample reads can be generated. Two types of genomes are needed: The genome to which reads shall be mapped is called genome of an <em>endogenous</em> species. The genome (or genomes) from which contaminant reads stem (e.g. soil bacteria or humans) is called genome(s) of <em>exogenous</em> species.</p>
+<p>A genome must be provided from which sample reads can be generated. Two types of genomes are needed: The genome to which reads shall be mapped is called genome of an <em>endogenous</em> species. The genome (or genomes) from which contaminant reads stem (e.g. soil bacteria or humans) is called genome(s) of <em>exogenous</em> species.</p>
 <p>In this tutorial, mutated reads of the genome <code>input/genome/volpertinger.fasta</code> shall be generated and mapped back to that genome. Therefore, <code>volpertinger</code> is the endogenous species.</p>
 <p>The file <code>input/retli/retli_tr.fasta</code> contains an excerpt (if this were not a demonstration, the whole genome would be used, of course) genome of the soil bacterium <em>R. etli</em>. Reads from this genome will be generated as exogenous, contaminant reads.</p>
 <h2 id="read-mutation-probabilities">Read Mutation probabilities</h2>
 <p>In order to simulate mutation of the synthetic reads, probabilities that a mutation happens must be set. An example of this can be found in the file <code>input/mut-tables/mut.tab</code>, which is shown below</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="fu">cat</span> input/mut-tables/mut.tab</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mut-tables/mut.tab</code></pre></div>
 <pre class="output"><code>strand   from   to   factor  geom_prob  intercept
 3p       C      T    0.3     0.4        0.1
 5p       C      T    0.1     0.2        0.0
@@ -118,27 +90,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 id="mapping-script">Mapping script</h2>
 <p>As mappers are different in the way they are called, a shell script must be created which forwards the values of the parameters to the mapper. The script will be called for each combination of mapping parameters to be tested. The script must use variables for each parameter which varies in the comparison.</p>
 <p>An example for the short read mapper is given below.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">#!/bin/bash</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## This script performs a mapping using BWA.</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">## It requires the variables k, n and runidx be set </span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">## prior to its execution.</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co"># Fail if any needed variable is not set</span></a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">set</span> <span class="ex">-ue</span></a>
-<a class="sourceLine" id="cb3-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \</a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">    input/genome/volpertinger \</a>
-<a class="sourceLine" id="cb3-12" data-line-number="12">    data/3/all.fastq         \</a>
-<a class="sourceLine" id="cb3-13" data-line-number="13">    <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \</a>
-<a class="sourceLine" id="cb3-14" data-line-number="14">    <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span></a>
-<a class="sourceLine" id="cb3-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb3-16" data-line-number="16"><span class="ex">bwa</span> samse                      \</a>
-<a class="sourceLine" id="cb3-17" data-line-number="17">      input/genome/volpertinger \</a>
-<a class="sourceLine" id="cb3-18" data-line-number="18">      data/4/<span class="va">${runidx}</span>.sai     \</a>
-<a class="sourceLine" id="cb3-19" data-line-number="19">      data/3/all.fastq         \</a>
-<a class="sourceLine" id="cb3-20" data-line-number="20">      <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \</a>
-<a class="sourceLine" id="cb3-21" data-line-number="21">      <span class="op">2&gt;&gt;</span> data/4/<span class="va">${runidx}</span>.log</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="co">## This script performs a mapping using BWA.</span>
+<span class="co">## It requires the variables k, n and runidx be set </span>
+<span class="co">## prior to its execution.</span>
+
+<span class="co"># Fail if any needed variable is not set</span>
+<span class="kw">set</span> <span class="ex">-ue</span>
+
+<span class="ex">bwa</span> aln -n <span class="va">${n}</span> -k <span class="va">${k}</span>      \
+    input/genome/volpertinger \
+    data/3/all.fastq         \
+    <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sai   \
+    <span class="op">2&gt;</span> data/4/<span class="va">${runidx}</span>.log   <span class="kw">&amp;&amp;</span>
+
+<span class="ex">bwa</span> samse                      \
+      input/genome/volpertinger \
+      data/4/<span class="va">${runidx}</span>.sai     \
+      data/3/all.fastq         \
+      <span class="op">&gt;</span> data/4/<span class="va">${runidx}</span>.sam   \
+      <span class="op">2&gt;&gt;</span> data/4/<span class="va">${runidx}</span>.log</code></pre></div>
 <p>The script reflects the common procedure of short read mapping using BWA: First, <code>bwa aln</code> is called to map a set of reads (<code>all.fastq</code>) to a reference genome (<code>volpertinger</code>). Afterwards, the command <code>bwa samse</code> is used to convert the output of the mapper to the SAM format.</p>
 <p>Note that the script contains the variables <code>${n}</code>, <code>${k}</code> and <code>${runidx}</code>, which are not set to any values inside the script. For each of the variables, different values will be provided for each time a mapping is performed with a different set of mapping parameters.</p>
 <p>As will be detailed later, <code>${runidx}</code> serves as a run index, taking counting values, the values for the variables <code>${n}</code> and <code>${k}</code> will be provided starting from a set of parameter files which will be shown in the following.</p>
@@ -147,12 +119,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>To compare different combinations of parameter values, the lines of these files will be merged in different combinations and the mapping script mentioned above will be run for each combination.</p>
 <p>Example files, which are used in this tutorial, can be seen in he folder <code>input/mapping</code> and are printed below. The file names are arbitrary, however, the column names (first line of each file) determines the name of the variable in the mapping script (previous section) which will take the values of that column.</p>
 <p>In the following, the file contents are printed:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="fu">cat</span> input/mapping/k.par</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mapping/k.par</code></pre></div>
 <pre class="output"><code>k
 2
 10
 </code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="fu">cat</span> input/mapping/n.par</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cat</span> input/mapping/n.par</code></pre></div>
 <pre class="output"><code>n
 0
 4

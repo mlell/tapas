@@ -4,75 +4,47 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Appendix A2 – Advanced read generation</title>
+  <title>Appendix A2 -- Advanced read generation</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="manual.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <link rel="stylesheet" href="manual.css" type="text/css" />
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
@@ -89,47 +61,47 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
 <li><a href="06_sam-parsing.html">Parsing of SAM files</a>
 <li><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
-<li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
-<li class="tocthis"><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
-<li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li class="tocthis"><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
 </ul>
 </div>
 <div class="content contentbox">
 <div id="header">
-<h1 class="title">Appendix A2 – Advanced read generation</h1>
+<h1 class="title">Appendix A2 -- Advanced read generation</h1>
 </div>
 <!-- Local Table of contents -->
 <!--Back to table of contents -->
 <!-- CONTENT -------------------------------------->
-<p>This more verbose but also more flexible way of generating artificial reads is currently needed for example if you want to</p>
+<p>This more verbose but also more flexible way of generating artificial reads is currently needed if you want to</p>
 <ul class="incremental">
-<li>Use customised base quality strings in the output FASTQ file</li>
-<li>Apply alterations to the nucleotide string which also affect the read quality string, like insertions or deletion (indels)</li>
+<li>Use customised base quality strings in the output FASTQ file,</li>
+<li>Apply indels or other alterations to the nucleotide string which also affect the read quality string.</li>
 </ul>
 <p>The output FASTQ file will be constructed by interleaving the contents of three files, containing the read names, the nucleotide strings and the quality strings, respectively. These files will be generated in the following.</p>
 <p>Additionally, a table containing the read names with the true read positions will be created, to evaluate later on whether a read was mapped correctly.</p>
 <p>The <code>uniform</code> script can be used to sample reads from a reference genome. The command is used like already explained in the chapter about <a href="02_read-generation.html">simplified read generation</a>. The difference is that in this case it is called without the <code>--output-fastq</code> switch. Instead, the files needed for creating the read FASTQ file are created manually and merged to the FASTQ format using <code>synth_fastq</code>.</p>
 <p>This manual shows an example, arbitrary custom manipulation steps can be performed in between or instead these steps.</p>
 <p>Create the subfolder which holds the generated files:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="fu">mkdir</span> data/2e</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> data/2e</code></pre></div>
 <pre class="output"><code></code></pre>
 <h2 id="generating-artificial-reads-from-the-reference">Generating artificial reads from the reference</h2>
 <p>Using <code>uniform</code> without the <code>--output-fastq</code> switch produces a text table output with four columns:</p>
-<ol class="incremental" type="1">
-<li>The FASTA record name (e.g. chromosome) where the read originated.</li>
-<li>1-based base number of the reads’ first base.</li>
-<li>1-based base number of the reads’ last base.</li>
+<ol class="incremental" style="list-style-type: decimal">
+<li>The FASTA record name (e.g. chromosome) where the read originated.</li>
+<li>1-based base number of the reads' first base.</li>
+<li>1-based base number of the reads' last base.</li>
 <li>The nucleotide sequence of the artificial read.</li>
 </ol>
-<p>Example: Extract 25 reads, with minimum length 20 basepairs, where half of the reads have a length longer than 25 bp. The value 1234 is used to initialize the random number generator. To obtain a reproducable output, this parameter can be used with an arbitrary integer. If omitted, different reads are produced on every call.</p>
+<p>Example: Extract 25 reads, with minimum length 20 base pairs, where half of the reads longer than 25 bp. The value 1234 is used to initialize the random number generator. To obtain a reproducible output, this parameter can be used with an arbitrary integer. If omitted, different reads are produced on every call.</p>
 <p>We will generate sample reads from our <code>volpertinger</code> sample genome. Execute the following script to generate random nucleotide sequences:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">    --seed 1234\</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">    25 20 5  \</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">    <span class="op">&gt;</span> data/2e/volpertinger.reads</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
+    --seed 1234\
+    25 20 5  \
+    <span class="op">&gt;</span> data/2e/volpertinger.reads</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>The resulting file looks like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="fu">head</span> data/2e/volpertinger.reads <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/2e/volpertinger.reads <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>record  start  end   read
 B1      2143   2171  TTCCACAAGATATTAGCCAACCAGATCCA
 MT      3402   3421  TCTATTTAATAACTTCTCCC
@@ -142,13 +114,13 @@ A3      4480   4506  AATAAACTTAAAAAAATTAGTGGCATG
 X       2381   2400  ACGATGACCATCTTCTTGCG</code></pre>
 <h2 id="insertions-and-deletions-indels">Insertions and deletions (indels)</h2>
 <p>TAPAS contains a tool, called <code>indel</code>, which can insert and delete nucleotides randomly. The tool outputs the mutated nucleotide sequences along with a CIGAR string which describes which operation had been taken. It expects as input the list of nucleotides. Below is an example call with the nucleotides created above.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="ex">scripts/indel</span> --in-prob 0.01  --in-exp 0.1 \</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2">              --cigar-new     --seed 112233 \</a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">              --col-seq read --col-cigar cigar \</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">    <span class="op">&lt;</span> data/2e/volpertinger.reads \</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">    <span class="op">&gt;</span> data/2e/volpertinger.reads.indel</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/indel</span> --in-prob 0.01  --in-exp 0.1 \
+              --cigar-new     --seed 112233 \
+              --col-seq read --col-cigar cigar \
+    <span class="op">&lt;</span> data/2e/volpertinger.reads \
+    <span class="op">&gt;</span> data/2e/volpertinger.reads.indel
+
+<span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>record  start  end   read                             cigar
 B1      2143   2171  TTCCACAATGGATATTAGCCAACCAGATCCA  8M2I21M
 MT      3402   3421  TCTATTTAATAACTTCTCCC             20M
@@ -159,20 +131,21 @@ A3      4936   4962  ACCCAAGGGCCCCCAGCCAGGTTGCTG      27M
 A1      1320   1341  TGGGAATAGCCCTGTGTTTATC           22M
 A3      4480   4506  AATAAACTTAAAAAAATTAGTGGCATG      27M
 X       2381   2400  ACGATGACCATCTTCTTGCG             20M</code></pre>
-<p><strong>Please note:</strong> If a deletion occurs at the beginning of the read, it can not be detected by the mapper which is to be tested. In the optimal case a deletion of <span class="math inline">\(n\)</span> bp at the beginning of the read will cause the mapper to locate the read <span class="math inline">\(n\)</span> bp downstream of its true position. For an insertion, the read location reported by the mapper depends on whether the mapper matches the inserted base pairs to the reference or not. Therefore, it might be warranted to allow for some tolerance when determining whether a read is correctly mapped or remove the affected reads from the read set. For example, <code>awk</code> and its regular expression matching capabilities (<code>... ~ /.../</code>) can be used to this effect. The following call removes lines (=reads) in the input table (<code>volpertinger.reads.indel</code>) where the CIGAR string (column 6 = <code>$6</code>) does not start with a match (<code>^[0-9]+M</code>) and end with a match (<code>[0-9]+M$</code>). See tutorials on regular expressions and the SAM Specification (CIGAR strings) for more information.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="fu">awk</span> <span class="st">&#39;$6 ~ /^[0-9]+M/  &amp;&amp;  $6 ~ /[0-9]+M$/&#39;</span> \</a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">    data/2e/volpertinger.reads.indel</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">    <span class="op">&gt;</span> <span class="ex">data/2e/volpertinger.reads.indel.filtered</span></a></code></pre></div>
-<p>The usage of <code>indel</code> shown above creates a new file because that facilitates the demonstration of how the presented tools change the data. However, it is also possible to directly combine the read generation and indel insertion using the UNIX pipe:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \</a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">    --quiet --seed 1234  25 20 5  \</a>
-<a class="sourceLine" id="cb10-3" data-line-number="3"> <span class="kw">|</span> <span class="ex">scripts/indel</span> --in-prob 0.01 --in-exp 0.1 \</a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">                 --cigar-new --seed 112233 \</a>
-<a class="sourceLine" id="cb10-5" data-line-number="5">                 --col-seq read --col-cigar cigar \</a>
-<a class="sourceLine" id="cb10-6" data-line-number="6">    <span class="op">&gt;</span> data/2e/volpertinger.reads.indel</a></code></pre></div>
+<p><strong>Please note (I):</strong> If a deletion occurs at the beginning of the read, it cannot be detected by the mapper which is to be tested. In the optimal case a deletion of <span class="math inline">\(n\)</span> bp at the beginning of the read will cause the mapper to locate the read <span class="math inline">\(n\)</span> bp downstream of its true position. For an insertion, the read location reported by the mapper depends on whether the mapper matches the inserted base pairs to the reference or not. Therefore, it might be warranted to allow for some tolerance when determining whether a read is correctly mapped or remove the affected reads from the read set. For example, <code>awk</code> and its regular expression matching capabilities (<code>... ~ /.../</code>) can be used to this effect. The following call removes lines (=reads) in the input table (<code>volpertinger.reads.indel</code>) where the CIGAR string (column 6 = <code>$6</code>) does not start with a match (<code>^[0-9]+M</code>) and end with a match (<code>[0-9]+M$</code>). See tutorials on regular expressions and the SAM Specification (CIGAR strings) for more information.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">awk</span> <span class="st">&#39;$6 ~ /^[0-9]+M/  &amp;&amp;  $6 ~ /[0-9]+M$/&#39;</span> \
+    data/2e/volpertinger.reads.indel
+    <span class="op">&gt;</span> <span class="ex">data/2e/volpertinger.reads.indel.filtered</span></code></pre></div>
+<p><strong>Please note (II):</strong> In the published pilot study version 1.1 of TAPAS was used, which did not have the indel feature implemented. The current version is not yet been tested on an in vivo dataset. We urge caution with the use of the indel feature. Should erroneous behaviour occur despite our efforts and care to produce correcly working software, a short notice to the authors is much appreciated.</p>
+<p>The usage of <code>indel</code> shown above creates a new file to facilitate the demonstration of how the presented tools change the data. However, it is also possible to directly combine the read generation and indel insertion using the UNIX pipe:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
+    --quiet --seed 1234  25 20 5  \
+ <span class="kw">|</span> <span class="ex">scripts/indel</span> --in-prob 0.01 --in-exp 0.1 \
+                 --cigar-new --seed 112233 \
+                 --col-seq read --col-cigar cigar \
+    <span class="op">&gt;</span> data/2e/volpertinger.reads.indel</code></pre></div>
 <pre class="output"><code></code></pre>
-<p>The result is the same as with the above aproach using the intermediate files:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<p>The result is the same as with the above approach using the intermediate files:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>record  start  end   read                             cigar
 B1      2143   2171  TTCCACAATGGATATTAGCCAACCAGATCCA  8M2I21M
 MT      3402   3421  TCTATTTAATAACTTCTCCC             20M
@@ -185,13 +158,12 @@ A3      4480   4506  AATAAACTTAAAAAAATTAGTGGCATG      27M
 X       2381   2400  ACGATGACCATCTTCTTGCG             20M</code></pre>
 <h2 id="read-names">Read names</h2>
 <p>In this tutorial we generate read names consisting of the organism name (<em>volpertinger</em>) followed by an underscore and a counting number.</p>
-<p>To have the origin information of the reads available along with their newly-generated reads, it is advisable to add the read names to the <code>volpertinger.coord</code> file generated above.</p>
 <p>There is a script included for adding this kind of column, which is shown in the next code example. You can as well use <code>awk</code> or whichever tool you like to accomplish this task if you need more sophisticated read names.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="ex">scripts/index_column</span>  --prefix volpertinger_ \</a>
-<a class="sourceLine" id="cb14-2" data-line-number="2">                      --colname name  \</a>
-<a class="sourceLine" id="cb14-3" data-line-number="3">                      --inplace data/2e/volpertinger.reads.indel</a>
-<a class="sourceLine" id="cb14-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb14-5" data-line-number="5"><span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span>  --prefix volpertinger_ \
+                      --colname name  \
+                      --inplace data/2e/volpertinger.reads.indel
+
+<span class="fu">head</span> data/2e/volpertinger.reads.indel <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
 <pre class="output"><code>name            record  start  end   read                             cigar
 volpertinger_0  B1      2143   2171  TTCCACAATGGATATTAGCCAACCAGATCCA  8M2I21M
 volpertinger_1  MT      3402   3421  TCTATTTAATAACTTCTCCC             20M
@@ -204,25 +176,25 @@ volpertinger_7  A3      4480   4506  AATAAACTTAAAAAAATTAGTGGCATG      27M
 volpertinger_8  X       2381   2400  ACGATGACCATCTTCTTGCG             20M</code></pre>
 <h2 id="splitting-the-read-table">Splitting the read table</h2>
 <p>To create a FASTQ file out of the generated reads, three files must be prepared containing:</p>
-<ol class="incremental" type="1">
+<ol class="incremental" style="list-style-type: decimal">
 <li>The list of read names</li>
 <li>The list of nucleotide strings</li>
 <li>The list of quality strings</li>
 </ol>
 <p>The first and the second file are generated from the file which contains the read coordinates and sequences (<code>volpertinger.coord.indel</code> in this example). The third list is generated using standard UNIX tools from the nucleotide strings.</p>
-<p>First, the contents of <code>volpertinger.reads.indel</code>, generated in the previous section, are split into seperate files containing the read names and the nucleotide sequences. This step can be performed using the UNIX tool <code>awk</code>. <code>(NR != 1)</code> removes the header line and <code>{print $4}</code> prints the corresponding column. The columns are counted starting with 1.</p>
-<p>Generate raw read seqences:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="fu">awk</span> <span class="st">&#39;(NR != 1){print $5}&#39;</span> \</a>
-<a class="sourceLine" id="cb16-2" data-line-number="2">    <span class="op">&lt;</span> data/2e/volpertinger.reads.indel \</a>
-<a class="sourceLine" id="cb16-3" data-line-number="3">    <span class="op">&gt;</span> data/2e/volpertinger.nucl</a></code></pre></div>
+<p>First, the contents of <code>volpertinger.reads.indel</code>, generated in the previous section, are split into separate files containing the read names and the nucleotide sequences. This step can be performed using the UNIX tool <code>awk</code>. <code>(NR != 1)</code> removes the header line and <code>{print $4}</code> prints the corresponding column. The columns are counted starting with 1.</p>
+<p>Generate raw read sequences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">awk</span> <span class="st">&#39;(NR != 1){print $5}&#39;</span> \
+    <span class="op">&lt;</span> data/2e/volpertinger.reads.indel \
+    <span class="op">&gt;</span> data/2e/volpertinger.nucl</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>Generate list of read names:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="fu">awk</span> <span class="st">&#39;(NR != 1){print $1}&#39;</span> \</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">    <span class="op">&lt;</span> data/2e/volpertinger.reads.indel \</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">    <span class="op">&gt;</span> data/2e/volpertinger.i</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">awk</span> <span class="st">&#39;(NR != 1){print $1}&#39;</span> \
+    <span class="op">&lt;</span> data/2e/volpertinger.reads.indel \
+    <span class="op">&gt;</span> data/2e/volpertinger.i</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>Show the result:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="fu">head</span> data/2e/volpertinger.nucl</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/2e/volpertinger.nucl</code></pre></div>
 <pre class="output"><code>TTCCACAATGGATATTAGCCAACCAGATCCA
 TCTATTTAATAACTTCTCCC
 TTGAACTCTATCTTCCGGGGCTCAAC
@@ -233,7 +205,7 @@ TGGGAATAGCCCTGTGTTTATC
 AATAAACTTAAAAAAATTAGTGGCATG
 ACGATGACCATCTTCTTGCG
 TATGGTATTTGGTACTATATGTAGTTTGTGTGTGGTG</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="fu">head</span> data/2e/volpertinger.i</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> data/2e/volpertinger.i</code></pre></div>
 <pre class="output"><code>volpertinger_0
 volpertinger_1
 volpertinger_2
@@ -246,11 +218,11 @@ volpertinger_8
 volpertinger_9</code></pre>
 <h2 id="quality-strings">Quality strings</h2>
 <p>The following example generates strings of constant quality score for every read. This can be done by the UNIX <code>sed</code> tool, which replaces every character by an F:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span> \</a>
-<a class="sourceLine" id="cb24-2" data-line-number="2">      data/2e/volpertinger.nucl \</a>
-<a class="sourceLine" id="cb24-3" data-line-number="3">    <span class="op">&gt;</span> data/2e/volpertinger.q</a>
-<a class="sourceLine" id="cb24-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb24-5" data-line-number="5"><span class="fu">head</span> data/2e/volpertinger.q</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span> \
+      data/2e/volpertinger.nucl \
+    <span class="op">&gt;</span> data/2e/volpertinger.q
+
+<span class="fu">head</span> data/2e/volpertinger.q</code></pre></div>
 <pre class="output"><code>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -263,13 +235,13 @@ FFFFFFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
 <p>If you want to generate more elaborate quality strings, you are free to do so using whichever tools you desire. Just generate a list with as many lines as there are nucleotide strings in <code>volpertinger.nucl</code> to input them into the pipeline.</p>
 <h2 id="putting-the-fastq-file-together">Putting the FASTQ file together</h2>
-<p>The <code>synth_fastq</code> tool creates a FASTQ file from its components, nucleotide string, quality string and read name (ID line). If the file containing the read lines is omitted, the reads are numbered sequentially.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="ex">scripts/synth_fastq</span> data/2e/volpertinger.nucl \</a>
-<a class="sourceLine" id="cb26-2" data-line-number="2">                    data/2e/volpertinger.q    \</a>
-<a class="sourceLine" id="cb26-3" data-line-number="3">                    data/2e/volpertinger.i    \</a>
-<a class="sourceLine" id="cb26-4" data-line-number="4">    <span class="op">&gt;</span> data/2e/volpertinger.fastq</a>
-<a class="sourceLine" id="cb26-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb26-6" data-line-number="6"><span class="fu">head</span> data/2e/volpertinger.fastq</a></code></pre></div>
+<p>The <code>synth_fastq</code> tool creates a FASTQ file from its components, nucleotide string, quality string and read name (ID line). If the file containing the read names is omitted, the reads are numbered sequentially.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/synth_fastq</span> data/2e/volpertinger.nucl \
+                    data/2e/volpertinger.q    \
+                    data/2e/volpertinger.i    \
+    <span class="op">&gt;</span> data/2e/volpertinger.fastq
+
+<span class="fu">head</span> data/2e/volpertinger.fastq</code></pre></div>
 <pre class="output"><code>@volpertinger_0
 TTCCACAATGGATATTAGCCAACCAGATCCA
 +
@@ -281,41 +253,40 @@ FFFFFFFFFFFFFFFFFFFF
 @volpertinger_2
 TTGAACTCTATCTTCCGGGGCTCAAC</code></pre>
 <h2 id="repeat-the-above-steps-to-generate-contaminant-reads">Repeat the above steps to generate contaminant reads</h2>
-<p>This commands generate some reads from a truncated <em>Rhizobium etli</em> genome, to supply reads which are not supposed to map. This way, contamination with non-endogenous reads are simulated.</p>
-<p>The endogenous (<code>volpertinger.fastq</code>) and contaminant (<code>retli.fastq</code>) read will be merged into one fastq file (<code>all.fastq</code>) once the sample reads have undergone mutation simulation. This will be done in the next section.</p>
+<p>The following commands generate some reads from a truncated <em>Rhizobium etli</em> genome, to supply reads which are not supposed to map. This way, contamination with non-endogenous reads is simulated.</p>
 <p>Note that three kinds of abbreviations are used here:</p>
 <ul class="incremental">
 <li>No indels are applied to the exogenous reads in this example, therefore the process of splitting the tabular output into suitable files for generating the FASTQ file is performed using the <code>--output</code> switch of the tool <code>uniform</code>.</li>
-<li>Terms like <code>const_{a,b,c}</code> are expanded by <code>bash</code> to <code>const_a const_b const_c</code> and can therefore be used to specify mulitple paths which share some parts.</li>
-<li>The temporary files (similar to <code>volpertinger.q</code> and <code>volpertinger.i</code> above) are omitted here by using <code>bash</code>’s <em>process substitution</em> (<code>&lt;(...)</code>) which uses the output of one argument instead of a file name which the other command expects.</li>
+<li>Terms like <code>const_{a,b,c}</code> are expanded by <code>bash</code> to <code>const_a const_b const_c</code> and can therefore be used to specify multiple paths which share some parts.</li>
+<li>The temporary files (similar to <code>volpertinger.q</code> and <code>volpertinger.i</code> above) are omitted here by using <code>bash</code>'s <em>process substitution</em> (<code>&lt;(...)</code>) which uses the output of one argument instead of a file name which the other command expects.</li>
 </ul>
-<p>If you do not understand why these commands are equivalent to the commands listed above used to generate <code>reads.fastq</code>, you can use those as well without problems.</p>
-<p>Index genome and sample nucleotide seqences:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="ex">samtools</span> faidx input/retli/retli_tr.fasta</a>
-<a class="sourceLine" id="cb28-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb28-3" data-line-number="3"><span class="ex">scripts/uniform</span> \</a>
-<a class="sourceLine" id="cb28-4" data-line-number="4">    input/retli/retli_tr.fasta \</a>
-<a class="sourceLine" id="cb28-5" data-line-number="5">    --seed 2345 \</a>
-<a class="sourceLine" id="cb28-6" data-line-number="6">    --output data/2e/retli.<span class="dt">{coord,nucl}</span> \</a>
-<a class="sourceLine" id="cb28-7" data-line-number="7">    25 20 5</a></code></pre></div>
+<p>As these are only abbreviations and do not change functionality, you can also use the more verbose commands described in the previous sections of this chapter to generate <code>retli.fastq</code>.</p>
+<p>Index genome and sample nucleotide sequences:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">samtools</span> faidx input/retli/retli_tr.fasta
+
+<span class="ex">scripts/uniform</span> \
+    input/retli/retli_tr.fasta \
+    --seed 2345 \
+    --output data/2e/retli.<span class="dt">{coord,nucl}</span> \
+    25 20 5</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>Read names:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="ex">scripts/index_column</span>  --prefix retli_ \</a>
-<a class="sourceLine" id="cb30-2" data-line-number="2">                      --colname name  \</a>
-<a class="sourceLine" id="cb30-3" data-line-number="3">                      --inplace data/2e/retli.coord</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/index_column</span>  --prefix retli_ \
+                      --colname name  \
+                      --inplace data/2e/retli.coord</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>Put the FASTQ together:</p>
 <ul class="incremental">
 <li>Quality strings are generated without an intermediate file using <code>sed</code></li>
 <li>Read names are extracted without an intermediate file using <code>awk</code></li>
 </ul>
-<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="ex">scripts/synth_fastq</span> \</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">    data/2e/retli.nucl \</a>
-<a class="sourceLine" id="cb32-3" data-line-number="3">    <span class="op">&lt;(</span><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span>           data/2e/retli.nucl<span class="op">)</span> \</a>
-<a class="sourceLine" id="cb32-4" data-line-number="4">    <span class="op">&lt;(</span><span class="fu">awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> data/2e/retli.coord<span class="op">)</span> \</a>
-<a class="sourceLine" id="cb32-5" data-line-number="5">    <span class="op">&gt;</span> data/2e/retli.fastq</a>
-<a class="sourceLine" id="cb32-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb32-7" data-line-number="7"><span class="fu">head</span> data/2e/retli.fastq</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/synth_fastq</span> \
+    data/2e/retli.nucl \
+    <span class="op">&lt;(</span><span class="fu">sed</span> <span class="st">&#39;s/./F/g&#39;</span>           data/2e/retli.nucl<span class="op">)</span> \
+    <span class="op">&lt;(</span><span class="fu">awk</span> <span class="st">&#39;(NR!=1){print $1}&#39;</span> data/2e/retli.coord<span class="op">)</span> \
+    <span class="op">&gt;</span> data/2e/retli.fastq
+
+<span class="fu">head</span> data/2e/retli.fastq</code></pre></div>
 <pre class="output"><code>@retli_0
 TCGTTCTTGTAGCCTTCCGGGAAG
 +

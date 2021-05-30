@@ -7,71 +7,43 @@
   <title>Generation of simulated read sets</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="manual.css" />
+  <link rel="stylesheet" href="manual.css" type="text/css" />
 </head>
 <!-- BODY BEGIN ------------------------------>
 <body>
@@ -88,9 +60,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="05_writing-a-mapper-script.html">Writing a mapper script</a>
 <li><a href="06_sam-parsing.html">Parsing of SAM files</a>
 <li><a href="07_parameter_influence.html">Comparing multiple mapper runs</a>
-<li><a href="A01_workflow.html">Appendix A1 – Tutorial script</a>
-<li><a href="A02_advanced_read-generation.html">Appendix A2 – Advanced read generation</a>
-<li><a href="A03_scripts.html">Appendix A3 – Overview of the scripts by category</a>
+<li><a href="A01_workflow.html">Appendix A1 -- Tutorial script</a>
+<li><a href="A02_advanced_read-generation.html">Appendix A2 -- Advanced read generation</a>
+<li><a href="A03_scripts.html">Appendix A3 -- Overview of the scripts by category</a>
 </ul>
 </div>
 <div class="content contentbox">
@@ -107,27 +79,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul>
 <h2 id="generating-endogenous-reads">Generating endogenous reads</h2>
 <p>In this tutorial, endogenous reads are generated from the sample genome <code>volpertinger.fasta</code>, which is stored in the <code>input/genome</code> folder of this manual. The script <code>uniform</code> is used to sample reads uniformly from the reference:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">    --seed 1234 \</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">    --name volpertinger_ \</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">    --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">    25 20 5</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/genome/volpertinger.fasta \
+    --seed 1234 \
+    --name volpertinger_ \
+    --output-fastq data/2/volpertinger.coord data/2/volpertinger.fastq \
+    25 20 5</code></pre></div>
 <pre class="output"><code></code></pre>
 <p>The call is explained in the following:</p>
 <p>The output files are <code>volpertinger.fastq</code> and <code>volpertinger.coord</code>. They contain the generated reads and the positions on the reference from which they were extracted, respectively.</p>
-<p>The parameter <code>--seed</code> is used to initialize the random number generator to a defined state. Calling <code>uniform</code> with same seed value and same input yields the same set of reads. If you don’t specify <code>--seed</code>, you will generate different reads each time you call this script.</p>
+<p>The parameter <code>--seed</code> is used to initialize the random number generator to a defined state. Calling <code>uniform</code> with same seed value and same input yields the same set of reads. If you don't specify <code>--seed</code>, you will generate different reads each time you call this script.</p>
 <p>The parameter <code>--name</code> specifies a prefix for the names the generated reads get, to identify them in the SAM file once they were mapped.</p>
 <h2 id="generating-exogenous-reads">Generating exogenous reads</h2>
 <p>In this tutorial, contaminant reads are generated from the genome <code>retli_tr.fasta</code>, which is a part of the <em>Rhizobium etli</em> genome.</p>
 <p>The process of read generation is very similar to the previous section:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="ex">scripts/uniform</span> input/retli/retli_tr.fasta \</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">    --seed 1235 \</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">    --name retli_ \</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">    --output-fastq data/2/retli.coord data/2/retli.fastq \</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">    50 20 5</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/uniform</span> input/retli/retli_tr.fasta \
+    --seed 1235 \
+    --name retli_ \
+    --output-fastq data/2/retli.coord data/2/retli.fastq \
+    50 20 5</code></pre></div>
 <pre class="output"><code></code></pre>
 <h2 id="read-quality-scores">Read quality scores</h2>
-<p>The generated reads have only <code>FFFF.....</code> as base quality scores, if you want more control over the read generation process, see the section “Advanced read generation”.</p>
+<p>The generated reads have only <code>FFFF.....</code> as base quality scores, if you want more control over the read generation process, see the section &quot;Advanced read generation&quot;.</p>
 </div>
 <div class="contentbox" id="navlinksbox">
 <div>
