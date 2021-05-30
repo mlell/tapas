@@ -1,4 +1,7 @@
 #!/usr/bin/env Rscript
+
+options(warn = 1) # print warnings immediately
+
 args <- commandArgs(TRUE)
 
 deptabfile = "r_deps.txt"
@@ -47,9 +50,20 @@ if(!file.exists("dl_r_pkgs.R")){
 dlPkgVer <- function(pkgname, ver, destdir, skipExisting = TRUE){
     pkgfile <- paste0(pkgname,"_",ver,".tar.gz")
     pkgpath <- file.path(destdir, pkgfile)
-    url <- paste0(options("repos"), "/src/contrib/", pkgfile)
+    url <- paste0(options("repos"), "/src/contrib/",pkgfile)
+    url_archive <- paste0(
+      options("repos"), "/src/contrib/Archive/",pkgname,"/", pkgfile)
     if(!file.exists(pkgpath) || !skipExisting){
-        download.file(url, destfile = pkgpath)
+        tryCatch({
+            # Suppress warning for every 404 error. This is normal if the 
+            # package has moved to the Archive
+            suppressWarnings(
+                download.file(url, destfile = pkgpath)
+            )
+        }, error = function(e){
+            download.file(url_archive, destfile = pkgpath)
+        })
+
     }else{
         message("Skip ",pkgfile," (exists already)")
     }
@@ -60,6 +74,9 @@ if(options("repos") == "@CRAN@"){
     options(repos = "https://cloud.r-project.org")
 }
 deptab <- read.table(deptabfile, row.names = NULL, header = FALSE, stringsAsFactors = FALSE)
+
+if(!dir.exists(dest)) dir.create(dest)
+
 for(row in seq_len(nrow(deptab))){
     dlPkgVer(deptab[row,1], deptab[row,2], dest)
 }

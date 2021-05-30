@@ -43,13 +43,16 @@ echo "Download R dependencies..."
 "${thisdir}"/dl_r_pkgs.R
 
 echo "Install R dependencies..."
+mkdir -p "$rlib"
+mkdir -p "$pylib"
+
 cat r_deps.txt |\
 while read pkg ver; do 
     if [ -d "$rlib/$pkg" ]; then 
         echo "Skip $pkg"
         continue
     fi
-    R_LIBS="$rlib" R CMD INSTALL -l "$rlib" "$rsrc/${pkg}_${ver}.tar.gz"
+    R_LIBS="$rlib" R CMD INSTALL --no-test-load -l "$rlib" "$rsrc/${pkg}_${ver}.tar.gz"
 done
 
 echo "Install python dependencies..."
