@@ -1,7 +1,7 @@
 docopt==0.6.2
 numpy==1.14.0
 pandas==0.21.0
-scipy==1.0.0
+scipy==1.10.0
 matplotlib==2.1.1
 python-dateutil==2.6.1
 pytz==2018.3
