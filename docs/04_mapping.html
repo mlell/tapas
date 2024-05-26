@@ -161,12 +161,12 @@ input/mapping/n.par</code></pre>
                     input/mapping/map-bwa.sh \
                   <span class="op">&gt;</span> data/4/calls
 <span class="fu">cat</span> data/4/calls</code></pre></div>
-<pre class="output"><code>reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=2 runidx=0 n=0 input/mapping/map-bwa.sh
-reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=2 runidx=1 n=4 input/mapping/map-bwa.sh
-reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=2 runidx=2 n=8 input/mapping/map-bwa.sh
-reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=10 runidx=3 n=0 input/mapping/map-bwa.sh
-reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=10 runidx=4 n=4 input/mapping/map-bwa.sh
-reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=10 runidx=5 n=8 input/mapping/map-bwa.sh</code></pre>
+<pre class="output"><code>n=0 genome=input/genome/volpertinger outdir=data/4 k=2 runidx=0 reads=data/3/all.fastq input/mapping/map-bwa.sh
+n=4 genome=input/genome/volpertinger outdir=data/4 k=2 runidx=1 reads=data/3/all.fastq input/mapping/map-bwa.sh
+n=8 genome=input/genome/volpertinger outdir=data/4 k=2 runidx=2 reads=data/3/all.fastq input/mapping/map-bwa.sh
+n=0 genome=input/genome/volpertinger outdir=data/4 k=10 runidx=3 reads=data/3/all.fastq input/mapping/map-bwa.sh
+n=4 genome=input/genome/volpertinger outdir=data/4 k=10 runidx=4 reads=data/3/all.fastq input/mapping/map-bwa.sh
+n=8 genome=input/genome/volpertinger outdir=data/4 k=10 runidx=5 reads=data/3/all.fastq input/mapping/map-bwa.sh</code></pre>
 <h1 id="executing-multiple-mapping-runs-in-parallel">Executing multiple mapping runs in parallel</h1>
 <p>For this task, many programs can be used, from simple shell background spawning using &amp; (in bash) to job managers orchestrating a big network of worker machines. In this package, a simple program is implemented which executes a user-definable number of jobs in parallel and waits with spawning new ones until another of its already started jobs finishes.</p>
 <p>Note that some mappers can use more than one processor core themselves. Therefore if you spawn multiple mapper processes where each mapper process utilizes multiple cores, the total number of utilized cores is the number of cores used per mapper multiplied with the number of mapper processes launched in parallel.</p>
@@ -180,7 +180,31 @@ reads=data/3/all.fastq outdir=data/4 genome=input/genome/volpertinger k=10 runid
     <span class="co"># `tmpl` file.</span>
     <span class="fu">head</span> data/4/0.log
     <span class="fu">head</span> -n15 data/4/0.sam</code></pre></div>
-<pre class="output"><code>input/mapping/map-bwa.sh: line 13: bwa: command not found</code></pre>
+<pre class="output"><code>[bwa_aln_core] calculate SA coordinate... 0.00 sec
+[bwa_aln_core] write to the disk... 0.00 sec
+[bwa_aln_core] 75 sequences have been processed.
+[main] Version: 0.7.15-r1140
+[main] CMD: bwa aln -n 0 -k 2 input/genome/volpertinger data/3/all.fastq
+[main] Real time: 0.004 sec; CPU: 0.003 sec
+[bwa_aln_core] convert to sequence coordinate... 0.00 sec
+[bwa_aln_core] refine gapped alignments... 0.00 sec
+[bwa_aln_core] print alignments... 0.00 sec
+[bwa_aln_core] 75 sequences have been processed.
+@SQ SN:A1   LN:6000
+@SQ SN:A2   LN:6000
+@SQ SN:A3   LN:6000
+@SQ SN:B1   LN:6000
+@SQ SN:B2   LN:6000
+@SQ SN:B3   LN:6000
+@SQ SN:B4   LN:6000
+@SQ SN:MT   LN:6000
+@SQ SN:X    LN:6000
+@PG ID:bwa  PN:bwa  VN:0.7.15-r1140 CL:bwa samse input/genome/volpertinger data/4/0.sai data/3/all.fastq
+volpertinger_1  4   *   0   0   *   *   0   0   CTCTAAAAGATAGTAGCCAATCAGATCCA   FFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_2  4   *   0   0   *   *   0   0   TCTACTTAATAGTTTCTCCC    FFFFFFFFFFFFFFFFFFFF
+volpertinger_3  4   *   0   0   *   *   0   0   TCGGACTTTATCTTCCGCCGCTCAAC  FFFFFFFFFFFFFFFFFFFFFFFFFF
+volpertinger_4  4   *   0   0   *   *   0   0   TCATTAGGGTTCCTATCTAGA   FFFFFFFFFFFFFFFFFFFFF
+volpertinger_5  4   *   0   0   *   *   0   0   TGGGACCTCGATGTTGGATCAGGAT   FFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
 </div>
 <div class="contentbox" id="navlinksbox">
 <div>

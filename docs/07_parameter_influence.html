@@ -88,7 +88,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
                  <span class="op">&gt;</span> data/6/performance
 
 <span class="fu">cat</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
-<pre class="output"><code></code></pre>
+<pre class="output"><code>map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   runidx
+25        1         0.04         50          50          1            0.52  0
+25        16        0.64         50          49          0.98         0.81  1
+25        21        0.84         50          15          0.3          0.57  2
+25        1         0.04         50          50          1            0.52  3
+25        17        0.68         50          49          0.98         0.83  4
+25        25        1            50          15          0.3          0.65  5</code></pre>
 <p>Next, the parameter values belonging to the run indices are joined in, appending the parameter columns to <code>data/6/parameters</code> itself.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">scripts/merge</span> -a data/6/performance runidx \
               -b data/4/partab      runidx \
@@ -96,7 +102,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
            <span class="kw">|</span> <span class="ex">scripts/write_later</span> data/6/performance
 
 <span class="fu">head</span> data/6/performance <span class="kw">|</span> <span class="ex">column</span> -t</code></pre></div>
-<pre class="output"><code></code></pre>
+<pre class="output"><code>runidx  map.true  map.actl  sensitivity  nomap.true  nomap.actl  specificity  bcr   k   n
+0       25        1         0.04         50          50          1            0.52  2   0
+1       25        16        0.64         50          49          0.98         0.81  2   4
+2       25        21        0.84         50          15          0.3          0.57  2   8
+3       25        1         0.04         50          50          1            0.52  10  0
+4       25        17        0.68         50          49          0.98         0.83  10  4
+5       25        25        1            50          15          0.3          0.65  10  8</code></pre>
 <p>The value of one parameter can be plotted against some measure. The following command shows plots where the X and Y axis are free to choose. If multiple runs yield a similar score on the Y axis, their data points are merged to form one bigger dot on the plot. Here all numbers are rounded to one significant digit, because only 8 mapping runs are compared in this example. Therefore results must be aggregated coarsely to demonstrate the results.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Plot n versus BCR</span>
 <span class="ex">scripts/plot_parameter_effects</span> --signif 1 data/6/performance n bcr \
